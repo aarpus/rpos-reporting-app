@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS auth_users (
+  id UUID PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  email VARCHAR(254) NOT NULL UNIQUE CHECK (email = lower(email)),
+  password_hash TEXT NOT NULL,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS auth_login_attempts (
+  email VARCHAR(254) PRIMARY KEY,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  window_start TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

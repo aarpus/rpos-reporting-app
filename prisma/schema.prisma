@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AuthUser {
+  id           String   @id @db.Uuid
+  name         String   @db.VarChar(120)
+  email        String   @unique @db.VarChar(254)
+  passwordHash String   @map("password_hash")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("auth_users")
+}
+
+model AuthLoginAttempt {
+  email       String   @id @db.VarChar(254)
+  attempts    Int      @default(0)
+  windowStart DateTime @default(now()) @map("window_start") @db.Timestamptz(6)
+
+  @@map("auth_login_attempts")
+}
