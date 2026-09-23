@@ -2,10 +2,16 @@
   "name": "reporting_dashboard",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "preview": "node scripts/cloudflare.mjs build && node scripts/cloudflare.mjs preview",
+    "deploy": "node scripts/cloudflare.mjs build && node scripts/cloudflare.mjs deploy -- --keep-vars",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "lint": "eslint",
     "postinstall": "prisma generate",
     "prisma": "prisma",
@@ -15,6 +21,7 @@
     "prisma:studio": "prisma studio",
     "db:create": "node scripts/database.mjs create",
     "db:migrate": "node scripts/database.mjs migrate",
+    "db:deploy": "prisma migrate deploy",
     "db:create-user": "node scripts/database.mjs create-user",
     "test:auth": "node --test tests/password.test.mjs"
   },
@@ -22,6 +29,7 @@
     "@base-ui/react": "^1.8.0",
     "@floating-ui/react": "^0.27.20",
     "@internationalized/date": "^3.12.4",
+    "@opennextjs/cloudflare": "^1.20.6",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@tailgrids/icons": "^2.0.1",
@@ -59,6 +67,7 @@
     "eslint-config-next": "16.3.4",
     "prisma": "^7.10.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.136.3"
   }
 }

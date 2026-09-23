@@ -2,21 +2,15 @@ import "server-only";
 
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
+import { getDatabaseConnectionString } from "@/lib/db";
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
-
-function createPrismaClient() {
-  const connectionString = process.env.DATABASE_URL;
-
-  if (!connectionString) {
-    throw new Error("DATABASE_URL is not configured.");
-  }
+function createPrisma() {
+  const connectionString = getDatabaseConnectionString();
 
   const adapter = new PrismaPg({
     connectionString,
-    max: 5,
+    max: 1,
+    maxUses: 1,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 5_000,
     statement_timeout: 10_000,
@@ -25,10 +19,13 @@ function createPrismaClient() {
   return new PrismaClient({ adapter });
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+export async function withPrisma<T>(
+  query: (prisma: PrismaClient) => Promise<T>,
+) {
+  const prisma = createPrisma();
+  try {
+    return await query(prisma);
+  } finally {
+    await prisma.$disconnect();
+  }
 }
-
-export default prisma;

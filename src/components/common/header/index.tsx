@@ -5,15 +5,24 @@ import ThemeToggle from "@/components/common/header/theme-toggle";
 import { UserProfileButton } from "@/components/common/header/user-profile";
 import { ThreeDots } from "@/components/common/sidebar/icon";
 import { cn } from "@/utils/cn";
-import { LogoWithText } from "@/utils/icon";
 import React from "react";
 import { NotificationsButton } from "./notifications";
 import SearchBar from "./searchbar";
 import Image from "next/image";
+import { useTheme } from "next-themes";
+
+const emptySubscribe = () => () => {};
 
 //  Main Header
 export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+  const { resolvedTheme } = useTheme();
+  const mounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+  const isDark = mounted && resolvedTheme === "dark";
 
   return (
     <>
@@ -34,13 +43,12 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
 
           {/* Center: Logo */}
           <div className="flex items-center justify-center">
-            {/* <LogoWithText /> */}
             <Image
-                src='/images/logo-light.png'
-                alt='Dashboard logo'
-                width={300}
-                height={64}
-                className='h-8 w-auto'
+              src={isDark ? "/images/logo-light.png" : "/images/logo.png"}
+              alt="Dashboard logo"
+              width={300}
+              height={64}
+              className="h-8 w-auto"
             />
           </div>
 

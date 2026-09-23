@@ -1,0 +1,10 @@
+# Copy this file to .dev.vars for `npm run preview`.
+NEXTJS_ENV=development
+
+# Set the same direct TLS Neon URL used in .env.local. Never commit the real value.
+DATABASE_URL=postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require
+CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require
+
+AUTH_URL=http://localhost:8787
+AUTH_SECRET=generate-a-32-byte-random-secret
+AUTH_TRUST_HOST=true

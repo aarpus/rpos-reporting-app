@@ -162,7 +162,7 @@ export default function RegionLabelsMap() {
   useEffect(() => {
     fetch("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
       .then((r) => r.json())
-      .then(setGeoData)
+      .then((data) => setGeoData(data as GeoJSON.FeatureCollection))
       .catch(console.error);
   }, []);
 

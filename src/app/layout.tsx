@@ -1,4 +1,5 @@
 import Providers from "@/app/providers";
+import PwaInstallPrompt from "@/components/pwa-install-prompt";
 import { cn } from "@/utils/cn";
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "next-themes";
@@ -19,7 +20,9 @@ export const metadata: Metadata = {
       { url: "/icon.png", sizes: "512x512", type: "image/png" },
     ],
     shortcut: [{ url: "/favicon.png", sizes: "48x48", type: "image/png" }],
-    apple: [{ url: "/icon.png", sizes: "512x512", type: "image/png" }],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
   appleWebApp: {
     capable: true,
@@ -67,6 +70,7 @@ export default function RootLayout({
             {children}
           </Providers>
         </ThemeProvider>
+        <PwaInstallPrompt />
         <Toaster />
       </body>
     </html>

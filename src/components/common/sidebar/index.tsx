@@ -59,7 +59,6 @@ export default function Sidebar({
           {isSidebarOpen ? (
             <>
               {isDark ? (
-                // <LogoWithTextDark />
                 <Image
                   src="/images/logo-light.png"
                   alt="Dashboard logo"
@@ -68,7 +67,6 @@ export default function Sidebar({
                   className="h-10 w-auto"
                 />
               ) : (
-                // <LogoWithText />
                 <Image
                   src="/images/logo.png"
                   alt="Dashboard logo"

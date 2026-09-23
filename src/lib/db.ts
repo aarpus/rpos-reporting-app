@@ -1,19 +1,31 @@
 import "server-only";
-import { Pool } from "pg";
 
-const globalForDb = globalThis as unknown as { postgresPool?: Pool };
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { Client } from "pg";
 
-export function getDb() {
-  if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is not configured.");
-  if (!globalForDb.postgresPool) {
-    globalForDb.postgresPool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-      max: 5,
-      idleTimeoutMillis: 30_000,
-      connectionTimeoutMillis: 5_000,
-      statement_timeout: 10_000,
-    });
-    globalForDb.postgresPool.on("error", () => console.error("PostgreSQL pool connection failed."));
+export function getDatabaseConnectionString() {
+  try {
+    const connectionString = getCloudflareContext().env.HYPERDRIVE?.connectionString;
+    if (connectionString) return connectionString;
+  } catch {
+    // Next.js dev, database scripts, and builds run outside a Workers request.
   }
-  return globalForDb.postgresPool;
+
+  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+  throw new Error("Neither HYPERDRIVE nor DATABASE_URL is configured.");
+}
+
+export async function withDb<T>(query: (client: Client) => Promise<T>) {
+  const client = new Client({
+    connectionString: getDatabaseConnectionString(),
+    connectionTimeoutMillis: 5_000,
+    statement_timeout: 10_000,
+  });
+
+  await client.connect();
+  try {
+    return await query(client);
+  } finally {
+    await client.end();
+  }
 }
