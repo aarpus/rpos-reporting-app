@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/common/header";
+import MobileBottomNav from "@/components/common/mobile-bottom-nav";
 import Sidebar from "@/components/common/sidebar";
 import { SheetContent, SheetOverlay, SheetTitle } from "@/components/tailgrids/core/sheet";
 import { cn } from "@/utils/cn";
@@ -56,11 +57,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="flex h-full flex-col overflow-hidden border-[0.5px] border-card-surface-border bg-card-surface-area lg:rounded-2xl lg:shadow-[0_3px_6px_-2px_rgba(0,0,0,0.02),0_1px_1px_0_rgba(0,0,0,0.04)]">
           <Header onMenuClick={() => setIsMobileSheetOpen(true)} />
 
-          <main className="scrollbar-thin flex-1 min-h-0 overflow-y-auto">
-            <div className="mx-auto w-full max-w-384 pb-5">{children}</div>
+          <main className="scrollbar-thin min-h-0 flex-1 overflow-y-auto">
+            <div className="mx-auto w-full max-w-384 pb-[calc(5rem+env(safe-area-inset-bottom))] xl:pb-5">
+              {children}
+            </div>
           </main>
         </div>
       </div>
+
+      <MobileBottomNav />
     </div>
   );
 }

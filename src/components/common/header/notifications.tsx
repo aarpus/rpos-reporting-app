@@ -136,7 +136,7 @@ export function NotificationsButton() {
 
           <Link
             className="p-1 text-icon-secondary transition-colors hover:text-icon-primary"
-            href="/profile/notification"
+            href="/notifications"
             onClick={() => setIsOpen(false)}
           >
             <SettingIcon />
@@ -201,9 +201,13 @@ export function NotificationsButton() {
           >
             Mark all as read
           </button>
-          <Button variant="primary" size="sm" className="bg-brand-500 py-1.5">
+          <Link
+            href="/notifications"
+            onClick={() => setIsOpen(false)}
+            className="rounded-lg bg-button-primary-background px-3.5 py-1.5 text-xs font-medium text-button-primary-text transition hover:bg-button-primary-hover-background"
+          >
             View All
-          </Button>
+          </Link>
         </div>
       </Popover>
     </OverlayWrapper>
