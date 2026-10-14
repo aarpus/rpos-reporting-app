@@ -28,8 +28,10 @@ import {
   CalendarDate,
   endOfMonth,
   endOfWeek,
+  getLocalTimeZone,
   startOfMonth,
   startOfWeek,
+  today,
 } from "@internationalized/date";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -37,10 +39,8 @@ import { LuEye, LuRotateCcw } from "react-icons/lu";
 import { CompactDatePicker, ReportCard } from "../../_components/report-ui";
 import {
   datePresets,
-  defaultFromDate,
   defaultPreset,
   defaultStation,
-  defaultToDate,
   parseDateKey,
   shifts,
   stations,
@@ -48,30 +48,32 @@ import {
   type Station,
 } from "./data";
 
-const today = new CalendarDate(2026, 9, 14);
-
 function rangeForPreset(preset: DatePreset) {
+  const currentDate = today(getLocalTimeZone());
   if (preset === "today") {
-    return { from: today, to: today };
+    return { from: currentDate, to: currentDate };
   }
   if (preset === "yesterday") {
-    const yesterday = today.subtract({ days: 1 });
+    const yesterday = currentDate.subtract({ days: 1 });
     return { from: yesterday, to: yesterday };
   }
   if (preset === "this-week") {
-    return { from: startOfWeek(today, "en-GB"), to: endOfWeek(today, "en-GB") };
+    return {
+      from: startOfWeek(currentDate, "en-GB"),
+      to: endOfWeek(currentDate, "en-GB"),
+    };
   }
   if (preset === "last-week") {
-    const lastWeek = today.subtract({ weeks: 1 });
+    const lastWeek = currentDate.subtract({ weeks: 1 });
     return {
       from: startOfWeek(lastWeek, "en-GB"),
       to: endOfWeek(lastWeek, "en-GB"),
     };
   }
   if (preset === "this-month") {
-    return { from: startOfMonth(today), to: endOfMonth(today) };
+    return { from: startOfMonth(currentDate), to: endOfMonth(currentDate) };
   }
-  return { from: defaultFromDate, to: defaultToDate };
+  return { from: currentDate, to: currentDate };
 }
 
 type FilterState = {
@@ -81,15 +83,16 @@ type FilterState = {
   station: Station;
 };
 
-const defaultFilters: FilterState = {
-  preset: defaultPreset,
-  from: defaultFromDate,
-  to: defaultToDate,
-  station: defaultStation,
-};
+function createDefaultFilters(): FilterState {
+  return {
+    preset: defaultPreset,
+    ...rangeForPreset(defaultPreset),
+    station: defaultStation,
+  };
+}
 
 export default function ShiftReportList() {
-  const [draft, setDraft] = useState<FilterState>(defaultFilters);
+  const [draft, setDraft] = useState<FilterState>(createDefaultFilters);
   const [applied, setApplied] = useState<FilterState | null>(null);
 
   const rows = useMemo(() => {
@@ -219,7 +222,7 @@ export default function ShiftReportList() {
               appearance="outline"
               className="h-8 gap-1.5 px-3 py-1 text-xs [&>svg]:size-3.5"
               onPress={() => {
-                setDraft(defaultFilters);
+                setDraft(createDefaultFilters());
                 setApplied(null);
               }}
             >

@@ -32,8 +32,6 @@ export type ClockSession = {
   breaks: BreakSession[];
 };
 
-export const reportDate = new CalendarDate(2026, 9, 22);
-
 export const sessions: ClockSession[] = [
   {
     id: 1,

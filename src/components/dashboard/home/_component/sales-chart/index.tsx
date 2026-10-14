@@ -12,13 +12,16 @@ import HeaderSection from "./header";
 import SalesChartSkeleton from "./skeleton";
 import type { Granularity } from "@/services/api/home";
 import { getSalesChartStats } from "./utils";
+import { useStore } from "@/components/store/store-provider";
 
 export default function SalesChart() {
+  const { selectedStoreCode } = useStore();
   const [timeRange, setTimeRange] = useState<Granularity>("monthly");
 
   const { data: rawResponse, isLoading } = useQuery({
-    queryKey: ["sales-chart", timeRange],
-    queryFn: () => getSalesChartData(timeRange),
+    queryKey: ["sales-chart", selectedStoreCode, timeRange],
+    enabled: Boolean(selectedStoreCode),
+    queryFn: () => getSalesChartData(selectedStoreCode!, timeRange),
   });
 
   const chartData = rawResponse ? mapSalesChartResponse(rawResponse) : undefined;

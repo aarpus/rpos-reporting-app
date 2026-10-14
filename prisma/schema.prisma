@@ -7,21 +7,196 @@ datasource db {
   provider = "postgresql"
 }
 
+enum AuthRole {
+  ADMIN
+  USER
+}
+
 model AuthUser {
-  id           String   @id @db.Uuid
+  id           Int      @id @default(autoincrement())
   name         String   @db.VarChar(120)
   email        String   @unique @db.VarChar(254)
   passwordHash String   @map("password_hash")
+  role         AuthRole @default(USER)
   active       Boolean  @default(true)
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  storeAccess             StoreAccess[]
+  notificationPreferences NotificationPreference[]
+  notifications           UserNotification[]
+  pushSubscriptions       PushSubscription[]
 
   @@map("auth_users")
 }
 
 model AuthLoginAttempt {
-  email       String   @id @db.VarChar(254)
+  id          Int      @id @default(autoincrement())
+  email       String   @unique @db.VarChar(254)
   attempts    Int      @default(0)
   windowStart DateTime @default(now()) @map("window_start") @db.Timestamptz(6)
 
   @@map("auth_login_attempts")
+}
+
+// Retained only to preserve legacy data from the earlier customer-schema migration.
+model LegacyReportingCustomer {
+  id               Int      @id @default(autoincrement())
+  name             String   @db.VarChar(160)
+  schemaName       String   @unique @map("schema_name") @db.VarChar(63)
+  active           Boolean  @default(true)
+  reportingVersion Int      @default(0) @map("reporting_version")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  stores           Store[]
+
+  @@map("customers")
+}
+
+model StoreReportingSchema {
+  storeCode String @id @map("store_code") @db.VarChar(64)
+  schemaName String @unique @map("schema_name") @db.VarChar(63)
+  reportingVersion Int @default(0) @map("reporting_version")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  store Store @relation(fields: [storeCode], references: [storeCode], onDelete: Restrict, onUpdate: Restrict)
+
+  @@map("store_reporting_schemas")
+}
+
+model Store {
+  id        Int      @id @default(autoincrement()) @map("id")
+  storeCode String   @unique @map("store_code") @db.VarChar(64)
+  name      String   @db.VarChar(160)
+  timezone  String   @default("UTC") @db.VarChar(80)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  legacyCustomerId Int? @map("customer_id")
+  legacyCustomer LegacyReportingCustomer? @relation(fields: [legacyCustomerId], references: [id], onDelete: Restrict)
+  reportingSchema StoreReportingSchema?
+
+  access                  StoreAccess[]
+  notificationPreferences NotificationPreference[]
+  notificationEvents      NotificationEvent[]
+  notifications           UserNotification[]
+  posCredentials          PosCredential[]
+
+  @@unique([legacyCustomerId, storeCode], map: "stores_customer_code_unique")
+  @@index([legacyCustomerId], map: "stores_customer_id_idx")
+  @@map("stores")
+}
+
+model StoreAccess {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  storeCode String   @map("store_code") @db.VarChar(64)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user  AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store Store    @relation(fields: [storeCode], references: [storeCode], onDelete: Cascade, onUpdate: Restrict)
+
+  @@unique([userId, storeCode])
+  @@index([storeCode])
+  @@map("store_access")
+}
+
+model NotificationType {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(40)
+  label     String   @db.VarChar(100)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  preferences NotificationPreference[]
+  events      NotificationEvent[]
+
+  @@map("notification_types")
+}
+
+model NotificationPreference {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  storeCode String   @map("store_code") @db.VarChar(64)
+  type      String   @map("notification_type") @db.VarChar(40)
+  enabled   Boolean  @default(false)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user             AuthUser         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store            Store            @relation(fields: [storeCode], references: [storeCode], onDelete: Cascade, onUpdate: Restrict)
+  notificationType NotificationType @relation(fields: [type], references: [key], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([userId, storeCode, type])
+  @@index([storeCode, type, enabled])
+  @@map("notification_preferences")
+}
+
+model NotificationEvent {
+  id         Int      @id @default(autoincrement())
+  eventId    String   @map("event_id") @db.VarChar(160)
+  storeCode  String   @map("store_code") @db.VarChar(64)
+  type       String   @map("notification_type") @db.VarChar(40)
+  occurredAt DateTime @map("occurred_at") @db.Timestamptz(6)
+  payload    Json
+  title      String   @db.VarChar(180)
+  body       String   @db.VarChar(500)
+  targetPath String   @map("target_path") @db.VarChar(500)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  store            Store              @relation(fields: [storeCode], references: [storeCode], onDelete: Restrict, onUpdate: Restrict)
+  notificationType NotificationType   @relation(fields: [type], references: [key], onDelete: Restrict, onUpdate: Restrict)
+  notifications    UserNotification[]
+
+  @@unique([storeCode, eventId])
+  @@index([storeCode, createdAt(sort: Desc)])
+  @@map("notification_events")
+}
+
+model UserNotification {
+  id                  Int       @id @default(autoincrement())
+  userId              Int       @map("user_id")
+  notificationEventId Int       @map("notification_event_id")
+  storeCode           String    @map("store_code") @db.VarChar(64)
+  readAt              DateTime? @map("read_at") @db.Timestamptz(6)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user  AuthUser          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event NotificationEvent @relation(fields: [notificationEventId], references: [id], onDelete: Cascade)
+  store Store             @relation(fields: [storeCode], references: [storeCode], onDelete: Cascade, onUpdate: Restrict)
+
+  @@unique([userId, notificationEventId])
+  @@index([userId, storeCode, createdAt(sort: Desc)])
+  @@map("user_notifications")
+}
+
+model PushSubscription {
+  id             Int       @id @default(autoincrement())
+  userId         Int       @map("user_id")
+  endpoint       String    @unique
+  p256dh         String
+  auth           String
+  expirationTime DateTime? @map("expiration_time") @db.Timestamptz(6)
+  userAgent      String?   @map("user_agent") @db.VarChar(500)
+  failureCount   Int       @default(0) @map("failure_count")
+  lastSeenAt     DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+model PosCredential {
+  id              Int       @id @default(autoincrement())
+  storeCode       String    @map("store_code") @db.VarChar(64)
+  keyId           String    @map("key_id") @db.VarChar(80)
+  encryptedSecret String    @map("encrypted_secret")
+  iv              String    @db.VarChar(64)
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  rotatedAt       DateTime? @map("rotated_at") @db.Timestamptz(6)
+
+  store Store @relation(fields: [storeCode], references: [storeCode], onDelete: Cascade, onUpdate: Restrict)
+
+  @@unique([storeCode, keyId])
+  @@map("pos_credentials")
 }

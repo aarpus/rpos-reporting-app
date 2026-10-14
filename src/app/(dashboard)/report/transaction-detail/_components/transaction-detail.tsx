@@ -1,6 +1,10 @@
 "use client";
 
 import { Button } from "@/components/tailgrids/core/button";
+import { useStore } from "@/components/store/store-provider";
+import { reportingQueryKey } from "@/lib/reporting/query-key";
+import type { TransactionReport, TransactionRow } from "@/lib/reporting/transaction-types";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import { Input } from "@/components/tailgrids/core/input";
 import {
@@ -26,11 +30,12 @@ import {
   endOfWeek,
   startOfMonth,
   startOfWeek,
+  today,
 } from "@internationalized/date";
 import { ArrowLeft } from "@tailgrids/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   LuBadgePercent,
   LuChartColumn,
@@ -48,16 +53,10 @@ import {
 import { CompactDatePicker, Meta } from "../../_components/report-ui";
 import {
   datePresets,
-  departmentOptions,
   employeeOptions,
   formatAmount,
   pageSizeOptions,
-  paidByOptions,
-  parseDateKey,
   reportByOptions,
-  today,
-  transactionTypeOptions,
-  transactions,
   type DatePreset,
   type DepartmentId,
   type EmployeeId,
@@ -65,6 +64,37 @@ import {
   type ReportById,
   type TransTypeId,
 } from "./data";
+
+async function fetchReport(params: URLSearchParams, signal: AbortSignal): Promise<TransactionReport> {
+  const response = await fetch(`/api/reporting/transaction-detail?${params}`, {
+    signal,
+    cache: "no-store",
+  });
+  const body = await response.json() as TransactionReport & { error?: string };
+  if (!response.ok) throw new Error(body.error ?? "Unable to load transactions.");
+  return body;
+}
+
+function displayRow(row: TransactionRow, timezone: string) {
+  return {
+    ...row,
+    dateTime: new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(row.createdAt)),
+    subtotal: Number(row.subtotal),
+    tax: Number(row.tax),
+    discount: Number(row.discount),
+    gratuity: Number(row.gratuity),
+    fees: Number(row.fees),
+    tips: Number(row.tips),
+    total: Number(row.total),
+  };
+}
 
 type FilterState = {
   preset: DatePreset;
@@ -82,21 +112,24 @@ type FilterState = {
   reportBy: ReportById;
 };
 
-const defaultFilters: FilterState = {
-  preset: "today",
-  from: today,
-  to: today,
-  checkNo: "",
-  transactionNo: "",
-  creditCard: "",
-  menuItem: "",
-  sku: "",
-  paidBy: "all",
-  employee: "all",
-  department: "all",
-  transType: "all",
-  reportBy: "batchwise",
-};
+function createDefaultFilters(timezone: string): FilterState {
+  const currentDate = today(timezone);
+  return {
+    preset: "today",
+    from: currentDate,
+    to: currentDate,
+    checkNo: "",
+    transactionNo: "",
+    creditCard: "",
+    menuItem: "",
+    sku: "",
+    paidBy: "all",
+    employee: "all",
+    department: "all",
+    transType: "all",
+    reportBy: "transaction",
+  };
+}
 
 const columns = [
   "Date / Time",
@@ -114,30 +147,30 @@ const columns = [
   "Trans Type",
 ] as const;
 
-function rangeForPreset(preset: DatePreset) {
-  if (preset === "today") return { from: today, to: today };
+function rangeForPreset(preset: DatePreset, timezone: string) {
+  const currentDate = today(timezone);
+  if (preset === "today") return { from: currentDate, to: currentDate };
   if (preset === "yesterday") {
-    const yesterday = today.subtract({ days: 1 });
+    const yesterday = currentDate.subtract({ days: 1 });
     return { from: yesterday, to: yesterday };
   }
   if (preset === "this-week") {
-    return { from: startOfWeek(today, "en-GB"), to: endOfWeek(today, "en-GB") };
+    return {
+      from: startOfWeek(currentDate, "en-GB"),
+      to: endOfWeek(currentDate, "en-GB"),
+    };
   }
   if (preset === "last-week") {
-    const lastWeek = today.subtract({ weeks: 1 });
+    const lastWeek = currentDate.subtract({ weeks: 1 });
     return {
       from: startOfWeek(lastWeek, "en-GB"),
       to: endOfWeek(lastWeek, "en-GB"),
     };
   }
   if (preset === "this-month") {
-    return { from: startOfMonth(today), to: endOfMonth(today) };
+    return { from: startOfMonth(currentDate), to: endOfMonth(currentDate) };
   }
-  return { from: today, to: today };
-}
-
-function contains(value: string, query: string) {
-  return value.toLowerCase().includes(query.trim().toLowerCase());
+  return { from: currentDate, to: currentDate };
 }
 
 function Field({
@@ -160,92 +193,73 @@ function Field({
 }
 
 export default function TransactionDetailList() {
-  const [draft, setDraft] = useState<FilterState>(defaultFilters);
-  const [applied, setApplied] = useState<FilterState>(defaultFilters);
+  const { selectedStore } = useStore();
+  if (!selectedStore) return <p className="p-6 text-text-secondary">Select a store to view transactions.</p>;
+  return <StoreTransactions key={selectedStore.storeCode} storeCode={selectedStore.storeCode} timezone={selectedStore.timezone} />;
+}
+
+function StoreTransactions({ storeCode, timezone }: { storeCode: string; timezone: string }) {
+  const [draft, setDraft] = useState<FilterState>(() => createDefaultFilters(timezone));
+  const [applied, setApplied] = useState<FilterState>(() => createDefaultFilters(timezone));
   const [hasAppliedFilters, setHasAppliedFilters] = useState(false);
   const [open, setOpen] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
-  const rows = useMemo(() => {
-    return transactions.filter((row) => {
-      const date = parseDateKey(row.dateKey);
-      const inRange =
-        date.compare(applied.from) >= 0 && date.compare(applied.to) <= 0;
-      if (!inRange) return false;
-      if (applied.checkNo && !contains(row.checkNo, applied.checkNo)) {
-        return false;
-      }
-      if (applied.transactionNo && !contains(row.id, applied.transactionNo)) {
-        return false;
-      }
-      if (applied.creditCard && !contains(row.creditCard, applied.creditCard)) {
-        return false;
-      }
-      if (
-        applied.menuItem &&
-        !row.items.some((item) => contains(item.name, applied.menuItem))
-      ) {
-        return false;
-      }
-      if (
-        applied.sku &&
-        !row.items.some((item) => contains(item.sku, applied.sku))
-      ) {
-        return false;
-      }
-      if (
-        applied.paidBy !== "all" &&
-        !row.paidByKeys.includes(applied.paidBy)
-      ) {
-        return false;
-      }
-      if (applied.employee !== "all" && row.employeeId !== applied.employee) {
-        return false;
-      }
-      if (
-        applied.department !== "all" &&
-        row.departmentId !== applied.department
-      ) {
-        return false;
-      }
-      if (applied.transType !== "all" && row.transType !== applied.transType) {
-        return false;
-      }
-      return true;
-    });
-  }, [applied]);
-
-  const stats = useMemo(() => {
-    const paid = rows.filter((row) => row.transType === "PAID");
-    const refunds = rows.filter((row) => row.transType === "RETURN");
-    const sales = paid.reduce((sum, row) => sum + row.total, 0);
-    return {
-      sales,
-      count: rows.length,
-      refunds: Math.abs(refunds.reduce((sum, row) => sum + row.total, 0)),
-      average: paid.length ? sales / paid.length : 0,
-      tips: rows.reduce((sum, row) => sum + row.tips, 0),
-      gratuity: rows.reduce((sum, row) => sum + row.gratuity, 0),
-      fees: rows.reduce((sum, row) => sum + row.fees, 0),
-    };
-  }, [rows]);
-
-  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
-  const currentPage = Math.min(page, pageCount);
-  const pagedRows = rows.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize,
-  );
-  const fromRow = rows.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-  const toRow = Math.min(currentPage * pageSize, rows.length);
+  const params = new URLSearchParams({
+    store_code: storeCode,
+    from: applied.from.toString(),
+    to: applied.to.toString(),
+    limit: String(pageSize),
+    offset: String((page - 1) * pageSize),
+  });
+  for (const [key, value] of Object.entries({
+    check_no: applied.checkNo,
+    transaction_no: applied.transactionNo,
+    credit_card: applied.creditCard,
+    menu_item: applied.menuItem,
+    sku: applied.sku,
+    paid_by: applied.paidBy,
+    department: applied.department,
+    trans_type: applied.transType,
+  })) {
+    if (value && value !== "all") params.set(key, value);
+  }
+  const report = useQuery({
+    queryKey: reportingQueryKey(storeCode, { report: "transaction-detail", params: params.toString() }),
+    queryFn: ({ signal }) => fetchReport(params, signal),
+    enabled: hasAppliedFilters,
+  });
+  const rows = (report.data?.rows ?? []).map(row => displayRow(row, timezone));
+  const count = report.data?.count ?? 0;
+  const totals = report.data?.totals;
+  const stats = {
+    count,
+    sales: Number(totals?.sales ?? 0),
+    refunds: Number(totals?.refunds ?? 0),
+    average: Number(totals?.average ?? 0),
+    tips: Number(totals?.tips ?? 0),
+    gratuity: Number(totals?.gratuity ?? 0),
+    fees: Number(totals?.fees ?? 0),
+  };
+  const options = report.data?.options;
+  const paidByOptions = [{ id: "all", label: "All" }, ...(options?.tenders ?? []).map(value => ({ id: value, label: value }))];
+  const departmentOptions = [{ id: "all", label: "All" }, ...(options?.departments ?? [])];
+  const transactionTypeOptions = [{ id: "all", label: "All" }, ...(options?.statuses ?? []).map(value => ({ id: value, label: value }))];
+  const pageCount = Math.max(1, Math.ceil(count / pageSize));
+  // A background refresh can reduce the number of available pages.
+  if (report.data && page > pageCount) setPage(pageCount);
+  const currentPage = page;
+  const pagedRows = rows;
+  const fromRow = count === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const toRow = Math.min(currentPage * pageSize, count);
 
   function applyPreset(preset: DatePreset) {
     if (preset === "custom") {
       setDraft((current) => ({ ...current, preset }));
       return;
     }
-    setDraft((current) => ({ ...current, preset, ...rangeForPreset(preset) }));
+    setDraft((current) => ({ ...current, preset, ...rangeForPreset(preset, timezone) }));
   }
 
   return (
@@ -409,6 +423,7 @@ export default function TransactionDetailList() {
               />
               <FilterSelect
                 label="Employee"
+                disabled
                 value={draft.employee}
                 onChange={(value) =>
                   setDraft((current) => ({
@@ -442,6 +457,7 @@ export default function TransactionDetailList() {
               />
               <FilterSelect
                 label="Report By"
+                disabled
                 value={draft.reportBy}
                 onChange={(value) =>
                   setDraft((current) => ({
@@ -453,13 +469,16 @@ export default function TransactionDetailList() {
               />
             </div>
 
+            {draft.from.compare(draft.to) > 0 && <p role="alert" className="text-sm text-error-500">From date must not be after To date.</p>}
             <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
                 className="h-8 gap-1.5 px-3 py-1 text-xs [&>svg]:size-3.5"
                 onPress={() => {
+                  if (draft.from.compare(draft.to) > 0) return;
+                  if (hasAppliedFilters && page === 1 && JSON.stringify(applied) === JSON.stringify(draft)) void report.refetch();
                   setPage(1);
-                  setApplied(draft);
+                  setApplied({ ...draft });
                   setHasAppliedFilters(true);
                 }}
               >
@@ -472,8 +491,9 @@ export default function TransactionDetailList() {
                 appearance="outline"
                 className="h-8 gap-1.5 px-3 py-1 text-xs [&>svg]:size-3.5"
                 onPress={() => {
-                  setDraft(defaultFilters);
-                  setApplied(defaultFilters);
+                  const filters = createDefaultFilters(timezone);
+                  setDraft(filters);
+                  setApplied(filters);
                   setHasAppliedFilters(false);
                   setPage(1);
                   setPageSize(20);
@@ -487,7 +507,9 @@ export default function TransactionDetailList() {
         )}
       </Card>
 
-      {hasAppliedFilters && (
+      {hasAppliedFilters && report.isFetching && <p className="p-3 text-text-secondary">Loading transactions…</p>}
+      {hasAppliedFilters && report.error && <div role="alert" className="p-3 text-error-500">{report.error.message} <Button size="sm" onPress={() => void report.refetch()}>Retry</Button></div>}
+      {hasAppliedFilters && report.data && !report.error && (
         <>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7">
             <StatCard
@@ -570,7 +592,7 @@ export default function TransactionDetailList() {
                       </TableCell>
                       <TableCell className="px-3 py-2.5 text-xs whitespace-nowrap">
                         <Link
-                          href={`/report/transaction-detail/${row.id}`}
+                          href={`/report/transaction-detail/${encodeURIComponent(row.id)}`}
                           className="font-medium text-primary-500 hover:underline"
                         >
                           {row.id}
@@ -602,7 +624,7 @@ export default function TransactionDetailList() {
             </div>
             <div className="flex flex-col gap-3 border-t border-card-border px-3 py-3 lg:flex-row lg:items-center lg:justify-between">
               <p className="text-center text-xs text-text-tertiary sm:text-left">
-                Showing {fromRow} to {toRow} of {rows.length} transactions
+                Showing {fromRow} to {toRow} of {count} transactions
               </p>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center justify-center gap-2">
@@ -682,7 +704,9 @@ function FilterSelect({
   value,
   onChange,
   items,
+  disabled = false,
 }: {
+  disabled?: boolean;
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -692,6 +716,7 @@ function FilterSelect({
     <Field label={label}>
       <Select
         aria-label={label}
+        isDisabled={disabled}
         value={value}
         onChange={(next) => onChange(String(next))}
       >
@@ -761,10 +786,22 @@ function AmountCell({ value, strong }: { value: number; strong?: boolean }) {
 }
 
 export function TransactionReceipt({ id }: { id: string }) {
-  const router = useRouter();
-  const tx = transactions.find((item) => item.id === id);
+  const { selectedStore } = useStore();
+  if (!selectedStore) return <p className="p-6 text-text-secondary">Select a store to view this transaction.</p>;
+  return <StoreReceipt key={selectedStore.storeCode} id={id} storeCode={selectedStore.storeCode} timezone={selectedStore.timezone} />;
+}
 
-  if (!tx) return null;
+function StoreReceipt({ id, storeCode, timezone }: { id: string; storeCode: string; timezone: string }) {
+  const router = useRouter();
+  const report = useQuery({
+    queryKey: reportingQueryKey(storeCode, { report: "transaction-detail", orderCode: id }),
+    queryFn: ({ signal }) => fetchReport(new URLSearchParams({ store_code: storeCode, order_code: id }), signal),
+  });
+  if (report.isPending) return <p className="p-6 text-text-secondary">Loading transaction…</p>;
+  if (report.error) return <div role="alert" className="p-6 text-error-500">{report.error.message} <Button onPress={() => void report.refetch()}>Retry</Button> <Link href="/report/transaction-detail">Transactions</Link></div>;
+  if (!report.data?.detail) return <p className="p-6">Transaction not found.</p>;
+  const detail = report.data.detail;
+  const tx = { ...displayRow(detail, timezone), items: detail.items.map(item => ({ ...item, qty: Number(item.qty), amount: Number(item.amount) })), payments: detail.payments.map(payment => ({ ...payment, amount: Number(payment.amount) })) };
 
   return (
     <div className="mt-2 space-y-2 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:mt-3 sm:space-y-2.5 lg:px-4">
@@ -818,7 +855,7 @@ export function TransactionReceipt({ id }: { id: string }) {
           </TableHeader>
           <TableBody>
             {tx.items.map((item) => (
-              <TableRow key={item.sku} className="[&_td]:border-none">
+              <TableRow key={item.id} className="[&_td]:border-none">
                 <TableCell className="px-3 py-2.5 text-sm text-text-primary">
                   {item.name}
                 </TableCell>
@@ -855,7 +892,7 @@ export function TransactionReceipt({ id }: { id: string }) {
             </TableHeader>
             <TableBody>
               {tx.payments.map((payment) => (
-                <TableRow key={payment.method} className="[&_td]:border-none">
+                <TableRow key={payment.id} className="[&_td]:border-none">
                   <TableCell className="px-3 py-2.5 text-sm text-text-primary">
                     {payment.method}
                   </TableCell>

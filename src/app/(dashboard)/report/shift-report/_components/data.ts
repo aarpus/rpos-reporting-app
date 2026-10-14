@@ -15,8 +15,6 @@ export const datePresets = [
 
 export type DatePreset = (typeof datePresets)[number]["id"];
 
-export const defaultFromDate = new CalendarDate(2026, 9, 7);
-export const defaultToDate = new CalendarDate(2026, 9, 13);
 export const defaultPreset: DatePreset = "last-week";
 export const defaultStation: Station = "MS27";
 

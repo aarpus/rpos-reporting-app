@@ -87,6 +87,12 @@ In the created Worker, open **Settings > Variables and Secrets** and add:
 
 - Secret `AUTH_SECRET`: generate with
   `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`.
+- Secret `VAPID_PRIVATE_KEY` and build/runtime variable
+  `NEXT_PUBLIC_VAPID_PUBLIC_KEY`: generate together with
+  `npm run push:generate-vapid`.
+- Variable `VAPID_SUBJECT`: a contact URI such as `mailto:admin@example.com`.
+- Secret `POS_CREDENTIAL_ENCRYPTION_KEY`: generate with
+  `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`.
 - Variable `AUTH_URL`:
   `https://rpos-reporting-app.<your-workers-subdomain>.workers.dev`.
 - Variable `AUTH_TRUST_HOST`: `true`.
@@ -97,6 +103,11 @@ traffic must use Hyperdrive.
 
 Trigger a new deployment from `main` after setting the variables. The deploy
 script uses `--keep-vars` so dashboard-managed runtime values remain intact.
+
+After deploying the store/notification migration, run `npm run db:bootstrap-admin`
+with `ADMIN_EMAIL` set, then provision each POS credential with
+`npm run pos:credential -- create STORE_CODE`. See
+`docs/pos-notification-api.md` for the C# signing contract.
 
 ## 6. Production smoke test
 

@@ -29,6 +29,7 @@ import type { RawTransactionItem } from "@/services/api/home";
 
 import type { TransactionViewModel } from "./types";
 import { formatAmount, formatDate } from "./utils";
+import { useStore } from "@/components/store/store-provider";
 
 function toViewModel(raw: RawTransactionItem): TransactionViewModel {
   const { date, time } = formatDate(raw.created_at);
@@ -46,11 +47,13 @@ function toViewModel(raw: RawTransactionItem): TransactionViewModel {
 }
 
 export default function LastTransactionsTable() {
+  const { selectedStoreCode } = useStore();
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
 
   const { data: rawResponse, isLoading } = useQuery({
-    queryKey: ["lastTransactions"],
-    queryFn: getLastTransactionsData,
+    queryKey: ["lastTransactions", selectedStoreCode],
+    enabled: Boolean(selectedStoreCode),
+    queryFn: () => getLastTransactionsData(selectedStoreCode!),
   });
 
   const transactions: TransactionViewModel[] = rawResponse?.data.map(toViewModel) ?? [];

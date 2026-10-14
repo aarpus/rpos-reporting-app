@@ -18,12 +18,16 @@ Sign-in and logout show a spinner and disable repeat submissions.
 3. Run `npm run db:create` to create the database on an existing PostgreSQL server.
    The configured database role needs permission to create databases. For a hosted
    database already provisioned by your provider, skip this command.
-4. Run `npm run prisma:push` to sync the Prisma schema, then
-   `npm run prisma:generate` to regenerate the typed client. For future tracked
-   schema changes use `npm run prisma:migrate -- --name <change-name>` instead.
+4. Run `npm run prisma:push` to sync the Prisma schema and seed required lookup
+   data, then `npm run prisma:generate` to regenerate the typed client. For future
+   tracked schema changes use `npm run prisma:migrate -- --name <change-name>`
+   instead. If the schema was already pushed before notification types were
+   seeded, run `npm run db:seed-notification-types` once.
 5. Set `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` (non-empty, maximum 256 characters) in
    `.env.local`, then run `npm run db:create-user`. Remove `ADMIN_PASSWORD` afterward.
    Repeat with different values for additional accounts; existing accounts are never overwritten.
+   For an account created before the store migration, set `ADMIN_EMAIL` and run
+   `npm run db:bootstrap-admin` once.
 6. Start the app and open `/auth` to sign in.
 
 Passwords are salted and hashed with Node's scrypt. SQL queries are parameterized.
@@ -40,6 +44,26 @@ route protection. Keep `ADMIN_EMAIL` and `ADMIN_PASSWORD` set temporarily to als
 check invalid credentials, successful sign-in, the dashboard session, and logout.
 Remove `ADMIN_PASSWORD` after these checks. An actual PostgreSQL connection and
 account are required for end-to-end sign-in testing.
+
+## Store-scoped PWA notifications
+
+Dashboard scope is selected by immutable `store_code`. Generate VAPID keys with
+`npm run push:generate-vapid`, configure the variables documented in
+`.env.example`, apply the Prisma migration, and provision a per-store POS secret
+with `npm run pos:credential -- create STORE_CODE`. The C# payload, HMAC signing,
+retry behavior, and credential rotation contract are documented in
+[`docs/pos-notification-api.md`](docs/pos-notification-api.md).
+
+## Store reporting schemas
+
+Every store has its own schema for orders, items, payments and card transactions.
+Login users select from their existing store assignments; reports resolve the
+selected store's registered schema. The POS API, provisioning, customer-schema
+cutover, public-table import and live `/report/orders` screen are documented in
+[`docs/pos-reporting-api.md`](docs/pos-reporting-api.md). After migrations, run
+`npm run reporting:stores -- provision-all` for existing stores. New Admin-created
+stores provision automatically. Run `npm run test:reporting` for disposable
+PostgreSQL integration tests.
 
 ## Prisma database access
 

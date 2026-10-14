@@ -56,6 +56,7 @@ import type {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
+import { useStore } from "@/components/store/store-provider";
 
 const stats: [string, string, string, IconType, string, string][] = [
   [
@@ -307,6 +308,7 @@ function Details() {
 }
 
 export default function HomePage() {
+  const { selectedStore } = useStore();
   const [batch, setBatch] = useState(false);
   return (
     <div className="mt-6 space-y-5">
@@ -316,7 +318,7 @@ export default function HomePage() {
             Today&apos;s performance
           </h1>
           <p className="text-sm leading-5 text-text-tertiary">
-            A live summary of your sales and operations.
+            A live summary of {selectedStore?.name ?? "your store"} sales and operations.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-4">

@@ -15,11 +15,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Pie, PieChart } from "recharts";
 import InventoryOverviewSkeleton from "./skeleton";
 import { mapInventoryOverviewResponse } from "./utils";
+import { useStore } from "@/components/store/store-provider";
 
 export default function InventoryOverview() {
+  const { selectedStoreCode } = useStore();
   const { data, isLoading } = useQuery({
-    queryKey: ["inventory-overview"],
-    queryFn: getInventoryOverviewData,
+    queryKey: ["inventory-overview", selectedStoreCode],
+    enabled: Boolean(selectedStoreCode),
+    queryFn: () => getInventoryOverviewData(selectedStoreCode!),
   });
 
   if (isLoading) {

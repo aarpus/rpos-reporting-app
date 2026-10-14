@@ -7,11 +7,14 @@ import { MenuDotsIcon } from "@/utils/icon";
 import { useQuery } from "@tanstack/react-query";
 import TrafficSourcesSkeleton from "./skeleton";
 import { mapTrafficSourcesResponse } from "./utils";
+import { useStore } from "@/components/store/store-provider";
 
 export default function TrafficSources() {
+  const { selectedStoreCode } = useStore();
   const { data, isLoading } = useQuery({
-    queryKey: ["traffic-sources"],
-    queryFn: getTrafficSourcesData,
+    queryKey: ["traffic-sources", selectedStoreCode],
+    enabled: Boolean(selectedStoreCode),
+    queryFn: () => getTrafficSourcesData(selectedStoreCode!),
   });
 
   if (isLoading || !data) {

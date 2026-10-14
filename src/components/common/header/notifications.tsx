@@ -1,213 +1,93 @@
 "use client";
 
-import {
-  BellIcon,
-  CreditCardIcon,
-  LetterIcon,
-  PrinterIcon,
-  SettingIcon,
-} from "@/components/common/header/icons";
+import { BellIcon, SettingIcon } from "@/components/common/header/icons";
+import { useStore } from "@/components/store/store-provider";
 import { Button } from "@/components/tailgrids/core/button";
 import { OverlayWrapper } from "@/components/tailgrids/core/overlay";
 import { Popover } from "@/components/tailgrids/core/popover";
 import { ScrollArea, ScrollAreaViewport, ScrollBar } from "@/components/tailgrids/core/scroll-area";
-import { cn } from "@/utils/cn";
+import { getNotifications, markAllNotificationsRead, markNotificationRead } from "@/services/api/notifications";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Header, Heading } from "react-aria-components";
+import { LuBellRing } from "react-icons/lu";
 
-interface Notification {
-  id: string;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  timestamp: string;
-  isUnread?: boolean;
+function relativeTime(value: string) {
+  const seconds = Math.round((new Date(value).getTime() - Date.now()) / 1000);
+  const formatter = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+  if (Math.abs(seconds) < 60) return formatter.format(seconds, "second");
+  const minutes = Math.round(seconds / 60);
+  if (Math.abs(minutes) < 60) return formatter.format(minutes, "minute");
+  const hours = Math.round(minutes / 60);
+  return Math.abs(hours) < 24
+    ? formatter.format(hours, "hour")
+    : formatter.format(Math.round(hours / 24), "day");
 }
 
-const defaultNotifications: { title: string; items: Notification[] }[] = [
-  {
-    title: "Today",
-    items: [
-      {
-        id: "1",
-        icon: <LetterIcon />,
-        title: "New Message Arrived",
-        description: "Elsie McElroy sent you new message",
-        timestamp: "5h ago",
-        isUnread: true,
-      },
-      {
-        id: "2",
-        icon: <CreditCardIcon />,
-        title: "Transaction Approved",
-        description: "Your payment of $75.00 to Chad Hurley was successful.",
-        timestamp: "10h ago",
-        isUnread: true,
-      },
-      {
-        id: "3",
-        icon: <PrinterIcon />,
-        title: "Upcoming Bill",
-        description: "Reminder: Invoice EST-INV012 is due in 3 days. Please submit payment.",
-        timestamp: "12h ago",
-        isUnread: false,
-      },
-    ],
-  },
-  {
-    title: "Yesterday",
-    items: [
-      {
-        id: "4",
-        icon: <CreditCardIcon />,
-        title: "Transaction Approved",
-        description: "Your payment of $75.00 to Chad Hurley was successful.",
-        timestamp: "10h ago",
-        isUnread: true,
-      },
-      {
-        id: "5",
-        icon: <LetterIcon />,
-        title: "New Message Arrived",
-        description: "Elsie McElroy sent you new message",
-        timestamp: "5h ago",
-        isUnread: true,
-      },
-      {
-        id: "6",
-        icon: <PrinterIcon />,
-        title: "Upcoming Bill",
-        description: "Reminder: Invoice EST-INV012 is due in 3 days. Please submit payment.",
-        timestamp: "12h ago",
-        isUnread: false,
-      },
-    ],
-  },
-];
-
 export function NotificationsButton() {
-  const [notifications, setNotifications] = useState(defaultNotifications);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { selectedStoreCode } = useStore();
+  const [isOpen, setIsOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const query = useQuery({
+    queryKey: ["notifications", selectedStoreCode],
+    enabled: Boolean(selectedStoreCode),
+    queryFn: () => getNotifications(selectedStoreCode!),
+    refetchInterval: 30_000,
+  });
+  const unreadCount = query.data?.unreadCount ?? 0;
 
-  const unreadCount = notifications.flatMap((n) => n.items).filter((n) => n.isUnread).length;
+  async function openNotification(id: number) {
+    if (!selectedStoreCode) return;
+    const result = await markNotificationRead(id, selectedStoreCode);
+    await queryClient.invalidateQueries({ queryKey: ["notifications", selectedStoreCode] });
+    setIsOpen(false);
+    router.push(result.targetPath);
+  }
 
-  const handleMarkAsRead = (notificationId: string) => {
-    setNotifications((prevNotifications) =>
-      prevNotifications.map((group) => ({
-        ...group,
-        items: group.items.map((item) =>
-          item.id === notificationId ? { ...item, isUnread: false } : item,
-        ),
-      })),
-    );
-  };
-
-  const handleMarkAllAsRead = () => {
-    setNotifications(
-      notifications.map((n) => ({ ...n, items: n.items.map((i) => ({ ...i, isUnread: false })) })),
-    );
-  };
+  async function markAll() {
+    if (!selectedStoreCode) return;
+    await markAllNotificationsRead(selectedStoreCode);
+    await queryClient.invalidateQueries({ queryKey: ["notifications", selectedStoreCode] });
+  }
 
   return (
     <OverlayWrapper isOpen={isOpen} onOpenChange={setIsOpen}>
-      <Button
-        iconOnly
-        appearance="outline"
-        className="relative size-10 rounded-lg border border-card-border bg-card-background text-icon-primary shadow-xs focus-visible:border-input-primary-focus-border focus-visible:ring-4 focus-visible:ring-input-primary-focus-border/20 [&>svg]:size-auto"
-      >
+      <Button iconOnly appearance="outline" aria-label={`${unreadCount} unread notifications`} className="relative size-10 rounded-lg border border-card-border bg-card-background text-icon-primary shadow-xs">
         <BellIcon />
-        {unreadCount > 0 && (
-          <span className={cn("absolute top-2 right-2.75 z-1 size-2 rounded-full bg-red-400")}>
-            <span className="absolute inset-0 -z-1 animate-ping rounded-full bg-red-400 opacity-75" />
-          </span>
-        )}
+        {unreadCount > 0 && <span className="absolute top-2 right-2.5 z-1 size-2 rounded-full bg-red-400"><span className="absolute inset-0 -z-1 animate-ping rounded-full bg-red-400 opacity-75" /></span>}
       </Button>
-
-      <Popover
-        placement="bottom end"
-        className="w-84.5 overflow-hidden rounded-2xl border border-border-secondary-alt bg-background-white-secondary p-0 shadow-3xl"
-      >
-        {/* Header */}
+      <Popover placement="bottom end" className="w-84.5 overflow-hidden rounded-2xl border border-border-secondary-alt bg-background-white-secondary p-0 shadow-3xl">
         <Header className="flex items-center justify-between border-b border-border-secondary-alt px-5 pt-5 pb-4">
-          <Heading level={4} className="leading-6 font-semibold text-text-primary">
-            Notifications
-          </Heading>
-
-          <Link
-            className="p-1 text-icon-secondary transition-colors hover:text-icon-primary"
-            href="/notifications"
-            onClick={() => setIsOpen(false)}
-          >
-            <SettingIcon />
-          </Link>
+          <div><Heading level={4} className="leading-6 font-semibold text-text-primary">Notifications</Heading><p className="text-xs text-text-tertiary">{unreadCount} unread</p></div>
+          <Link className="p-1 text-icon-secondary" href="/settings#notifications" onClick={() => setIsOpen(false)}><SettingIcon /></Link>
         </Header>
-
-        <ScrollArea className="h-100 max-h-100">
+        <ScrollArea className="h-96 max-h-96">
           <ScrollAreaViewport>
-            {notifications.map((group) => (
-              <section key={group.title}>
-                {/* Group Header */}
-                <div className="border-t border-b border-border-primary bg-background-gray-secondary px-5 py-2">
-                  <p className="text-xs leading-4 text-text-tertiary uppercase">{group.title}</p>
-                </div>
-                {/* Notifications List */}
-                <ul className="flex-1 overflow-y-auto px-3 py-2">
-                  {group.items.map((notification) => (
-                    <li key={notification.id}>
-                      <button
-                        className="group flex w-full cursor-pointer gap-3.5 rounded-lg px-3 py-3 transition-colors duration-300 hover:bg-background-gray-secondary_alt"
-                        onClick={() => handleMarkAsRead(notification.id)}
-                      >
-                        {/* Icon */}
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border-secondary bg-background-gray-primary text-icon-secondary transition-all duration-300 group-hover:bg-brand-500 group-hover:text-base-white group-hover:shadow-[0_1px_3px_0.5px_rgba(13,13,18,0.08)]">
-                          {notification.icon}
-                        </span>
-
-                        {/* Content */}
-                        <div className="min-w-0 flex-1 text-start">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="text-sm leading-5 font-semibold text-text-primary">
-                              {notification.title}
-                            </p>
-
-                            {notification.isUnread && (
-                              <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" />
-                            )}
-                          </div>
-
-                          <p className="mt-1 line-clamp-2 text-xs leading-4 text-text-secondary">
-                            {notification.description}
-                          </p>
-                          <p className="mt-2 text-xs leading-4 text-text-tertiary">
-                            {notification.timestamp}
-                          </p>
-                        </div>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
+            {query.isLoading ? <p className="p-5 text-sm text-text-tertiary">Loading…</p> : query.data?.items.length ? (
+              <ul className="px-3 py-2">
+                {query.data.items.slice(0, 10).map((notification) => (
+                  <li key={notification.id}>
+                    <button type="button" className="group flex w-full gap-3 rounded-lg px-3 py-3 text-left transition hover:bg-background-gray-secondary_alt" onClick={() => void openNotification(notification.id)}>
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border-secondary bg-background-gray-primary text-icon-secondary"><LuBellRing className="size-5" /></span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center justify-between gap-2"><span className="text-sm font-semibold text-text-primary">{notification.title}</span>{!notification.readAt && <span className="size-1.5 shrink-0 rounded-full bg-brand-500" />}</span>
+                        <span className="mt-1 line-clamp-2 text-xs text-text-secondary">{notification.body}</span>
+                        <span className="mt-2 block text-xs text-text-tertiary">{relativeTime(notification.createdAt)}</span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="p-5 text-sm text-text-tertiary">No notifications for this store.</p>}
           </ScrollAreaViewport>
           <ScrollBar />
         </ScrollArea>
-
-        {/* Footer */}
         <div className="flex items-center justify-between border-t border-border-secondary-alt px-5 py-4">
-          <button
-            onClick={handleMarkAllAsRead}
-            className="text-xs font-medium text-text-secondary underline transition-colors hover:text-text-primary"
-          >
-            Mark all as read
-          </button>
-          <Link
-            href="/notifications"
-            onClick={() => setIsOpen(false)}
-            className="rounded-lg bg-button-primary-background px-3.5 py-1.5 text-xs font-medium text-button-primary-text transition hover:bg-button-primary-hover-background"
-          >
-            View All
-          </Link>
+          <button type="button" disabled={!unreadCount} onClick={() => void markAll()} className="text-xs font-medium text-text-secondary underline disabled:opacity-50">Mark all as read</button>
+          <Link href="/notifications" onClick={() => setIsOpen(false)} className="rounded-lg bg-button-primary-background px-3.5 py-1.5 text-xs font-medium text-button-primary-text">View All</Link>
         </div>
       </Popover>
     </OverlayWrapper>

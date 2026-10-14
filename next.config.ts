@@ -2,6 +2,12 @@ import type { NextConfig } from "next";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const nextConfig: NextConfig = {
+  typescript: {
+    tsconfigPath:
+      process.env.NODE_ENV === "production"
+        ? "tsconfig.build.json"
+        : "tsconfig.json",
+  },
   // OpenNext must copy the full package so its `workerd` export is available.
   serverExternalPackages: ["pg-cloudflare"],
   async headers() {

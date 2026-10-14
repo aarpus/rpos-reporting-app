@@ -1,5 +1,4 @@
 import Providers from "@/app/providers";
-import PwaInstallPrompt from "@/components/pwa-install-prompt";
 import { cn } from "@/utils/cn";
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "next-themes";
@@ -70,7 +69,6 @@ export default function RootLayout({
             {children}
           </Providers>
         </ThemeProvider>
-        <PwaInstallPrompt />
         <Toaster />
       </body>
     </html>

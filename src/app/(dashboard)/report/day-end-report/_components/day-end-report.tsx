@@ -186,9 +186,7 @@ function TotalRow({ children }: { children: ReactNode }) {
 }
 
 function EmptyState({ label = "No records" }: { label?: string }) {
-  return (
-    <p className="px-2 py-2 text-[11px] text-text-tertiary">{label}</p>
-  );
+  return <p className="px-2 py-2 text-[11px] text-text-tertiary">{label}</p>;
 }
 
 const datePresets = [
@@ -211,11 +209,31 @@ const defaultFilters: DateFilters = {
 };
 
 const dayEndBatches = [
-  { id: "293", endedAt: "Sep-21-2026 06:01 PM", date: new CalendarDate(2026, 9, 21) },
-  { id: "292", endedAt: "Sep-21-2026 04:59 PM", date: new CalendarDate(2026, 9, 21) },
-  { id: "291", endedAt: "Sep-21-2026 04:17 PM", date: new CalendarDate(2026, 9, 21) },
-  { id: "290", endedAt: "Sep-21-2026 03:28 PM", date: new CalendarDate(2026, 9, 21) },
-  { id: "4", endedAt: "Sep-10-2026 02:54 PM", date: new CalendarDate(2026, 9, 10) },
+  {
+    id: "293",
+    endedAt: "Sep-21-2026 06:01 PM",
+    date: new CalendarDate(2026, 9, 21),
+  },
+  {
+    id: "292",
+    endedAt: "Sep-21-2026 04:59 PM",
+    date: new CalendarDate(2026, 9, 21),
+  },
+  {
+    id: "291",
+    endedAt: "Sep-21-2026 04:17 PM",
+    date: new CalendarDate(2026, 9, 21),
+  },
+  {
+    id: "290",
+    endedAt: "Sep-21-2026 03:28 PM",
+    date: new CalendarDate(2026, 9, 21),
+  },
+  {
+    id: "4",
+    endedAt: "Sep-10-2026 02:54 PM",
+    date: new CalendarDate(2026, 9, 10),
+  },
 ];
 
 function rangeForPreset(preset: DatePreset) {
@@ -288,74 +306,86 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
         </div>
 
         <ReportCard title="Filters">
-            <div className="space-y-2 px-2 py-2 sm:px-2.5">
-              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
-                <div className="flex w-full flex-col gap-1 sm:w-40">
-                  <span className="text-[11px] font-medium text-text-secondary">
-                    Date Filter
-                  </span>
-                  <Select
-                    aria-label="Date filter"
-                    value={draft.preset}
-                    onChange={(value) => applyPreset(value as DatePreset)}
-                  >
-                    <SelectTrigger size="sm" className="h-8 py-1 text-xs">
-                      <SelectValue />
-                      <SelectIndicator />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {datePresets.map((preset) => (
-                        <SelectItem key={preset.id} id={preset.id} textValue={preset.label}>
-                          {preset.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <CompactDatePicker
-                  label="From Date"
-                  value={draft.from}
-                  onChange={(value) => {
-                    if (!value) return;
-                    setDraft((current) => ({ ...current, preset: "custom", from: value }));
-                  }}
-                />
-                <CompactDatePicker
-                  label="To Date"
-                  value={draft.to}
-                  onChange={(value) => {
-                    if (!value) return;
-                    setDraft((current) => ({ ...current, preset: "custom", to: value }));
-                  }}
-                />
-              </div>
-              <div className="flex flex-wrap gap-2 pt-1">
-                <Button
-                  size="sm"
-                  className="h-8 gap-1.5 px-3 py-1 text-xs"
-                  onPress={() => {
-                    setApplied(draft);
-                    setHasAppliedFilters(true);
-                  }}
+          <div className="space-y-2 px-2 py-2 sm:px-2.5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+              <div className="flex w-full flex-col gap-1 sm:w-40">
+                <span className="text-[11px] font-medium text-text-secondary">
+                  Date Filter
+                </span>
+                <Select
+                  aria-label="Date filter"
+                  value={draft.preset}
+                  onChange={(value) => applyPreset(value as DatePreset)}
                 >
-                  Generate report
-                </Button>
-                <Button
-                  size="sm"
-                  variant="primary"
-                  appearance="outline"
-                  className="h-8 gap-1.5 px-3 py-1 text-xs [&>svg]:size-3.5"
-                  onPress={() => {
-                    setDraft(defaultFilters);
-                    setApplied(defaultFilters);
-                    setHasAppliedFilters(false);
-                  }}
-                >
-                  <LuRotateCcw />
-                  Reset filter
-                </Button>
+                  <SelectTrigger size="sm" className="h-8 py-1 text-xs">
+                    <SelectValue />
+                    <SelectIndicator />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {datePresets.map((preset) => (
+                      <SelectItem
+                        key={preset.id}
+                        id={preset.id}
+                        textValue={preset.label}
+                      >
+                        {preset.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+              <CompactDatePicker
+                label="From Date"
+                value={draft.from}
+                onChange={(value) => {
+                  if (!value) return;
+                  setDraft((current) => ({
+                    ...current,
+                    preset: "custom",
+                    from: value,
+                  }));
+                }}
+              />
+              <CompactDatePicker
+                label="To Date"
+                value={draft.to}
+                onChange={(value) => {
+                  if (!value) return;
+                  setDraft((current) => ({
+                    ...current,
+                    preset: "custom",
+                    to: value,
+                  }));
+                }}
+              />
             </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button
+                size="sm"
+                className="h-8 gap-1.5 px-3 py-1 text-xs"
+                onPress={() => {
+                  setApplied(draft);
+                  setHasAppliedFilters(true);
+                }}
+              >
+                Generate report
+              </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                appearance="outline"
+                className="h-8 gap-1.5 px-3 py-1 text-xs [&>svg]:size-3.5"
+                onPress={() => {
+                  setDraft(defaultFilters);
+                  setApplied(defaultFilters);
+                  setHasAppliedFilters(false);
+                }}
+              >
+                <LuRotateCcw />
+                Reset filter
+              </Button>
+            </div>
+          </div>
         </ReportCard>
 
         {hasAppliedFilters && (
@@ -375,7 +405,9 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
                       Batch #
                     </TableHead>
                     <TableHead className="px-6 py-2.5 text-xs leading-4 font-semibold text-text-secondary">
-                      <div className="flex items-center justify-center">Action</div>
+                      <div className="flex items-center justify-center">
+                        Action
+                      </div>
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -499,17 +531,32 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
               <Td className="font-medium text-text-primary">{row.name}</Td>
               <Td align="right">{row.trans}</Td>
               <Td align="right">{row.qty}</Td>
-              <Td align="right" className="text-success-500">{money(row.amount)}</Td>
+              <Td align="right" className="text-success-500">
+                {money(row.amount)}
+              </Td>
               <Td align="right" className={amountClass(row.discount)}>
                 {money(row.discount)}
               </Td>
-              <Td align="right" className={row.discount < 0 ? "text-error-500" : "text-success-500"}>{pct(row.discountPct)}</Td>
-              <Td align="right" className="text-success-500">{money(row.subtotal)}</Td>
-              <Td align="right" className="text-success-500">{money(row.tax)}</Td>
+              <Td
+                align="right"
+                className={
+                  row.discount < 0 ? "text-error-500" : "text-success-500"
+                }
+              >
+                {pct(row.discountPct)}
+              </Td>
+              <Td align="right" className="text-success-500">
+                {money(row.subtotal)}
+              </Td>
+              <Td align="right" className="text-success-500">
+                {money(row.tax)}
+              </Td>
               <Td align="right" className="font-medium text-success-500">
                 {money(row.total)}
               </Td>
-              <Td align="right" className="text-success-500">{pct(row.salesPct)}</Td>
+              <Td align="right" className="text-success-500">
+                {pct(row.salesPct)}
+              </Td>
             </tr>
           ))}
           <TotalRow>
@@ -545,7 +592,9 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
                 <Td>{row.no}</Td>
                 <Td className="font-medium text-text-primary">{row.name}</Td>
                 <Td align="right">{row.count}</Td>
-                <Td align="right" className="text-success-500">{money(row.amount)}</Td>
+                <Td align="right" className="text-success-500">
+                  {money(row.amount)}
+                </Td>
               </tr>
             ))}
             <TotalRow>
@@ -570,8 +619,12 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
               <tr key={row.name}>
                 <Td>{row.no}</Td>
                 <Td className="font-medium text-text-primary">{row.name}</Td>
-                <Td align="right" className="text-success-500">{money(row.taxable)}</Td>
-                <Td align="right" className="text-success-500">{money(row.tax)}</Td>
+                <Td align="right" className="text-success-500">
+                  {money(row.taxable)}
+                </Td>
+                <Td align="right" className="text-success-500">
+                  {money(row.tax)}
+                </Td>
               </tr>
             ))}
             <TotalRow>
@@ -583,7 +636,10 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
           </DenseTable>
         </ReportCard>
 
-        <ReportCard title="6. Tips & fees summary" className="sm:col-span-2 xl:col-span-1">
+        <ReportCard
+          title="6. Tips & fees summary"
+          className="sm:col-span-2 xl:col-span-1"
+        >
           <DenseTable
             head={[
               { label: "#" },
@@ -597,7 +653,9 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
                 <Td>{row.no}</Td>
                 <Td className="font-medium text-text-primary">{row.name}</Td>
                 <Td align="right">{row.count}</Td>
-                <Td align="right" className="text-success-500">{money(row.amount)}</Td>
+                <Td align="right" className="text-success-500">
+                  {money(row.amount)}
+                </Td>
               </tr>
             ))}
             <TotalRow>
@@ -628,14 +686,22 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
               <Td>{row.no}</Td>
               <Td className="font-medium text-text-primary">{row.name}</Td>
               <Td align="right">{row.count}</Td>
-              <Td align="right" className="text-success-500">{money(row.sale)}</Td>
+              <Td align="right" className="text-success-500">
+                {money(row.sale)}
+              </Td>
               <Td align="right" className="text-success-500">
                 {money(row.ret)}
               </Td>
               <Td align="right" className={amountClass(row.voidAmt)}>
                 {money(row.voidAmt)}
               </Td>
-              <Td align="right" className={cn("font-medium", row.name === "Cash" ? "text-error-500" : "text-success-500")}>
+              <Td
+                align="right"
+                className={cn(
+                  "font-medium",
+                  row.name === "Cash" ? "text-error-500" : "text-success-500",
+                )}
+              >
                 {money(row.net)}
               </Td>
             </tr>
@@ -673,8 +739,12 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
                 <Td>{row.no}</Td>
                 <Td className="font-medium text-text-primary">{row.name}</Td>
                 <Td align="right">{row.count}</Td>
-                <Td align="right" className="text-success-500">{money(row.sale)}</Td>
-                <Td align="right" className="text-success-500">{money(row.tip)}</Td>
+                <Td align="right" className="text-success-500">
+                  {money(row.sale)}
+                </Td>
+                <Td align="right" className="text-success-500">
+                  {money(row.tip)}
+                </Td>
                 <Td align="right" className="font-medium text-success-500">
                   {money(row.total)}
                 </Td>
@@ -707,8 +777,12 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
                 <Td>{row.no}</Td>
                 <Td className="font-medium text-text-primary">{row.name}</Td>
                 <Td align="right">{row.count}</Td>
-                <Td align="right" className="text-success-500">{money(row.cardAmount)}</Td>
-                <Td align="right" className="text-success-500">{money(row.surcharge)}</Td>
+                <Td align="right" className="text-success-500">
+                  {money(row.cardAmount)}
+                </Td>
+                <Td align="right" className="text-success-500">
+                  {money(row.surcharge)}
+                </Td>
                 <Td align="right" className="font-medium text-success-500">
                   {money(row.total)}
                 </Td>
@@ -752,20 +826,47 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
               <Td>{row.no}</Td>
               <Td>{row.shift}</Td>
               <Td className="font-medium text-text-primary">{row.employee}</Td>
-              <Td align="right" className="text-success-500">{money(row.open)}</Td>
-              <Td align="right" className="text-success-500">{money(row.sales)}</Td>
-              <Td align="right" className="text-success-500">{money(row.tip)}</Td>
-              <Td align="right" className="text-success-500">{money(row.close)}</Td>
-              <Td align="right" className="text-success-500">{money(row.total)}</Td>
-              <Td align="right" className="text-success-500">{money(row.cashGratuity)}</Td>
-              <Td align="right" className="text-success-500">{money(row.nonCashTip)}</Td>
-              <Td align="right" className="text-success-500">{money(row.cashTip)}</Td>
-              <Td align="right" className="text-success-500">{money(row.nonCashTipWithheld)}</Td>
-              <Td align="right" className="text-success-500">{money(row.gratuityWithheld)}</Td>
-              <Td align="right" className={row.owedToRest < 0 ? "text-error-500" : "text-success-500"}>
+              <Td align="right" className="text-success-500">
+                {money(row.open)}
+              </Td>
+              <Td align="right" className="text-success-500">
+                {money(row.sales)}
+              </Td>
+              <Td align="right" className="text-success-500">
+                {money(row.tip)}
+              </Td>
+              <Td align="right" className="text-success-500">
+                {money(row.close)}
+              </Td>
+              <Td align="right" className="text-success-500">
+                {money(row.total)}
+              </Td>
+              <Td align="right" className="text-success-500">
+                {money(row.cashGratuity)}
+              </Td>
+              <Td align="right" className="text-success-500">
+                {money(row.nonCashTip)}
+              </Td>
+              <Td align="right" className="text-success-500">
+                {money(row.cashTip)}
+              </Td>
+              <Td align="right" className="text-success-500">
+                {money(row.nonCashTipWithheld)}
+              </Td>
+              <Td align="right" className="text-success-500">
+                {money(row.gratuityWithheld)}
+              </Td>
+              <Td
+                align="right"
+                className={
+                  row.owedToRest < 0 ? "text-error-500" : "text-success-500"
+                }
+              >
                 {money(row.owedToRest)}
               </Td>
-              <Td align="right" className="text-success-500">{money(row.received)}</Td>
+              <Td align="right" className="text-success-500">
+                {money(row.received)}
+              </Td>
             </tr>
           ))}
           <TotalRow>
@@ -782,7 +883,10 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
             <Td align="right">{money(cashAuditTotal.cashTip)}</Td>
             <Td align="right">{money(cashAuditTotal.nonCashTipWithheld)}</Td>
             <Td align="right">{money(cashAuditTotal.gratuityWithheld)}</Td>
-            <Td align="right" className={amountClass(cashAuditTotal.owedToRest)}>
+            <Td
+              align="right"
+              className={amountClass(cashAuditTotal.owedToRest)}
+            >
               {money(cashAuditTotal.owedToRest)}
             </Td>
             <Td align="right">{money(cashAuditTotal.received)}</Td>
@@ -799,7 +903,9 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
                 className="flex items-baseline justify-between gap-3 py-0.5 text-[11px] leading-4"
               >
                 <span className="text-text-secondary">{row.label}</span>
-                <span className={amountClass(row.amount)}>{money(row.amount)}</span>
+                <span className={amountClass(row.amount)}>
+                  {money(row.amount)}
+                </span>
               </div>
             ))}
             <div className="mt-1 flex items-baseline justify-between gap-3 border-t border-card-border pt-1 text-[11px] leading-4 font-semibold">
@@ -825,7 +931,9 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
                 <Td>{row.no}</Td>
                 <Td className="font-medium text-text-primary">{row.type}</Td>
                 <Td align="right">{row.count}</Td>
-                <Td align="right" className="text-success-500">{money(row.amount)}</Td>
+                <Td align="right" className="text-success-500">
+                  {money(row.amount)}
+                </Td>
               </tr>
             ))}
             <TotalRow>
@@ -851,7 +959,9 @@ export default function DayEndReportView({ batchId }: { batchId?: string }) {
                 <Td>{row.no}</Td>
                 <Td className="font-medium text-text-primary">{row.name}</Td>
                 <Td align="right">{row.count}</Td>
-                <Td align="right" className="text-success-500">{money(row.amount)}</Td>
+                <Td align="right" className="text-success-500">
+                  {money(row.amount)}
+                </Td>
               </tr>
             ))}
             <TotalRow>

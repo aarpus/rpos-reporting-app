@@ -5,11 +5,12 @@ import ThemeToggle from "@/components/common/header/theme-toggle";
 import { UserProfileButton } from "@/components/common/header/user-profile";
 import { ThreeDots } from "@/components/common/sidebar/icon";
 import { cn } from "@/utils/cn";
+import Image from "next/image";
+import { useTheme } from "next-themes";
 import React from "react";
 import { NotificationsButton } from "./notifications";
 import SearchBar from "./searchbar";
-import Image from "next/image";
-import { useTheme } from "next-themes";
+import { SelectedStoreHighlight, StoreSelector } from "@/components/store/store-selector";
 
 const emptySubscribe = () => () => {};
 
@@ -17,17 +18,13 @@ const emptySubscribe = () => () => {};
 export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const { resolvedTheme } = useTheme();
-  const mounted = React.useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false,
-  );
+  const mounted = React.useSyncExternalStore(emptySubscribe, () => true, () => false);
   const isDark = mounted && resolvedTheme === "dark";
 
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b-[0.5px] border-card-border bg-card-surface-area px-2 py-4 lg:px-5">
-        {/*  Mobile layout (< xl)  3-column grid: menu | logo | dots */}
+        {/* Mobile layout (< xl): menu | store selector and quick access */}
         <div className="flex items-center xl:hidden">
           {/* Left: Menu / Hamburger */}
           <div className="flex flex-1 justify-start">
@@ -42,18 +39,20 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           </div>
 
           {/* Center: Logo */}
-          <div className="flex items-center justify-center">
+          <div className="flex min-w-0 items-center justify-center px-2">
             <Image
               src={isDark ? "/images/logo-light.png" : "/images/logo.png"}
               alt="Dashboard logo"
               width={300}
               height={64}
-              className="h-8 w-auto"
+              className="h-8 w-auto max-w-full object-contain"
+              priority
             />
           </div>
 
-          {/* Right: Three-dot */}
-          <div className="flex flex-1 justify-end">
+          {/* Right: Store selector and three-dot */}
+          <div className="flex flex-1 items-center justify-end gap-1">
+            <StoreSelector iconOnly />
             <button
               id="mobile-info-toggle"
               onClick={() => setIsDrawerOpen(!isDrawerOpen)}
@@ -70,15 +69,19 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           </div>
         </div>
 
-        {/* Desktop layout (xl+) - original layout */}
-        <div className="hidden items-center justify-between xl:flex">
+        {/* Desktop layout (xl+) */}
+        <div className="hidden grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-5 xl:grid">
           {/* Left Side - Search */}
-          <div className="max-w-xs flex-1">
-            <SearchBar />
+          <div className="min-w-0">
+            <div className="max-w-xs"><SearchBar /></div>
           </div>
 
+          {/* Center - Active store */}
+          <SelectedStoreHighlight />
+
           {/* Right Side - Actions */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex min-w-0 items-center justify-end gap-2.5">
+            <StoreSelector />
             <ThemeToggle />
             <NotificationsButton />
             <UserProfileButton />

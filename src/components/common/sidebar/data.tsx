@@ -34,14 +34,19 @@ export const NAV_DATA: NavigationSection[] = [
     label: "QUICK REPORTS",
     items: [
       {
+        title: "Store Order Reporting",
+        icon: <TableIcon />,
+        url: "/report/orders",
+      },
+      {
+        title: "Shift End Report",
+        icon: <CalendarIcon />,
+        url: "/report/shift-report",
+      },
+      {
         title: "Day End Reports",
         icon: <InvoiceIcon />,
         url: "/report/day-end-report",
-      },
-      {
-        title: "Month End Report",
-        icon: <CalendarIcon />,
-        url: "/report/month-end-report",
       },
       {
         title: "Week End Report",
@@ -49,19 +54,20 @@ export const NAV_DATA: NavigationSection[] = [
         url: "/report/week-end-report",
       },
       {
+        title: "Month End Report",
+        icon: <CalendarIcon />,
+        url: "/report/month-end-report",
+      },
+      {
         title: "Year End Report",
         icon: <CalendarIcon />,
         url: "/report/year-end-report",
       },
+
       {
-        title: "Employee Clock-In / Clock-Out",
+        title: "Employee Clock-In-Out",
         icon: <CalendarIcon />,
         url: "/report/employee-clock-in-out",
-      },
-      {
-        title: "Shift Report",
-        icon: <CalendarIcon />,
-        url: "/report/shift-report",
       },
       {
         title: "Transaction Detail",

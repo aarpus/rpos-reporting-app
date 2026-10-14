@@ -5,17 +5,36 @@ import MobileBottomNav from "@/components/common/mobile-bottom-nav";
 import Sidebar from "@/components/common/sidebar";
 import { SheetContent, SheetOverlay, SheetTitle } from "@/components/tailgrids/core/sheet";
 import { cn } from "@/utils/cn";
+import { StoreProvider } from "@/components/store/store-provider";
+import type { StoreSummary } from "@/lib/store-access";
 import { ReactNode, useState } from "react";
+import { usePathname } from "next/navigation";
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default function DashboardLayout({
+  children,
+  stores,
+  initialStoreCode,
+  role,
+}: {
+  children: ReactNode;
+  stores: StoreSummary[];
+  initialStoreCode: string | null;
+  role: "ADMIN" | "USER";
+}) {
   // XL+ sidebar expand/collapse state
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   // Mobile sheet open state (< xl breakpoint)
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
+  const pathname = usePathname();
 
   const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
   return (
+    <StoreProvider
+      key={`${initialStoreCode ?? "none"}:${stores.map((store) => store.storeCode).join(",")}`}
+      stores={stores}
+      initialStoreCode={initialStoreCode}
+    >
     <div className="flex h-full">
       {/*  Desktop sidebar (xl+) — always in DOM, toggles width  */}
       <aside
@@ -59,7 +78,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
           <main className="scrollbar-thin min-h-0 flex-1 overflow-y-auto">
             <div className="mx-auto w-full max-w-384 pb-[calc(5rem+env(safe-area-inset-bottom))] xl:pb-5">
-              {children}
+              {stores.length || (role === "ADMIN" && pathname.startsWith("/admin/")) ? children : (
+                <div className="m-6 rounded-2xl border border-card-border bg-card-surface-area p-8 text-center">
+                  <h1 className="text-xl font-semibold text-text-primary">No store access</h1>
+                  <p className="mt-2 text-sm text-text-tertiary">Contact an administrator to get access to an active store.</p>
+                </div>
+              )}
             </div>
           </main>
         </div>
@@ -67,5 +91,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       <MobileBottomNav />
     </div>
+    </StoreProvider>
   );
 }

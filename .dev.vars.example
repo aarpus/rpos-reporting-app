@@ -8,3 +8,7 @@ CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=postgresql://USER:PASSW
 AUTH_URL=http://localhost:8787
 AUTH_SECRET=generate-a-32-byte-random-secret
 AUTH_TRUST_HOST=true
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=generate-a-vapid-key-pair
+VAPID_PRIVATE_KEY=generate-a-vapid-key-pair
+VAPID_SUBJECT=mailto:admin@example.com
+POS_CREDENTIAL_ENCRYPTION_KEY=generate-a-32-byte-base64-secret

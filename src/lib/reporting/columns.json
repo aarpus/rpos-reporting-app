@@ -1,0 +1,877 @@
+{
+  "tbl_rpt_order": {
+    "key": "order_code",
+    "fields": [
+      {
+        "name": "order_id",
+        "kind": "bigint",
+        "required": false
+      },
+      {
+        "name": "order_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 50
+      },
+      {
+        "name": "order_number",
+        "kind": "string",
+        "required": false,
+        "maxLength": 100
+      },
+      {
+        "name": "checkid",
+        "kind": "string",
+        "required": false,
+        "maxLength": 20
+      },
+      {
+        "name": "store_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 64
+      },
+      {
+        "name": "station_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "shift_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "batch_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "order_type",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "order_status",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "customer_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 40
+      },
+      {
+        "name": "customer_name",
+        "kind": "string",
+        "required": false,
+        "maxLength": 200
+      },
+      {
+        "name": "subtotal",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "tax",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "discount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "fees",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "surcharge",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "tip_amount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "gratuity",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "total",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "paid_amount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "balance_amount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "payment_method",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "payment_status",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "is_void",
+        "kind": "boolean",
+        "required": false,
+        "default": false
+      },
+      {
+        "name": "is_return",
+        "kind": "boolean",
+        "required": false,
+        "default": false
+      },
+      {
+        "name": "is_tax_exempt",
+        "kind": "boolean",
+        "required": false,
+        "default": false
+      },
+      {
+        "name": "is_split",
+        "kind": "boolean",
+        "required": false,
+        "default": false
+      },
+      {
+        "name": "order_fees",
+        "kind": "jsonb",
+        "required": false,
+        "default": {}
+      },
+      {
+        "name": "created_by",
+        "kind": "bigint",
+        "required": false
+      },
+      {
+        "name": "created_by_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 30
+      },
+      {
+        "name": "business_date",
+        "kind": "date",
+        "required": true
+      },
+      {
+        "name": "created_at",
+        "kind": "timestamp",
+        "required": true
+      },
+      {
+        "name": "completed_at",
+        "kind": "timestamp",
+        "required": false
+      }
+    ]
+  },
+  "tbl_rpt_order_item": {
+    "key": "order_item_code",
+    "fields": [
+      {
+        "name": "order_id",
+        "kind": "bigint",
+        "required": false
+      },
+      {
+        "name": "order_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 50
+      },
+      {
+        "name": "order_number",
+        "kind": "string",
+        "required": true,
+        "maxLength": 100
+      },
+      {
+        "name": "order_item_id",
+        "kind": "bigint",
+        "required": false
+      },
+      {
+        "name": "order_item_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 50
+      },
+      {
+        "name": "business_date",
+        "kind": "date",
+        "required": true
+      },
+      {
+        "name": "store_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 64
+      },
+      {
+        "name": "station_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "shift_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "batch_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "department_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "department_name",
+        "kind": "string",
+        "required": false,
+        "maxLength": 200
+      },
+      {
+        "name": "category_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "category_name",
+        "kind": "string",
+        "required": false,
+        "maxLength": 200
+      },
+      {
+        "name": "menu_item_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 100
+      },
+      {
+        "name": "item_name",
+        "kind": "string",
+        "required": false,
+        "maxLength": 500
+      },
+      {
+        "name": "quantity",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "price",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "subtotal",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "tax_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "tax_name",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "tax_amt",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "discount_amt",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "gift_card_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "tran_discount_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "tran_discount_name",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "tran_discount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "tran_discount_tax",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "item_discount_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "item_discount_name",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "item_discount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "item_discount_tax",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "comno_header",
+        "kind": "string",
+        "required": false,
+        "maxLength": 100
+      },
+      {
+        "name": "combo_group_name",
+        "kind": "string",
+        "required": false,
+        "maxLength": 100
+      },
+      {
+        "name": "combo_discount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "combo_discount_tax",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "discount_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "discount_type",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "discount_reason",
+        "kind": "string",
+        "required": false,
+        "maxLength": 255
+      },
+      {
+        "name": "discount_approved_by",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "cash_price",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "card_price",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "is_discounted_row",
+        "kind": "boolean",
+        "required": false,
+        "default": false
+      },
+      {
+        "name": "is_void",
+        "kind": "boolean",
+        "required": false,
+        "default": false
+      },
+      {
+        "name": "void_reason",
+        "kind": "string",
+        "required": false,
+        "maxLength": 500
+      },
+      {
+        "name": "is_return",
+        "kind": "boolean",
+        "required": false,
+        "default": false
+      },
+      {
+        "name": "return_quantity",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "created_at",
+        "kind": "timestamp",
+        "required": false
+      }
+    ]
+  },
+  "tbl_rpt_payment": {
+    "key": "payment_code",
+    "fields": [
+      {
+        "name": "payment_id",
+        "kind": "bigint",
+        "required": false
+      },
+      {
+        "name": "payment_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 50
+      },
+      {
+        "name": "order_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 50
+      },
+      {
+        "name": "split_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "business_date",
+        "kind": "date",
+        "required": true
+      },
+      {
+        "name": "store_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 64
+      },
+      {
+        "name": "station_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "shift_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "batch_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "tender_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "tender_name",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "payment_amount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "round_off_amt",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "tip_amount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "fees",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "surcharge",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "total_amount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "payable_amount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "change_amount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "payment_split_no",
+        "kind": "integer",
+        "required": false,
+        "default": 1
+      },
+      {
+        "name": "payment_status",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "gift_card_no",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "card_type",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "issuer",
+        "kind": "string",
+        "required": false,
+        "maxLength": 150
+      },
+      {
+        "name": "mask_pan",
+        "kind": "string",
+        "required": false,
+        "maxLength": 150
+      },
+      {
+        "name": "tran_type",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "entry_mode",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "is_void",
+        "kind": "boolean",
+        "required": false,
+        "default": false
+      },
+      {
+        "name": "is_capture",
+        "kind": "boolean",
+        "required": false,
+        "default": false
+      },
+      {
+        "name": "split_json",
+        "kind": "jsonb",
+        "required": false,
+        "default": {}
+      },
+      {
+        "name": "created_on",
+        "kind": "timestamp",
+        "required": false
+      }
+    ]
+  },
+  "tbl_rpt_card_payment": {
+    "key": "card_payment_code",
+    "fields": [
+      {
+        "name": "card_payment_id",
+        "kind": "bigint",
+        "required": false
+      },
+      {
+        "name": "card_payment_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 50
+      },
+      {
+        "name": "payment_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 50
+      },
+      {
+        "name": "order_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 50
+      },
+      {
+        "name": "split_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "business_date",
+        "kind": "date",
+        "required": true
+      },
+      {
+        "name": "store_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 64
+      },
+      {
+        "name": "station_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "shift_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "batch_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "device_type",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "device_serial_no",
+        "kind": "string",
+        "required": false,
+        "maxLength": 100
+      },
+      {
+        "name": "mid",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "tid",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "tran_id",
+        "kind": "string",
+        "required": false,
+        "maxLength": 100
+      },
+      {
+        "name": "rrn",
+        "kind": "string",
+        "required": false,
+        "maxLength": 150
+      },
+      {
+        "name": "stan_id",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "auth_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "tran_type",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "entry_mode",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "card_type",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "issuer",
+        "kind": "string",
+        "required": false,
+        "maxLength": 150
+      },
+      {
+        "name": "mask_pan",
+        "kind": "string",
+        "required": false,
+        "maxLength": 150
+      },
+      {
+        "name": "sale_amount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "tip_amount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "surcharge_amount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "total_amount",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "response_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 20
+      },
+      {
+        "name": "is_void",
+        "kind": "boolean",
+        "required": false,
+        "default": false
+      },
+      {
+        "name": "is_capture",
+        "kind": "boolean",
+        "required": false,
+        "default": false
+      },
+      {
+        "name": "created_on",
+        "kind": "timestamp",
+        "required": false
+      },
+      {
+        "name": "response_text",
+        "kind": "string",
+        "required": false,
+        "maxLength": 10000
+      }
+    ]
+  }
+}

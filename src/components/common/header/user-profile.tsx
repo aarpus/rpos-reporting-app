@@ -22,6 +22,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import { Spinner } from "@/components/tailgrids/core/spinner";
 import { toast } from "sonner";
+import { LuStore, LuUsers } from "react-icons/lu";
 
 interface UserProfileMenuItem {
   href: string;
@@ -50,10 +51,16 @@ export function UserProfileButton() {
       label: "View profile",
     },
     {
-      href: "#",
+      href: "/settings",
       icon: <GearIcon />,
       label: "Account Settings",
     },
+    ...(session?.user?.role === "ADMIN"
+      ? [
+          { href: "/admin/stores", icon: <LuStore className="size-4.5" />, label: "Store Management" },
+          { href: "/admin/users", icon: <LuUsers className="size-4.5" />, label: "User Management" },
+        ]
+      : []),
     {
       href: "#",
       icon: <BillingIcon />,
@@ -117,6 +124,18 @@ export function UserProfileButton() {
             if (pending) return;
             setPending(true);
             try {
+              if ("serviceWorker" in navigator) {
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.getSubscription();
+                if (subscription) {
+                  await fetch("/api/push-subscriptions", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ endpoint: subscription.endpoint }),
+                  });
+                  await subscription.unsubscribe();
+                }
+              }
               await signOut({ redirectTo: "/auth" });
             } catch {
               setPending(false);

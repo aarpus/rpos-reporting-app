@@ -36,12 +36,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           );
           if (attempts.rows[0].attempts > 10) return null;
           const result = await db.query<{
-            id: string;
+            id: number;
             name: string;
             email: string;
             password_hash: string;
+            role: "ADMIN" | "USER";
           }>(
-            "SELECT id, name, email, password_hash FROM auth_users WHERE email = $1 AND active = TRUE",
+            "SELECT id, name, email, password_hash, role FROM auth_users WHERE email = $1 AND active = TRUE",
             [email],
           );
           const user = result.rows[0];
@@ -54,9 +55,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           await db.query("DELETE FROM auth_login_attempts WHERE email = $1", [
             email,
           ]);
-          return { id: user.id, name: user.name, email: user.email };
+          return { id: String(user.id), name: user.name, email: user.email, role: user.role };
         });
       },
     }),
   ],
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) token.role = user.role;
+      return token;
+    },
+    session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
+        session.user.role = token.role === "ADMIN" ? "ADMIN" : "USER";
+      }
+      return session;
+    },
+  },
 });

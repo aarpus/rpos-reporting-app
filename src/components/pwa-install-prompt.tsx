@@ -4,76 +4,91 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { FiDownload, FiMoreVertical, FiShare2, FiX } from "react-icons/fi";
 
-type InstallChoice = {
-  outcome: "accepted" | "dismissed";
-  platform: string;
-};
-
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
-  userChoice: Promise<InstallChoice>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 }
 
 type NavigatorWithStandalone = Navigator & { standalone?: boolean };
 
-export default function PwaInstallPrompt() {
-  const [installPrompt, setInstallPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
+// Also remember within this tab if browser storage is unavailable.
+const notifiedUsers = new Set<string>();
+
+export default function PwaInstallPrompt({ userId }: { userId: string }) {
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isInstalling, setIsInstalling] = useState(false);
-  const primaryButtonRef = useRef<HTMLButtonElement>(null);
-  const userAgent =
-    typeof navigator === "undefined" ? "" : navigator.userAgent.toLowerCase();
-  const isIos = /iphone|ipad|ipod/.test(userAgent);
-  const isMobile = /android|iphone|ipad|ipod|mobile/.test(userAgent);
+  const [installError, setInstallError] = useState(false);
+  const [platform, setPlatform] = useState({ isIos: false, isMobile: false });
+  const installingRef = useRef(false);
 
   useEffect(() => {
-    const standalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (navigator as NavigatorWithStandalone).standalone === true;
-
-    if (standalone) {
-      return;
-    }
-
-    const showTimer = window.setTimeout(() => setIsOpen(true), 900);
-
-    const handleBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
-      setIsOpen(true);
-    };
-
-    const handleInstalled = () => {
-      setInstallPrompt(null);
-      setIsOpen(false);
-    };
-
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    window.addEventListener("appinstalled", handleInstalled);
-
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {
         // The app remains usable when service workers are unavailable.
       });
     }
 
+    const storageKey = `acutepos:install-notice:${userId}`;
+    const wasShown = () => {
+      if (notifiedUsers.has(userId)) return true;
+      try {
+        return window.localStorage.getItem(storageKey) === "shown";
+      } catch {
+        return false;
+      }
+    };
+    const standalone = () =>
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (navigator as NavigatorWithStandalone).standalone === true;
+
+    let installed = standalone();
+    let hideTimer: number | undefined;
+    const showTimer = window.setTimeout(() => {
+      if (installed || standalone() || wasShown()) return;
+      notifiedUsers.add(userId);
+      try {
+        window.localStorage.setItem(storageKey, "shown");
+      } catch {
+        // The in-memory marker still prevents repeats during navigation.
+      }
+      const agent = navigator.userAgent.toLowerCase();
+      setPlatform({
+        isIos: /iphone|ipad|ipod/.test(agent),
+        isMobile: /android|iphone|ipad|ipod|mobile/.test(agent),
+      });
+      setIsOpen(true);
+      hideTimer = window.setTimeout(() => {
+        if (!installingRef.current) setIsOpen(false);
+      }, 12_000);
+    }, 900);
+
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      // Update the action without reopening a dismissed or expired notice.
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+    const handleInstalled = () => {
+      installed = true;
+      window.clearTimeout(showTimer);
+      window.clearTimeout(hideTimer);
+      setInstallPrompt(null);
+      setIsOpen(false);
+    };
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleInstalled);
     return () => {
       window.clearTimeout(showTimer);
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt,
-      );
+      window.clearTimeout(hideTimer);
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleInstalled);
     };
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     if (!isOpen) return;
-    primaryButtonRef.current?.focus();
-
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsOpen(false);
+      if (event.key === "Escape" && !installingRef.current) setIsOpen(false);
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
@@ -84,130 +99,88 @@ export default function PwaInstallPrompt() {
       setIsOpen(false);
       return;
     }
-
+    installingRef.current = true;
     setIsInstalling(true);
+    setInstallError(false);
     try {
       await installPrompt.prompt();
       await installPrompt.userChoice;
-      setInstallPrompt(null);
       setIsOpen(false);
+    } catch {
+      setInstallError(true);
+      // Show browser-menu instructions if the native prompt fails.
+      window.setTimeout(() => setIsOpen(false), 12_000);
     } finally {
+      setInstallPrompt(null);
+      installingRef.current = false;
       setIsInstalling(false);
     }
   }
 
   if (!isOpen) return null;
 
-  const hasNativePrompt = Boolean(installPrompt);
-
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-black/55 p-3 backdrop-blur-sm sm:items-center sm:p-6"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) setIsOpen(false);
-      }}
+    <aside
+      aria-label="Install application notification"
+      className="fixed top-[calc(1rem+env(safe-area-inset-top))] right-4 z-[100] w-[calc(100%_-_2rem)] max-w-sm rounded-2xl border border-card-border bg-card-surface-area p-5 text-text-primary shadow-xl"
     >
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="pwa-install-title"
-        aria-describedby="pwa-install-description"
-        className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-white/10 bg-[#111118] text-white shadow-2xl"
+      <button
+        type="button"
+        onClick={() => setIsOpen(false)}
+        disabled={isInstalling}
+        aria-label="Dismiss install notification"
+        className="absolute top-3 right-3 flex size-8 items-center justify-center rounded-lg text-text-tertiary hover:bg-background-gray-secondary focus-visible:outline-2 focus-visible:outline-primary-500 disabled:opacity-50"
       >
-        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-br from-violet-600/35 via-indigo-500/15 to-transparent" />
+        <FiX className="size-4" aria-hidden="true" />
+      </button>
+      <div role="status" aria-live="polite" aria-atomic="true">
+        <div className="flex items-center gap-3 pr-6">
+          <div className="relative size-11 shrink-0 overflow-hidden rounded-xl">
+            <Image src="/icon.png" alt="" fill sizes="44px" />
+          </div>
+          <div>
+            <p className="text-xs font-medium text-text-tertiary">Install application</p>
+            <h2 className="text-base font-semibold">AcutePOS</h2>
+          </div>
+        </div>
+        <p className="mt-3 text-sm leading-6 text-text-tertiary">
+          Install the reporting dashboard for quick access from your home screen.
+        </p>
+        {!installPrompt && (
+          <p className="mt-2 flex items-start gap-2 text-sm leading-6 text-text-tertiary">
+            {platform.isIos ? (
+              <FiShare2 className="mt-1 size-4 shrink-0 text-primary-500" aria-hidden="true" />
+            ) : (
+              <FiMoreVertical className="mt-1 size-4 shrink-0 text-primary-500" aria-hidden="true" />
+            )}
+            <span>
+              {platform.isIos
+                ? "Tap Share, then Add to Home Screen."
+                : `Open the browser menu and choose ${platform.isMobile ? "Add to Home screen" : "Install AcutePOS"}, if available.`}
+            </span>
+          </p>
+        )}
+        {installError && <p className="mt-2 text-sm text-text-tertiary">Use the browser menu to install the app.</p>}
+      </div>
+      <div className="mt-4 flex justify-end gap-2">
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          aria-label="Close install prompt"
-          className="absolute top-4 right-4 z-10 flex size-9 items-center justify-center rounded-full bg-white/10 text-white/75 transition hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400"
+          disabled={isInstalling}
+          className="rounded-lg px-3 py-2 text-sm font-medium text-text-tertiary hover:bg-background-gray-secondary focus-visible:outline-2 focus-visible:outline-primary-500 disabled:opacity-50"
         >
-          <FiX className="size-5" aria-hidden="true" />
+          Not now
         </button>
-
-        <div className="relative px-6 pt-8 pb-6 sm:px-8 sm:pt-9 sm:pb-8">
-          <div className="flex items-center gap-4">
-            <div className="relative size-16 shrink-0 overflow-hidden rounded-2xl bg-white shadow-lg shadow-violet-950/40">
-              <Image src="/icon.png" alt="" fill sizes="64px" priority />
-            </div>
-            <div className="min-w-0 pr-8">
-              <p className="text-xs font-semibold tracking-[0.18em] text-violet-300 uppercase">
-                Install application
-              </p>
-              <h2
-                id="pwa-install-title"
-                className="mt-1 text-2xl font-semibold tracking-tight"
-              >
-                AcutePOS
-              </h2>
-            </div>
-          </div>
-
-          <p
-            id="pwa-install-description"
-            className="mt-6 text-sm leading-6 text-white/70"
-          >
-            Install the reporting dashboard for one-tap access and a focused,
-            full-screen experience on this device.
-          </p>
-
-          {!hasNativePrompt && (
-            <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.06] p-4">
-              {isIos ? (
-                <p className="flex items-start gap-3 text-sm leading-6 text-white/80">
-                  <FiShare2
-                    className="mt-1 size-4 shrink-0 text-violet-300"
-                    aria-hidden="true"
-                  />
-                  <span>
-                    Tap <strong className="text-white">Share</strong>, then
-                    choose{" "}
-                    <strong className="text-white">Add to Home Screen</strong>.
-                  </span>
-                </p>
-              ) : (
-                <p className="flex items-start gap-3 text-sm leading-6 text-white/80">
-                  <FiMoreVertical
-                    className="mt-1 size-4 shrink-0 text-violet-300"
-                    aria-hidden="true"
-                  />
-                  <span>
-                    Open the browser menu and choose
-                    <strong className="text-white">
-                      {isMobile ? " Add to Home screen" : " Install AcutePOS"}
-                    </strong>
-                    .
-                  </span>
-                </p>
-              )}
-            </div>
-          )}
-
-          <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="h-11 rounded-xl px-5 text-sm font-semibold text-white/70 transition hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400"
-            >
-              Not now
-            </button>
-            <button
-              ref={primaryButtonRef}
-              type="button"
-              onClick={install}
-              disabled={isInstalling}
-              className="flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-5 text-sm font-semibold shadow-lg shadow-violet-950/30 transition hover:from-violet-500 hover:to-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 disabled:cursor-wait disabled:opacity-70"
-            >
-              <FiDownload className="size-4" aria-hidden="true" />
-              {hasNativePrompt
-                ? isInstalling
-                  ? "Opening install..."
-                  : "Install app"
-                : "Got it"}
-            </button>
-          </div>
-        </div>
-      </section>
-    </div>
+        <button
+          type="button"
+          onClick={install}
+          disabled={isInstalling}
+          className="flex items-center gap-2 rounded-lg bg-primary-500 px-3 py-2 text-sm font-medium text-primary-text transition hover:bg-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:cursor-wait disabled:opacity-70"
+        >
+          <FiDownload className="size-4" aria-hidden="true" />
+          {installPrompt ? (isInstalling ? "Opening install..." : "Install app") : "Got it"}
+        </button>
+      </div>
+    </aside>
   );
 }

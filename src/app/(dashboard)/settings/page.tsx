@@ -1,6 +1,7 @@
 import ThemeToggle from "@/components/common/header/theme-toggle";
 import Link from "next/link";
 import { LuBell, LuChevronRight, LuMoonStar, LuShieldCheck } from "react-icons/lu";
+import { NotificationSettings } from "@/components/notifications/notification-settings";
 
 export default function SettingsPage() {
   return (
@@ -61,6 +62,7 @@ export default function SettingsPage() {
           </div>
         </div>
       </section>
+      <NotificationSettings />
     </div>
   );
 }

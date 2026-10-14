@@ -1,7 +1,6 @@
 import nextEnv from "@next/env";
 import { Pool } from "pg";
 import { readFile } from "node:fs/promises";
-import { randomUUID } from "node:crypto";
 import { hashPassword } from "../src/lib/password.mjs";
 
 nextEnv.loadEnvConfig(process.cwd());
@@ -23,6 +22,17 @@ try {
     if (command === "migrate") {
       await pool.query(await readFile(new URL("../database/001-auth.sql", import.meta.url), "utf8"));
       console.log("Authentication schema is ready.");
+    } else if (command === "seed-notification-types") {
+      await pool.query(
+        `INSERT INTO notification_types (key, label, active) VALUES
+           ('SHIFT_END', 'Shift ended', TRUE),
+           ('DAY_END', 'Business day closed', TRUE),
+           ('LOW_STOCK', 'Low stock', TRUE),
+           ('VOID_REFUND', 'Void or refund', TRUE)
+         ON CONFLICT (key) DO UPDATE
+         SET label = EXCLUDED.label, active = EXCLUDED.active`,
+      );
+      console.log("Notification types are ready.");
     } else if (command === "create-user") {
       const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
       const name = process.env.ADMIN_NAME?.trim();
@@ -30,9 +40,15 @@ try {
       if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !name || name.length > 120 || !password || password.length > 256) {
         throw new Error("Set ADMIN_NAME, ADMIN_EMAIL, and a non-empty ADMIN_PASSWORD (maximum 256 characters) in .env.local.");
       }
-      await pool.query("INSERT INTO auth_users (id, name, email, password_hash) VALUES ($1, $2, $3, $4)", [randomUUID(), name, email, await hashPassword(password)]);
+      await pool.query("INSERT INTO auth_users (name, email, password_hash, role) VALUES ($1, $2, $3, 'ADMIN')", [name, email, await hashPassword(password)]);
       console.log("Account created. Remove ADMIN_PASSWORD from .env.local.");
-    } else throw new Error("Expected create, migrate, or create-user.");
+    } else if (command === "bootstrap-admin") {
+      const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+      if (!email) throw new Error("Set ADMIN_EMAIL before bootstrapping the administrator.");
+      const result = await pool.query("UPDATE auth_users SET role = 'ADMIN' WHERE email = $1 AND active = TRUE", [email]);
+      if (!result.rowCount) throw new Error("No active account matches ADMIN_EMAIL.");
+      console.log("Administrator role applied.");
+    } else throw new Error("Expected create, migrate, seed-notification-types, create-user, or bootstrap-admin.");
   }
 } catch (error) {
   console.error(error.code === "23505" ? "An account with that email already exists; no changes made." : error.message);

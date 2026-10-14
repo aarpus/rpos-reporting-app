@@ -34,8 +34,10 @@ import {
   CalendarDate,
   endOfMonth,
   endOfWeek,
+  getLocalTimeZone,
   startOfMonth,
   startOfWeek,
+  today,
 } from "@internationalized/date";
 import { useMemo, useState } from "react";
 import {
@@ -56,7 +58,6 @@ import {
   employeeOptions,
   groupByOptions,
   parseDateKey,
-  reportDate,
   reportTypeOptions,
   sessions,
   type ClockSession,
@@ -72,36 +73,40 @@ type FilterState = {
   groupBy: string;
 };
 
-const defaultFilters: FilterState = {
-  preset: "today",
-  from: reportDate,
-  to: reportDate,
-  employee: "All Employees",
-  reportType: "Date",
-  groupBy: "Batchwise",
-};
+function createDefaultFilters(): FilterState {
+  const currentDate = today(getLocalTimeZone());
+  return {
+    preset: "today",
+    from: currentDate,
+    to: currentDate,
+    employee: "All Employees",
+    reportType: "Date",
+    groupBy: "Batchwise",
+  };
+}
 
 function rangeForPreset(preset: DatePreset) {
-  if (preset === "today") return { from: reportDate, to: reportDate };
+  const currentDate = today(getLocalTimeZone());
+  if (preset === "today") return { from: currentDate, to: currentDate };
   if (preset === "yesterday") {
-    const yesterday = reportDate.subtract({ days: 1 });
+    const yesterday = currentDate.subtract({ days: 1 });
     return { from: yesterday, to: yesterday };
   }
   if (preset === "this-week") {
     return {
-      from: startOfWeek(reportDate, "en-GB"),
-      to: endOfWeek(reportDate, "en-GB"),
+      from: startOfWeek(currentDate, "en-GB"),
+      to: endOfWeek(currentDate, "en-GB"),
     };
   }
   if (preset === "last-week") {
-    const lastWeek = reportDate.subtract({ weeks: 1 });
+    const lastWeek = currentDate.subtract({ weeks: 1 });
     return {
       from: startOfWeek(lastWeek, "en-GB"),
       to: endOfWeek(lastWeek, "en-GB"),
     };
   }
   if (preset === "this-month") {
-    return { from: startOfMonth(reportDate), to: endOfMonth(reportDate) };
+    return { from: startOfMonth(currentDate), to: endOfMonth(currentDate) };
   }
   return null;
 }
@@ -291,8 +296,10 @@ function SessionDialog({
 }
 
 export default function EmployeeClockReport() {
-  const [draft, setDraft] = useState<FilterState>(defaultFilters);
-  const [applied, setApplied] = useState<FilterState | null>(defaultFilters);
+  const [draft, setDraft] = useState<FilterState>(createDefaultFilters);
+  const [applied, setApplied] = useState<FilterState | null>(
+    createDefaultFilters,
+  );
   const [selectedSession, setSelectedSession] = useState<ClockSession | null>(
     null,
   );
@@ -492,8 +499,9 @@ export default function EmployeeClockReport() {
               appearance="outline"
               className="h-8 gap-1.5 px-3 py-1 text-xs [&>svg]:size-3.5"
               onPress={() => {
-                setDraft(defaultFilters);
-                setApplied(defaultFilters);
+                const filters = createDefaultFilters();
+                setDraft(filters);
+                setApplied(filters);
                 setPage(1);
               }}
             >

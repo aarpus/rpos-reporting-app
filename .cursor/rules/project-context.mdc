@@ -1,0 +1,18 @@
+---
+description: AcutePOS architecture, source context, and safe development rules
+alwaysApply: true
+---
+
+# AcutePOS project context
+
+Consult root `AGENTS.md` and `docs/ai-handover/CURSOR_HANDOVER.md` before major work. The remaining `docs/ai-handover/` files explain architecture, APIs, database, workflows, setup, status and issues. Re-read related source; documentation is a dated working-tree snapshot.
+
+- Next.js App Router with strict TypeScript/React; frontend in `src/app` and reusable UI in `src/components/tailgrids/core`.
+- APIs in `src/app/api`; services/validators in `src/lib`; live reports use parameterized `pg` SQL. Prisma models public metadata; SQL provisions registered per-store reporting schemas.
+- Preserve Auth.js credentials, ADMIN/USER permissions, active-user/store checks, assignment isolation and store-scoped query keys. Selected cookies/client schema names are never authorization.
+- Preserve full snapshot reconciliation, revision/idempotency rules, atomic transactions, exact decimal transport and exclusion of card attempts from revenue.
+- Read `KNOWN_ISSUES.md`: integer Prisma IDs disagree with UUID migrations; many summary pages use fixtures. Do not infer live behavior from rendered UI.
+- Reuse existing patterns/components; make focused changes, preserve user edits, avoid unrelated refactoring and unnecessary dependencies.
+- Obtain explicit approval before changing API contracts, database schemas/migrations, or deleting functionality. Never hardcode secrets or copy populated example credentials.
+- Read relevant installed `node_modules/next/dist/docs/` guides before framework changes. Run appropriate documented validation and report actual outcomes.
+- Update affected handover docs when implementation changes; keep this rule concise and identify assumptions/unresolved questions.

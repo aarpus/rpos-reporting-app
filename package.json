@@ -16,14 +16,22 @@
     "postinstall": "prisma generate",
     "prisma": "prisma",
     "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push",
+    "prisma:push": "prisma db push && npm run db:seed-notification-types && npm run reporting:install",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "db:create": "node scripts/database.mjs create",
     "db:migrate": "node scripts/database.mjs migrate",
     "db:deploy": "prisma migrate deploy",
+    "db:seed-notification-types": "node scripts/database.mjs seed-notification-types",
     "db:create-user": "node scripts/database.mjs create-user",
-    "test:auth": "node --test tests/password.test.mjs"
+    "db:bootstrap-admin": "node scripts/database.mjs bootstrap-admin",
+    "pos:credential": "node scripts/pos-credential.mjs",
+    "push:generate-vapid": "node scripts/generate-vapid.mjs",
+    "test:auth": "node --test --test-isolation=none tests/*.test.mjs",
+    "reporting:import-public": "node scripts/import-public-reporting.mjs",
+    "test:reporting": "node --test --test-isolation=none tests/reporting.test.mjs tests/transaction-reporting.test.mjs",
+    "reporting:stores": "node scripts/reporting-stores.mjs",
+    "reporting:install": "node scripts/install-reporting.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -53,9 +61,11 @@
     "server-only": "^0.0.1",
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.6.0",
-    "tailwind-scrollbar": "^4.0.2"
+    "tailwind-scrollbar": "^4.0.2",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.4.3",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/leaflet": "^1.9.22",
@@ -63,6 +73,7 @@
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "prisma": "^7.10.0",

@@ -7,11 +7,14 @@ import { ArrowDownIcon, ArrowUpIcon } from "@/utils/icon";
 import { useQuery } from "@tanstack/react-query";
 import OverviewStatsSkeleton from "./skeleton";
 import { mapOverviewStats } from "./utils";
+import { useStore } from "@/components/store/store-provider";
 
 export default function ECommerceOverviewStats() {
+  const { selectedStoreCode } = useStore();
   const { data, isLoading } = useQuery({
-    queryKey: ["home-overview-stats"],
-    queryFn: getHomeOverviewStats,
+    queryKey: ["home-overview-stats", selectedStoreCode],
+    enabled: Boolean(selectedStoreCode),
+    queryFn: () => getHomeOverviewStats(selectedStoreCode!),
   });
 
   const overviewStats = data ? mapOverviewStats(data) : [];

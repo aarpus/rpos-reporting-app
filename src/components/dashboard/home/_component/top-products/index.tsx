@@ -9,11 +9,14 @@ import { ArrowDownIcon, ArrowUpIcon, MenuDotsIcon } from "@/utils/icon";
 import { useQuery } from "@tanstack/react-query";
 import TopProductsSkeleton from "./skeleton";
 import { mapTopProductsResponse } from "./utils";
+import { useStore } from "@/components/store/store-provider";
 
 export default function TopProducts() {
+  const { selectedStoreCode } = useStore();
   const { data, isLoading } = useQuery({
-    queryKey: ["top-products"],
-    queryFn: getTopProductsData,
+    queryKey: ["top-products", selectedStoreCode],
+    enabled: Boolean(selectedStoreCode),
+    queryFn: () => getTopProductsData(selectedStoreCode!),
   });
 
   if (isLoading || !data) {
