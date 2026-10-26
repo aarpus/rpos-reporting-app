@@ -13,7 +13,7 @@ Use Node **24.x** (`package.json` engines), npm and PostgreSQL for application d
 3. Run `npm ci`. Prisma generation may require DATABASE_URL even though generation is not a database migration.
 4. For an explicitly disposable new database, the repository's schema-push path is `npm run prisma:push` (push current metadata, seed notification types, install reporting functions). It changes schema; use only with explicit approval and the intended database. Do not add `--accept-data-loss` to bypass drift. `npm run db:create` is optional for a role/server that allows CREATE DATABASE; hosted providers may already create it.
 5. `npm run prisma:generate` can regenerate the client. Set one-time ADMIN_NAME/ADMIN_EMAIL/ADMIN_PASSWORD, run `npm run db:create-user`, then remove ADMIN_PASSWORD. CLI creates ADMIN only; use admin UI/API for USER accounts.
-6. Create stores through `/admin/stores`, which provisions reporting atomically. For existing stores, `npm run reporting:stores -- provision STORE_CODE` or `provision-all` provisions mappings. Use the intended database and approved role privileges.
+6. Create stores through `/admin/stores`, which provisions reporting atomically. After a store is created, the same page can issue a POS credential and shows the secret once. For existing stores, `npm run reporting:stores -- provision STORE_CODE` or `provision-all` provisions mappings. Use the intended database and approved role privileges.
 7. `npm run dev`; open `/auth` at your local AUTH_URL (ordinary Next dev default is port 3000). Live reports require synchronized store data, not fixture pages.
 
 Do not use this disposable schema-push path as a production migration strategy. The legacy `db:migrate` command runs only `database/001-auth.sql`, which creates the older UUID auth tables and no current store/reporting subsystem.
@@ -37,7 +37,7 @@ Do not use this disposable schema-push path as a production migration strategy. 
 | NEXTJS_ENV | `.dev.vars.example` sets development for preview; no direct application source read |
 | NODE_ENV | Framework-controlled dev/production; selects build tsconfig and Secure selection cookie |
 
-Generate random base64 secrets using `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`. Generate VAPID pair with `npm run push:generate-vapid`; save output securely, not in docs. POS credential create prints the one-time shared secret; do not paste it into logs/chat/docs.
+Generate random base64 secrets using `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`. Generate VAPID pair with `npm run push:generate-vapid`; save output securely, not in docs. POS credential create, from `/admin/stores` or the CLI, reveals the one-time shared secret; do not paste it into logs/chat/docs.
 
 ## Exact available command reference
 
@@ -62,7 +62,7 @@ Generate random base64 secrets using `node -e "console.log(require('crypto').ran
 | `npm run reporting:stores -- provision CODE` | Provision one existing store |
 | `npm run reporting:stores -- provision-all` / `upgrade` | Same loop over all stores; not a generic version migration engine |
 | `npm run reporting:import-public -- CODE` | Read consistent legacy public source then sync revision-1 snapshots; source untouched, target changes |
-| `npm run pos:credential -- create CODE` | Encrypt/store a new POS credential; prints secret once |
+| `npm run pos:credential -- create CODE` | Encrypt/store a new POS credential; prints secret once. Store Management can issue the same credential after create or from a store row |
 | `npm run pos:credential -- deactivate CODE KEY_ID` | Deactivates that credential, records rotated timestamp |
 | `npm run push:generate-vapid` | Generates/prints a key pair |
 | `npm run cf-typegen` | Generates ignored root binding declarations |

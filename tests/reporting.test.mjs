@@ -3,12 +3,14 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { PGlite } from "@electric-sql/pglite";
 import {
+  parseBatchSnapshot,
+  parseShiftSnapshot,
   parseSnapshot,
   snapshotHash,
   schemaIdentifier,
   tables,
 } from "../src/lib/reporting/snapshot.ts";
-import { syncOrderSnapshot } from "../src/lib/reporting/sync.ts";
+import { syncBatchSnapshot, syncOrderSnapshot, syncShiftSnapshot } from "../src/lib/reporting/sync.ts";
 import {
   parseReportFilters,
   readOrderReport,
@@ -162,6 +164,9 @@ test("missing SQL provisioning function is repairable without resetting a db-pus
   const legacySchema = (await db.query("SELECT schema_name FROM public.store_reporting_schemas WHERE store_code = 'LEGACY-TEST'")).rows[0].schema_name;
   assert.match(legacySchema, /^store_[a-f0-9]{32}$/);
   await engine.exec(await readFile(new URL("../prisma/migrations/20261013000000_store_code_schema_names/migration.sql", import.meta.url), "utf8"));
+  await engine.exec(await readFile(new URL("../prisma/migrations/20261014000000_reporting_batch_shift/migration.sql", import.meta.url), "utf8"));
+  assert.equal((await db.query("SELECT count(*)::int AS n FROM information_schema.columns WHERE table_schema = $1 AND table_name = 'tbl_rpt_order' AND column_name = 'employee_name'", [legacySchema])).rows[0].n, 1);
+  assert.equal((await db.query("SELECT count(*)::int AS n FROM information_schema.tables WHERE table_schema = $1 AND table_name IN ('tbl_rpt_batch', 'tbl_rpt_shift')", [legacySchema])).rows[0].n, 2);
   assert.equal((await db.query("SELECT public.provision_store_reporting('LEGACY-TEST') AS schema_name")).rows[0].schema_name, legacySchema);
   const created = await createStoreWithReporting(db, input);
   assert.equal(created.store_code, input.storeCode);
@@ -194,7 +199,7 @@ test("missing SQL provisioning function is repairable without resetting a db-pus
         [mapping.schema_name],
       )
     ).rows[0].n,
-    4,
+    6,
   );
   await db.query(
     `INSERT INTO ${mapping.schema_name}.tbl_rpt_order (store_code, order_code, business_date, created_at, source_revision, snapshot_hash)
@@ -203,6 +208,7 @@ test("missing SQL provisioning function is repairable without resetting a db-pus
   );
   await engine.exec(reportingInstallationSql(migration));
   await engine.exec(await readFile(new URL("../prisma/migrations/20261013000000_store_code_schema_names/migration.sql", import.meta.url), "utf8"));
+  await engine.exec(await readFile(new URL("../prisma/migrations/20261014000000_reporting_batch_shift/migration.sql", import.meta.url), "utf8"));
   assert.deepEqual(
     (
       await db.query(
@@ -255,6 +261,14 @@ test("snapshot validation enforces complete arrays, store ownership, relations, 
   large.order.total = "9999999999999999.99";
   large.order.order_id = "9223372036854775807";
   assert.equal(parseSnapshot(large, "DT01").order.total, large.order.total);
+  const omitted = parseSnapshot(source, "DT01");
+  assert.equal(omitted.order.employee_name, null);
+  const withBatch = structuredClone(source);
+  withBatch.batch = { store_code: "DT01", batch_code: "BATCH-A" };
+  assert.throws(() => parseSnapshot(withBatch, "DT01"), /envelope/);
+  assert.throws(() => parseShiftSnapshot({ request_id: "s", source_revision: "1", shift: { store_code: "DT01", shift_code: "SHIFT-AM" } }, "DT01"), /batch_code/);
+  const batch = parseBatchSnapshot({ request_id: "b", source_revision: "1", batch: { store_code: "DT01", batch_code: "BATCH-A" } }, "DT01");
+  assert.equal(batch.batch.batch_code, "BATCH-A");
 });
 
 test("customer-to-store cutover preserves each store's data, revisions, receipts and report IDs", async (t) => {
@@ -345,6 +359,7 @@ test("customer-to-store cutover preserves each store's data, revisions, receipts
     ),
   );
   await engine.exec(await readFile(new URL("../prisma/migrations/20261013000000_store_code_schema_names/migration.sql", import.meta.url), "utf8"));
+  await engine.exec(await readFile(new URL("../prisma/migrations/20261014000000_reporting_batch_shift/migration.sql", import.meta.url), "utf8"));
   const dt = (
     await db.query(
       "SELECT public.provision_store_reporting('DT01') AS schema_name",
@@ -515,6 +530,7 @@ test("PostgreSQL reporting migrations, atomic snapshots, isolation and aggregati
     ),
   );
   await engine.exec(await readFile(new URL("../prisma/migrations/20261013000000_store_code_schema_names/migration.sql", import.meta.url), "utf8"));
+  await engine.exec(await readFile(new URL("../prisma/migrations/20261014000000_reporting_batch_shift/migration.sql", import.meta.url), "utf8"));
   for (const store of ["DT01", "AP01", "WS01"])
     await db.query("SELECT public.provision_store_reporting($1)", [store]);
   const scope = {
@@ -797,6 +813,81 @@ test("PostgreSQL reporting migrations, atomic snapshots, isolation and aggregati
       await assert.rejects(
         readLegacySnapshots(db, "AP01", "Asia/Kolkata"),
         /Orphan/,
+      );
+    },
+  );
+  await t.test(
+    "batch is created before a related shift, and orders do not remove them",
+    async () => {
+      const columns = (
+        await db.query(
+          "SELECT table_name, column_name FROM information_schema.columns WHERE table_schema = 'store_dt01' AND ((table_name = 'tbl_rpt_order' AND column_name = 'employee_name') OR (table_name = 'tbl_rpt_payment' AND column_name = 'station_name') OR table_name IN ('tbl_rpt_batch', 'tbl_rpt_shift', 'sync_master_requests'))",
+        )
+      ).rows;
+      assert.ok(columns.some((row) => row.column_name === "employee_name"));
+      assert.ok(columns.some((row) => row.column_name === "station_name"));
+      assert.ok(columns.some((row) => row.table_name === "tbl_rpt_batch"));
+      assert.ok(columns.some((row) => row.table_name === "tbl_rpt_shift"));
+      assert.ok(columns.some((row) => row.table_name === "sync_master_requests"));
+      const missingShift = parseShiftSnapshot({
+        request_id: "shift-missing",
+        source_revision: "1",
+        shift: { store_code: "DT01", shift_code: "SHIFT-AM", batch_code: "MISSING-BATCH" },
+      }, "DT01");
+      await assert.rejects(syncShiftSnapshot(db, scope, missingShift), /Create the batch/);
+      assert.equal(
+        (await db.query("SELECT count(*)::int AS n FROM store_dt01.tbl_rpt_shift")).rows[0].n,
+        0,
+      );
+      const opened = parseBatchSnapshot({
+        request_id: "batch-1",
+        source_revision: "1",
+        batch: { store_code: "DT01", batch_code: "BATCH-20261012", batchstart: "2026-10-08T09:00:00+05:30" },
+      }, "DT01");
+      assert.equal((await syncBatchSnapshot(db, scope, opened)).status, "accepted");
+      const shift = parseShiftSnapshot({
+        request_id: "shift-1",
+        source_revision: "1",
+        shift: { store_code: "DT01", shift_code: "SHIFT-AM", batch_code: "BATCH-20261012", shiftopenbal: "100.00" },
+      }, "DT01");
+      assert.equal((await syncShiftSnapshot(db, scope, shift)).status, "accepted");
+      assert.equal(
+        (await db.query("SELECT isopen, shiftopenbal::text FROM store_dt01.tbl_rpt_shift")).rows[0].shiftopenbal,
+        "100.00",
+      );
+      const order = snapshot("DT01", "1", "named-order", "ORDER-NAMED");
+      order.order.employee_name = "Asha Rao";
+      order.order.batch_code = "BATCH-20261012";
+      order.order.shift_code = "SHIFT-AM";
+      order.payments[0].station_name = "Front Counter";
+      assert.equal((await sync(order)).status, "accepted");
+      assert.equal(
+        (await db.query("SELECT employee_name FROM store_dt01.tbl_rpt_order WHERE order_code = 'ORDER-NAMED'")).rows[0].employee_name,
+        "Asha Rao",
+      );
+      assert.equal(
+        (await db.query("SELECT count(*)::int AS n FROM store_dt01.tbl_rpt_batch")).rows[0].n,
+        1,
+      );
+      const closed = parseBatchSnapshot({
+        request_id: "batch-2",
+        source_revision: "2",
+        batch: { store_code: "DT01", batch_code: "BATCH-20261012", isbatchclose: 1, batchend: "2026-10-08T22:00:00+05:30" },
+      }, "DT01");
+      assert.equal((await syncBatchSnapshot(db, scope, closed)).status, "accepted");
+      const extra = parseBatchSnapshot({
+        request_id: "batch-other",
+        source_revision: "1",
+        batch: { store_code: "DT01", batch_code: "BATCH-OTHER" },
+      }, "DT01");
+      assert.equal((await syncBatchSnapshot(db, scope, extra)).status, "accepted");
+      assert.deepEqual(
+        (await db.query("SELECT batch_code FROM store_dt01.tbl_rpt_batch ORDER BY batch_code")).rows.map((row) => row.batch_code),
+        ["BATCH-20261012", "BATCH-OTHER"],
+      );
+      assert.equal(
+        (await db.query("SELECT isbatchclose FROM store_dt01.tbl_rpt_batch WHERE batch_code = 'BATCH-20261012'")).rows[0].isbatchclose,
+        1,
       );
     },
   );

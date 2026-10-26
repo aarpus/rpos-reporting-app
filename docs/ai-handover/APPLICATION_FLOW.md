@@ -13,9 +13,9 @@ Sources: `src/app/auth/`, `src/auth.ts`, `src/lib/store-access.ts`, `src/app/(da
 
 ## Administration
 
-Admin pages call `getRequestUser` and enforce ADMIN, loading initial lists server-side. Client management forms use admin APIs and display failures. Creating a store normalizes code, validates name/timezone, checks the provisioning function/EXECUTE privilege, inserts the store, provisions its schema, and commits atomically. Editing does not rename store codes. Creating a user hashes the password and always sets USER. Editing/resetting passwords targets USER accounts only. Access PUT endpoints replace the full assignment set, not append it; empty arrays revoke all relevant assignments. Both orientations of assignment editing are supported.
+Admin pages call `getRequestUser` and enforce ADMIN, loading initial lists server-side. Client management forms use admin APIs and display failures. Creating a store normalizes code, validates name/timezone, checks the provisioning function/EXECUTE privilege, inserts the store, provisions its schema, and commits atomically. The create dialog then offers a POS credential; the same action is available from each store row. The plaintext secret is returned once and is not stored in the clear. Editing does not rename store codes. Creating a user hashes the password and always sets USER. Editing/resetting passwords targets USER accounts only. Access PUT endpoints replace the full assignment set, not append it; empty arrays revoke all relevant assignments. Both orientations of assignment editing are supported.
 
-Sources: `src/lib/store-admin.ts`, `src/lib/user-admin.ts`, validators and `reporting/store-creation.ts`.
+Sources: `src/lib/store-admin.ts`, `src/lib/pos-credentials.ts`, `src/lib/user-admin.ts`, validators and `reporting/store-creation.ts`.
 
 ## POS orders and live report reads
 

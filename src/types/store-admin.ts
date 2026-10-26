@@ -16,3 +16,15 @@ export type StoreAccessUser = {
   assigned: boolean;
 };
 
+export type PosCredentialSummary = {
+  keyId: string;
+  active: boolean;
+  createdAt: string;
+};
+
+export type IssuedPosCredential = {
+  storeCode: string;
+  keyId: string;
+  secret: string;
+};
+

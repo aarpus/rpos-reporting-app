@@ -187,6 +187,12 @@
         "maxLength": 30
       },
       {
+        "name": "employee_name",
+        "kind": "string",
+        "required": false,
+        "maxLength": 100
+      },
+      {
         "name": "business_date",
         "kind": "date",
         "required": true
@@ -536,6 +542,12 @@
         "maxLength": 50
       },
       {
+        "name": "station_name",
+        "kind": "string",
+        "required": false,
+        "maxLength": 100
+      },
+      {
         "name": "shift_code",
         "kind": "string",
         "required": false,
@@ -871,6 +883,168 @@
         "kind": "string",
         "required": false,
         "maxLength": 10000
+      }
+    ]
+  },
+  "tbl_rpt_batch": {
+    "key": "batch_code",
+    "fields": [
+      {
+        "name": "batch_id",
+        "kind": "bigint",
+        "required": false
+      },
+      {
+        "name": "batch_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 100
+      },
+      {
+        "name": "batchstart",
+        "kind": "timestamp",
+        "required": false
+      },
+      {
+        "name": "batchend",
+        "kind": "timestamp",
+        "required": false
+      },
+      {
+        "name": "isactive",
+        "kind": "integer",
+        "required": false,
+        "default": 1
+      },
+      {
+        "name": "isbatchclose",
+        "kind": "integer",
+        "required": false,
+        "default": 0
+      },
+      {
+        "name": "store_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 64
+      },
+      {
+        "name": "is_delete",
+        "kind": "boolean",
+        "required": false,
+        "default": false
+      }
+    ]
+  },
+  "tbl_rpt_shift": {
+    "key": "shift_code",
+    "fields": [
+      {
+        "name": "shiftid",
+        "kind": "bigint",
+        "required": false
+      },
+      {
+        "name": "shift_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 100
+      },
+      {
+        "name": "batchid",
+        "kind": "bigint",
+        "required": false
+      },
+      {
+        "name": "batch_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 100
+      },
+      {
+        "name": "shiftstart",
+        "kind": "timestamp",
+        "required": false
+      },
+      {
+        "name": "shiftend",
+        "kind": "timestamp",
+        "required": false
+      },
+      {
+        "name": "shiftnumber",
+        "kind": "bigint",
+        "required": false
+      },
+      {
+        "name": "employeeid",
+        "kind": "bigint",
+        "required": false
+      },
+      {
+        "name": "isopen",
+        "kind": "integer",
+        "required": false,
+        "default": 1
+      },
+      {
+        "name": "stationid",
+        "kind": "bigint",
+        "required": false
+      },
+      {
+        "name": "station_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 100
+      },
+      {
+        "name": "employeeuserid",
+        "kind": "string",
+        "required": false,
+        "maxLength": 20
+      },
+      {
+        "name": "store_code",
+        "kind": "string",
+        "required": true,
+        "maxLength": 64
+      },
+      {
+        "name": "shiftopenbal",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "shiftclosebal",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "stationclosebal",
+        "kind": "decimal",
+        "required": false,
+        "default": "0.00"
+      },
+      {
+        "name": "is_delete",
+        "kind": "boolean",
+        "required": false,
+        "default": false
+      },
+      {
+        "name": "is_login",
+        "kind": "boolean",
+        "required": false,
+        "default": true
+      },
+      {
+        "name": "login_station_code",
+        "kind": "string",
+        "required": false,
+        "maxLength": 50
       }
     ]
   }

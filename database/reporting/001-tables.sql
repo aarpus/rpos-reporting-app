@@ -36,6 +36,7 @@ CREATE TABLE __SCHEMA__.tbl_rpt_order (
     order_fees jsonb NOT NULL DEFAULT '{}'::jsonb,
     created_by bigint,
     created_by_code varchar(30),
+    employee_name varchar(100),
     business_date date NOT NULL,
     created_at timestamptz(6) NOT NULL,
     completed_at timestamptz(6),
@@ -116,6 +117,7 @@ CREATE TABLE __SCHEMA__.tbl_rpt_payment (
     business_date date NOT NULL,
     store_code varchar(64) NOT NULL,
     station_code varchar(50),
+    station_name varchar(100),
     shift_code varchar(50),
     batch_code varchar(50),
     tender_code varchar(50),
@@ -194,6 +196,56 @@ CREATE TABLE __SCHEMA__.tbl_rpt_card_payment (
 CREATE INDEX ON __SCHEMA__.tbl_rpt_card_payment(store_code, business_date);
 CREATE INDEX ON __SCHEMA__.tbl_rpt_card_payment(store_code, order_code);
 
+CREATE TABLE __SCHEMA__.tbl_rpt_batch (
+    report_batch_id bigserial PRIMARY KEY,
+    batch_id bigint,
+    batch_code varchar(100) NOT NULL,
+    batchstart timestamptz(6),
+    batchend timestamptz(6),
+    isactive smallint NOT NULL DEFAULT 1,
+    isbatchclose smallint NOT NULL DEFAULT 0,
+    store_code varchar(64) NOT NULL,
+    is_delete boolean NOT NULL DEFAULT false,
+    source_revision bigint NOT NULL CHECK (source_revision > 0),
+    snapshot_hash varchar(64) NOT NULL,
+    rpt_created_on timestamptz(6) NOT NULL DEFAULT now(),
+    rpt_updated_on timestamptz(6) NOT NULL DEFAULT now(),
+    UNIQUE (store_code, batch_code),
+    FOREIGN KEY (store_code) REFERENCES __SCHEMA__.reporting_stores(store_code) ON DELETE RESTRICT
+);
+CREATE INDEX tbl_rpt_batch_store_code_idx ON __SCHEMA__.tbl_rpt_batch(store_code);
+
+CREATE TABLE __SCHEMA__.tbl_rpt_shift (
+    report_shift_id bigserial PRIMARY KEY,
+    shiftid bigint,
+    shift_code varchar(100) NOT NULL,
+    batchid bigint,
+    batch_code varchar(100) NOT NULL,
+    shiftstart timestamptz(6),
+    shiftend timestamptz(6),
+    shiftnumber bigint,
+    employeeid bigint,
+    isopen smallint NOT NULL DEFAULT 1,
+    stationid bigint,
+    station_code varchar(100),
+    employeeuserid varchar(20),
+    store_code varchar(64) NOT NULL,
+    shiftopenbal numeric(18,2) NOT NULL DEFAULT 0,
+    shiftclosebal numeric(18,2) NOT NULL DEFAULT 0,
+    stationclosebal numeric(18,2) NOT NULL DEFAULT 0,
+    is_delete boolean NOT NULL DEFAULT false,
+    is_login boolean NOT NULL DEFAULT true,
+    login_station_code varchar(50),
+    source_revision bigint NOT NULL CHECK (source_revision > 0),
+    snapshot_hash varchar(64) NOT NULL,
+    rpt_created_on timestamptz(6) NOT NULL DEFAULT now(),
+    rpt_updated_on timestamptz(6) NOT NULL DEFAULT now(),
+    UNIQUE (store_code, shift_code),
+    FOREIGN KEY (store_code) REFERENCES __SCHEMA__.reporting_stores(store_code) ON DELETE RESTRICT,
+    FOREIGN KEY (store_code, batch_code) REFERENCES __SCHEMA__.tbl_rpt_batch(store_code, batch_code) ON DELETE RESTRICT
+);
+CREATE INDEX tbl_rpt_shift_store_code_idx ON __SCHEMA__.tbl_rpt_shift(store_code);
+
 CREATE TABLE __SCHEMA__.sync_requests (
     store_code varchar(64) NOT NULL REFERENCES __SCHEMA__.reporting_stores(store_code),
     request_id varchar(160) NOT NULL,
@@ -205,3 +257,16 @@ CREATE TABLE __SCHEMA__.sync_requests (
     PRIMARY KEY (store_code, request_id)
 );
 CREATE INDEX ON __SCHEMA__.sync_requests(store_code, received_at DESC);
+
+CREATE TABLE __SCHEMA__.sync_master_requests (
+    store_code varchar(64) NOT NULL REFERENCES __SCHEMA__.reporting_stores(store_code),
+    request_id varchar(160) NOT NULL,
+    entity_kind varchar(10) NOT NULL CHECK (entity_kind IN ('batch', 'shift')),
+    entity_code varchar(100) NOT NULL,
+    source_revision bigint NOT NULL,
+    snapshot_hash varchar(64) NOT NULL,
+    result varchar(20) NOT NULL CHECK (result IN ('accepted', 'duplicate', 'stale')),
+    received_at timestamptz(6) NOT NULL DEFAULT now(),
+    PRIMARY KEY (store_code, request_id)
+);
+CREATE INDEX ON __SCHEMA__.sync_master_requests(store_code, received_at DESC);

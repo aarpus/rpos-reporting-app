@@ -14,14 +14,16 @@ Assignments deduplicate up to 10,000 positive user IDs or normalized store codes
 
 Sources: `src/lib/reporting/snapshot.ts`, `columns.json`, `sync.ts`, SQL tables.
 
-- Exactly one envelope per request. Only `request_id`, `source_revision`, `order`, `items`, `payments`, `card_payments` are accepted at envelope level. Every child array is required and capped at 2,000.
+- Exactly one order envelope per request. Only `request_id`, `source_revision`, `order`, `items`, `payments`, and `card_payments` are accepted. Every child array is required and capped at 2,000.
+- Batch and shift use `POST /api/pos/reporting/batch` and `POST /api/pos/reporting/shift`. Each envelope is `request_id`, `source_revision`, and one `batch` or `shift` object. Create the batch before any shift that references its `batch_code`. A shift whose batch is missing is rejected and not stored.
 - Unknown/server-managed row fields are rejected. Missing required fields fail. Missing optional fields become their declared default or null. Explicit null fails for required fields or fields with non-null defaults.
 - Child `store_code`, `order_code`, and `business_date` must match the parent; cards must reference a payment in the same snapshot. Child codes are unique in their array and cannot move between orders in SQL upsert logic.
 - Large integers must be strings; bigint bounds are enforced. Revisions are positive bigint values. Decimals fit numeric(18,2), normalize to two decimal places, and signed values are retained. JSON objects/arrays cannot contain null characters and nesting is limited to 30.
 - Business date is a valid YYYY-MM-DD. Timestamps require explicit offset and seconds with optional 1–3 fractional digits; normalization produces UTC ISO strings. Business date is supplied by POS, not recalculated from timestamps.
 - Hash covers normalized content including revision, excludes `request_id`, sorts object keys and child codes. This content hash differs from HMAC, which covers exact raw request text.
 - Same request ID + changed hash: 409. Same request ID + same content: duplicate unless its recorded result was stale. New request ID + lower revision: stale. Equal revision + changed content: 409. Equal revision + equal content: duplicate. Higher revision: accepted.
-- Accepted snapshots upsert all supplied fields, remove omitted children (cards before payments before items), and retain server IDs/creation timestamps on updates. Empty arrays intentionally remove all children. Parent/children/receipt either all commit or all roll back.
+- Accepted order snapshots upsert all supplied fields, remove omitted children (cards before payments before items), and retain server IDs/creation timestamps on updates. Empty arrays intentionally remove all children. Parent, children, and the order receipt either all commit or all roll back. Order `batch_code` and `shift_code` do not insert or delete batch and shift rows.
+- Accepted batch and shift snapshots upsert by `batch_code` or `shift_code`, keep their own `source_revision` and `snapshot_hash`, and record receipts in `sync_master_requests`. The same request-id, revision, and hash rules apply. A shift write also requires the referenced batch row and shares that transaction with its receipt.
 - POS flags and totals are retained without deriving a new order state machine or reconciling money. No validation guarantees totals equal item sums, low-stock quantity is below threshold, or payment status matches flags.
 
 ## Calculations and date semantics

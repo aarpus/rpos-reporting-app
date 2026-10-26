@@ -25,19 +25,21 @@ erDiagram
   tbl_rpt_order ||--o{ tbl_rpt_order_item : contains
   tbl_rpt_order ||--o{ tbl_rpt_payment : paid_by
   tbl_rpt_payment ||--o{ tbl_rpt_card_payment : attempts
+  reporting_stores ||--o{ tbl_rpt_batch : batches
+  reporting_stores ||--o{ tbl_rpt_shift : shifts
 ```
 
 Diagram edges summarize ownership; exact FK actions, composite keys and fields are cataloged below. Public Store is globally identified by unique immutable `store_code`; integer `id` is internal to current Prisma. Legacy customer_id is optional and retained. There is no current customer-login membership or customer-scoped authorization model.
 
 `store_reporting_schemas` maps each store to unique schema name and version. New naming is `store_` plus lowercased store code with non `[a-z0-9_]` characters replaced by `_`; suffix 1–57. Existing hash-based mappings are preserved. The provisioning function returns an existing version-1 mapping without renaming it. Only trusted backend/provisioning roles should execute schema DDL; function is invoker-security with controlled search_path and revoked PUBLIC execution.
 
-Each reporting schema has `reporting_stores` with one store_code constrained to that store and FK to public stores. Order/item/payment/card rows reference membership and natural parent codes. Source POS IDs are nullable bigint attributes, not the report primary keys. Report IDs are server-generated bigserial. Decimal money/quantity uses numeric(18,2); timestamp fields use timestamptz(6); business_date is a POS-supplied date.
+Each reporting schema has `reporting_stores` with one store_code constrained to that store and FK to public stores. Order/item/payment/card rows reference membership and natural parent codes. Batch and shift rows reference the same membership and are shared across orders by `batch_code` and `shift_code`; they are not children of one order. Source POS IDs (`order_id`, `batch_id`, `shiftid`, and the other source ids) are nullable bigint attributes, not the report primary keys. Report IDs are server-generated bigserial. Decimal money/quantity uses numeric(18,2); timestamp fields use timestamptz(6); business_date is a POS-supplied date. Batch/shift flags `isactive`, `isbatchclose`, and `isopen` are smallint.
 
 ## Keys, constraints and indexes
 
 Public Prisma models below include their exact `@id`, `@unique`, `@@unique`, indexes, defaults, field mappings and relation actions. Important unique business keys are normalized user email, user/store access, preference user/store/type, event store/eventId, notification user/event, subscription endpoint, credential store/keyId, store code and schema name. Cascade deletes cover user-owned records; event store, notification type and schema store references restrict deletion. The SQL history also creates lowercase-email and canonical-store checks that Prisma syntax does not represent.
 
-Reporting orders have UNIQUE(store_code,order_code). Items/payments/cards respectively have UNIQUE(store_code,order_item_code/payment_code/card_payment_code). Payments also have UNIQUE(store_code,order_code,payment_code); cards use that triple FK, preventing linkage to a payment in another order. Child/order FKs use DELETE RESTRICT; reconciliation removes dependants explicitly. Order source_revision has CHECK >0. sync_requests has primary key `(store_code,request_id)`, result CHECK accepted/duplicate/stale, and received_at; it is not a foreign-key child of orders.
+Reporting orders have UNIQUE(store_code,order_code). Items/payments/cards respectively have UNIQUE(store_code,order_item_code/payment_code/card_payment_code). Batches and shifts have UNIQUE(store_code,batch_code) and UNIQUE(store_code,shift_code). Shift `batch_code` is required and references that batch unique key. `sync_master_requests` stores batch and shift receipts and is separate from order `sync_requests`. Payments also have UNIQUE(store_code,order_code,payment_code); cards use that triple FK, preventing linkage to a payment in another order. Child/order FKs use DELETE RESTRICT; reconciliation removes dependants explicitly. Order source_revision has CHECK >0. sync_requests has primary key `(store_code,request_id)`, result CHECK accepted/duplicate/stale, and received_at; it is not a foreign-key child of orders.
 
 Indexes: each report table `(store_code,business_date)`; children also `(store_code,order_code)`; sync requests `(store_code,received_at DESC)`. Current transaction filters read created_at and there is no corresponding explicit created_at index in the reporting DDL; assess scale before adding indexes.
 
@@ -50,8 +52,9 @@ Indexes: each report table `(store_code,business_date)`; children also `(store_c
 | `20261009000000_customer_reporting` | Customers, optional store customer ownership, membership trigger for legacy customer schemas |
 | `20261012000000_store_reporting` | Drops legacy membership trigger, adds store registry and provisioning, copies compatible legacy store data non-destructively; hash-based naming |
 | `20261013000000_store_code_schema_names` | Wider schema-name constraint and code-based naming for new stores; existing mappings unchanged |
+| `20261014000000_reporting_batch_shift` | Adds `employee_name` and `station_name`, creates per-store batch and shift tables, and replaces provisioning; reporting version stays 1 |
 
-Provisioning creates six reporting tables, optionally copies matching legacy customer's four report tables and receipts for the selected store, preserves report IDs/revisions/timestamps, resets serial sequences, then registers version 1. `database/reporting/legacy-customer-001.sql` is the older customer DDL template; new writes do not use that scope. Installer reuses tracked SQL with idempotent registry/function creation and applies naming SQL. Public import reads existing four `public.tbl_rpt_*` tables consistently, validates complete snapshots, converts naive timestamps in store timezone and syncs with revision 1. It leaves source data intact and can conflict with previously imported changed content.
+Provisioning creates nine reporting tables, optionally copies matching legacy customer's four report tables and receipts for the selected store, preserves report IDs/revisions/timestamps, resets serial sequences, then registers version 1. Legacy copy selects only columns that exist in both schemas. `database/reporting/legacy-customer-001.sql` is the older customer DDL template; new writes do not use that scope. Installer reuses tracked SQL with idempotent registry/function creation and applies naming and batch/shift SQL. Public import reads the four order `public.tbl_rpt_*` tables, validates complete snapshots, converts naive timestamps in store timezone and syncs with revision 1. It leaves source data intact and can conflict with previously imported changed content.
 
 Do not infer production structure from migrations or Prisma alone. Inspect actual column types, constraints, mapping/version rows, migration ledger and privileges during an explicitly authorized database task. This handover made no database changes.
 
@@ -315,6 +318,7 @@ Natural record key: `order_code`. Database constraints/columns follow below.
 | `order_fees` | jsonb | false | ? | `{}` |
 | `created_by` | bigint | false | ? | `null` |
 | `created_by_code` | string | false | 30 | `null` |
+| `employee_name` | string | false | 100 | `null` |
 | `business_date` | date | true | ? | `required` |
 | `created_at` | timestamp | true | ? | `required` |
 | `completed_at` | timestamp | false | ? | `null` |
@@ -387,6 +391,7 @@ Natural record key: `payment_code`. Database constraints/columns follow below.
 | `business_date` | date | true | ? | `required` |
 | `store_code` | string | true | 64 | `required` |
 | `station_code` | string | false | 50 | `null` |
+| `station_name` | string | false | 100 | `null` |
 | `shift_code` | string | false | 50 | `null` |
 | `batch_code` | string | false | 50 | `null` |
 | `tender_code` | string | false | 50 | `null` |
@@ -451,6 +456,47 @@ Natural record key: `card_payment_code`. Database constraints/columns follow bel
 | `created_on` | timestamp | false | ? | `null` |
 | `response_text` | string | false | 10000 | `null` |
 
+### Payload fields: tbl_rpt_batch
+
+Natural record key: `batch_code`. Shared across orders. Database constraints/columns follow below.
+
+| Column | Kind | Required in payload | Max length | Missing default |
+| --- | --- | --- | --- | --- |
+| `batch_id` | bigint | false | ? | `null` |
+| `batch_code` | string | true | 100 | `required` |
+| `batchstart` | timestamp | false | ? | `null` |
+| `batchend` | timestamp | false | ? | `null` |
+| `isactive` | integer | false | ? | `1` |
+| `isbatchclose` | integer | false | ? | `0` |
+| `store_code` | string | true | 64 | `required` |
+| `is_delete` | boolean | false | ? | `false` |
+
+### Payload fields: tbl_rpt_shift
+
+Natural record key: `shift_code`. Shared across orders. Database constraints/columns follow below.
+
+| Column | Kind | Required in payload | Max length | Missing default |
+| --- | --- | --- | --- | --- |
+| `shiftid` | bigint | false | ? | `null` |
+| `shift_code` | string | true | 100 | `required` |
+| `batchid` | bigint | false | ? | `null` |
+| `batch_code` | string | true | 100 | `required` |
+| `shiftstart` | timestamp | false | ? | `null` |
+| `shiftend` | timestamp | false | ? | `null` |
+| `shiftnumber` | bigint | false | ? | `null` |
+| `employeeid` | bigint | false | ? | `null` |
+| `isopen` | integer | false | ? | `1` |
+| `stationid` | bigint | false | ? | `null` |
+| `station_code` | string | false | 100 | `null` |
+| `employeeuserid` | string | false | 20 | `null` |
+| `store_code` | string | true | 64 | `required` |
+| `shiftopenbal` | decimal | false | ? | `"0.00"` |
+| `shiftclosebal` | decimal | false | ? | `"0.00"` |
+| `stationclosebal` | decimal | false | ? | `"0.00"` |
+| `is_delete` | boolean | false | ? | `false` |
+| `is_login` | boolean | false | ? | `true` |
+| `login_station_code` | string | false | 50 | `null` |
+
 ### Physical reporting DDL
 
 Extracted from the current provisioning function. `__SCHEMA__` and `__STORE_CODE__` are replaced server-side with quoted identifiers/literals. Includes every column, default, FK and index; this is a reference, not an instruction to execute placeholder SQL.
@@ -494,6 +540,7 @@ CREATE TABLE __SCHEMA__.tbl_rpt_order (
     order_fees jsonb NOT NULL DEFAULT '{}'::jsonb,
     created_by bigint,
     created_by_code varchar(30),
+    employee_name varchar(100),
     business_date date NOT NULL,
     created_at timestamptz(6) NOT NULL,
     completed_at timestamptz(6),
@@ -574,6 +621,7 @@ CREATE TABLE __SCHEMA__.tbl_rpt_payment (
     business_date date NOT NULL,
     store_code varchar(64) NOT NULL,
     station_code varchar(50),
+    station_name varchar(100),
     shift_code varchar(50),
     batch_code varchar(50),
     tender_code varchar(50),
@@ -652,6 +700,56 @@ CREATE TABLE __SCHEMA__.tbl_rpt_card_payment (
 CREATE INDEX ON __SCHEMA__.tbl_rpt_card_payment(store_code, business_date);
 CREATE INDEX ON __SCHEMA__.tbl_rpt_card_payment(store_code, order_code);
 
+CREATE TABLE __SCHEMA__.tbl_rpt_batch (
+    report_batch_id bigserial PRIMARY KEY,
+    batch_id bigint,
+    batch_code varchar(100) NOT NULL,
+    batchstart timestamptz(6),
+    batchend timestamptz(6),
+    isactive smallint NOT NULL DEFAULT 1,
+    isbatchclose smallint NOT NULL DEFAULT 0,
+    store_code varchar(64) NOT NULL,
+    is_delete boolean NOT NULL DEFAULT false,
+    source_revision bigint NOT NULL CHECK (source_revision > 0),
+    snapshot_hash varchar(64) NOT NULL,
+    rpt_created_on timestamptz(6) NOT NULL DEFAULT now(),
+    rpt_updated_on timestamptz(6) NOT NULL DEFAULT now(),
+    UNIQUE (store_code, batch_code),
+    FOREIGN KEY (store_code) REFERENCES __SCHEMA__.reporting_stores(store_code) ON DELETE RESTRICT
+);
+CREATE INDEX tbl_rpt_batch_store_code_idx ON __SCHEMA__.tbl_rpt_batch(store_code);
+
+CREATE TABLE __SCHEMA__.tbl_rpt_shift (
+    report_shift_id bigserial PRIMARY KEY,
+    shiftid bigint,
+    shift_code varchar(100) NOT NULL,
+    batchid bigint,
+    batch_code varchar(100) NOT NULL,
+    shiftstart timestamptz(6),
+    shiftend timestamptz(6),
+    shiftnumber bigint,
+    employeeid bigint,
+    isopen smallint NOT NULL DEFAULT 1,
+    stationid bigint,
+    station_code varchar(100),
+    employeeuserid varchar(20),
+    store_code varchar(64) NOT NULL,
+    shiftopenbal numeric(18,2) NOT NULL DEFAULT 0,
+    shiftclosebal numeric(18,2) NOT NULL DEFAULT 0,
+    stationclosebal numeric(18,2) NOT NULL DEFAULT 0,
+    is_delete boolean NOT NULL DEFAULT false,
+    is_login boolean NOT NULL DEFAULT true,
+    login_station_code varchar(50),
+    source_revision bigint NOT NULL CHECK (source_revision > 0),
+    snapshot_hash varchar(64) NOT NULL,
+    rpt_created_on timestamptz(6) NOT NULL DEFAULT now(),
+    rpt_updated_on timestamptz(6) NOT NULL DEFAULT now(),
+    UNIQUE (store_code, shift_code),
+    FOREIGN KEY (store_code) REFERENCES __SCHEMA__.reporting_stores(store_code) ON DELETE RESTRICT,
+    FOREIGN KEY (store_code, batch_code) REFERENCES __SCHEMA__.tbl_rpt_batch(store_code, batch_code) ON DELETE RESTRICT
+);
+CREATE INDEX tbl_rpt_shift_store_code_idx ON __SCHEMA__.tbl_rpt_shift(store_code);
+
 CREATE TABLE __SCHEMA__.sync_requests (
     store_code varchar(64) NOT NULL REFERENCES __SCHEMA__.reporting_stores(store_code),
     request_id varchar(160) NOT NULL,
@@ -663,4 +761,17 @@ CREATE TABLE __SCHEMA__.sync_requests (
     PRIMARY KEY (store_code, request_id)
 );
 CREATE INDEX ON __SCHEMA__.sync_requests(store_code, received_at DESC);
+
+CREATE TABLE __SCHEMA__.sync_master_requests (
+    store_code varchar(64) NOT NULL REFERENCES __SCHEMA__.reporting_stores(store_code),
+    request_id varchar(160) NOT NULL,
+    entity_kind varchar(10) NOT NULL CHECK (entity_kind IN ('batch', 'shift')),
+    entity_code varchar(100) NOT NULL,
+    source_revision bigint NOT NULL,
+    snapshot_hash varchar(64) NOT NULL,
+    result varchar(20) NOT NULL CHECK (result IN ('accepted', 'duplicate', 'stale')),
+    received_at timestamptz(6) NOT NULL DEFAULT now(),
+    PRIMARY KEY (store_code, request_id)
+);
+CREATE INDEX ON __SCHEMA__.sync_master_requests(store_code, received_at DESC);
 ```

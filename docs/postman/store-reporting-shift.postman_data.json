@@ -1,0 +1,52 @@
+[
+  {
+    "request_id": "batchshift-shift-001-r1",
+    "source_revision": "1",
+    "shift": {
+      "store_code": "{{storeCode}}",
+      "shiftid": "71",
+      "shift_code": "SHIFT-AM",
+      "batchid": "9001",
+      "batch_code": "BATCH-20261014",
+      "shiftstart": "2026-10-14T08:00:00+05:30",
+      "shiftend": null,
+      "shiftnumber": "1",
+      "employeeid": "501",
+      "isopen": 1,
+      "stationid": "1",
+      "station_code": "POS-01",
+      "employeeuserid": "EMP-501",
+      "shiftopenbal": "150.00",
+      "shiftclosebal": "0.00",
+      "stationclosebal": "0.00",
+      "is_delete": false,
+      "is_login": true,
+      "login_station_code": "POS-01"
+    }
+  },
+  {
+    "request_id": "batchshift-shift-002-r1",
+    "source_revision": "1",
+    "shift": {
+      "store_code": "{{storeCode}}",
+      "shiftid": "72",
+      "shift_code": "SHIFT-PM",
+      "batchid": "9001",
+      "batch_code": "BATCH-20261014",
+      "shiftstart": "2026-10-14T14:00:00+05:30",
+      "shiftend": null,
+      "shiftnumber": "2",
+      "employeeid": "502",
+      "isopen": 1,
+      "stationid": "2",
+      "station_code": "POS-02",
+      "employeeuserid": "EMP-502",
+      "shiftopenbal": "220.00",
+      "shiftclosebal": "0.00",
+      "stationclosebal": "0.00",
+      "is_delete": false,
+      "is_login": true,
+      "login_station_code": "POS-02"
+    }
+  }
+]

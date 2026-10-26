@@ -19,11 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/tailgrids/core/select";
-import type { AdminStore, StoreAccessUser } from "@/types/store-admin";
+import type {
+  AdminStore,
+  IssuedPosCredential,
+  PosCredentialSummary,
+  StoreAccessUser,
+} from "@/types/store-admin";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   LuBuilding2,
+  LuCopy,
+  LuKeyRound,
   LuPencil,
   LuPlus,
   LuSearch,
@@ -68,6 +75,9 @@ export function StoreManagement({
   const [formStore, setFormStore] = useState<AdminStore | "new" | null>(null);
   const [accessStore, setAccessStore] = useState<AdminStore | null>(null);
   const [statusStore, setStatusStore] = useState<AdminStore | null>(null);
+  const [credentialStore, setCredentialStore] = useState<AdminStore | null>(
+    null,
+  );
   const router = useRouter();
 
   const filteredStores = useMemo(() => {
@@ -83,7 +93,7 @@ export function StoreManagement({
     );
   }, [query, stores]);
 
-  function upsertStore(store: AdminStore) {
+  function upsertStore(store: AdminStore, refresh = true) {
     setStores((current) => {
       const exists = current.some((item) => item.storeCode === store.storeCode);
       const next = exists
@@ -97,7 +107,7 @@ export function StoreManagement({
           a.storeCode.localeCompare(b.storeCode),
       );
     });
-    router.refresh();
+    if (refresh) router.refresh();
   }
 
   function updateAssignedCount(storeCode: string, assignedUserCount: number) {
@@ -123,7 +133,7 @@ export function StoreManagement({
             Store Management
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-text-tertiary">
-            Create stores, maintain their details, and control which users can
+            Create stores, issue POS credentials, and control which users can
             access each location.
           </p>
         </div>
@@ -228,6 +238,7 @@ export function StoreManagement({
                           onEdit={() => setFormStore(store)}
                           onAccess={() => setAccessStore(store)}
                           onStatus={() => setStatusStore(store)}
+                          onCredential={() => setCredentialStore(store)}
                         />
                       </td>
                     </tr>
@@ -258,6 +269,7 @@ export function StoreManagement({
                     onEdit={() => setFormStore(store)}
                     onAccess={() => setAccessStore(store)}
                     onStatus={() => setStatusStore(store)}
+                    onCredential={() => setCredentialStore(store)}
                   />
                 </article>
               ))}
@@ -271,7 +283,21 @@ export function StoreManagement({
           key={formStore === "new" ? "new" : formStore.storeCode}
           store={formStore === "new" ? null : formStore}
           onClose={() => setFormStore(null)}
-          onSaved={upsertStore}
+          onSaved={(saved, refresh = true) => upsertStore(saved, refresh)}
+          onCreated={(created) => {
+            setFormStore(null);
+            setCredentialStore(created);
+          }}
+        />
+      )}
+      {credentialStore && (
+        <PosCredentialDialog
+          key={credentialStore.storeCode}
+          store={credentialStore}
+          onClose={() => {
+            setCredentialStore(null);
+            router.refresh();
+          }}
         />
       )}
       {accessStore && (
@@ -331,14 +357,23 @@ function StoreActions({
   onEdit,
   onAccess,
   onStatus,
+  onCredential,
 }: {
   store: AdminStore;
   onEdit: () => void;
   onAccess: () => void;
   onStatus: () => void;
+  onCredential: () => void;
 }) {
   return (
     <div className="flex flex-wrap justify-end gap-2">
+      <button
+        type="button"
+        onClick={onCredential}
+        className={outlineButtonClass}
+      >
+        <LuKeyRound className="size-4" /> POS credential
+      </button>
       <button type="button" onClick={onAccess} className={outlineButtonClass}>
         <LuUsers className="size-4" /> Access
       </button>
@@ -364,10 +399,12 @@ function StoreFormDialog({
   store,
   onClose,
   onSaved,
+  onCreated,
 }: {
   store: AdminStore | null;
   onClose: () => void;
-  onSaved: (store: AdminStore) => void;
+  onSaved: (store: AdminStore, refresh?: boolean) => void;
+  onCreated: (store: AdminStore) => void;
 }) {
   const [storeCode, setStoreCode] = useState(store?.storeCode ?? "");
   const [name, setName] = useState(store?.name ?? "");
@@ -397,9 +434,15 @@ function StoreFormDialog({
         },
       );
       const body = await readResponse<{ store: AdminStore }>(response);
-      onSaved(body.store);
-      toast.success(store ? "Store updated." : "Store created.");
-      onClose();
+      if (store) {
+        onSaved(body.store);
+        toast.success("Store updated.");
+        onClose();
+      } else {
+        onSaved(body.store, false);
+        toast.success("Store created.");
+        onCreated(body.store);
+      }
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -761,5 +804,204 @@ function StatusDialog({
         </button>
       </DialogFooter>
     </Dialog>
+  );
+}
+
+function PosCredentialDialog({
+  store,
+  onClose,
+}: {
+  store: AdminStore;
+  onClose: () => void;
+}) {
+  const [credentials, setCredentials] = useState<PosCredentialSummary[] | null>(
+    null,
+  );
+  const [issued, setIssued] = useState<IssuedPosCredential | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    void fetch(
+      `/api/admin/stores/${encodeURIComponent(store.storeCode)}/pos-credentials`,
+    )
+      .then((response) =>
+        readResponse<{ credentials: PosCredentialSummary[] }>(response),
+      )
+      .then((body) => setCredentials(body.credentials))
+      .catch((requestError) =>
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Unable to load POS credentials.",
+        ),
+      );
+  }, [store.storeCode]);
+
+  async function copyValue(value: string, label: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} copied.`);
+    } catch {
+      setError(`Unable to copy the ${label.toLowerCase()}.`);
+    }
+  }
+
+  async function createCredential() {
+    setPending(true);
+    setError(null);
+    try {
+      const response = await fetch(
+        `/api/admin/stores/${encodeURIComponent(store.storeCode)}/pos-credentials`,
+        { method: "POST" },
+      );
+      const body = await readResponse<IssuedPosCredential>(response);
+      setIssued(body);
+      setCredentials((current) => [
+        {
+          keyId: body.keyId,
+          active: true,
+          createdAt: new Date().toISOString(),
+        },
+        ...(current ?? []).filter((item) => item.keyId !== body.keyId),
+      ]);
+      toast.success("POS credential created.");
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to create a POS credential.",
+      );
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <Dialog isOpen onOpenChange={(open) => !open && onClose()}>
+      <DialogHeader>
+        <DialogTitle>POS credential</DialogTitle>
+        <DialogDescription>
+          {store.name} ({store.storeCode})
+        </DialogDescription>
+      </DialogHeader>
+      <DialogBody className="space-y-4">
+        <p className="text-sm text-text-secondary">
+          {issued
+            ? "Save this secret in the POS installation. It will not be shown again."
+            : "Create a credential for this store. A new credential does not deactivate an existing one."}
+        </p>
+        {issued && (
+          <div className="space-y-3 rounded-xl border border-card-border bg-background-gray-secondary p-3">
+            <CredentialField
+              label="Store code"
+              value={issued.storeCode}
+              onCopy={() => void copyValue(issued.storeCode, "Store code")}
+            />
+            <CredentialField
+              label="Key ID"
+              value={issued.keyId}
+              onCopy={() => void copyValue(issued.keyId, "Key ID")}
+            />
+            <CredentialField
+              label="Secret"
+              value={issued.secret}
+              onCopy={() => void copyValue(issued.secret, "Secret")}
+            />
+          </div>
+        )}
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-text-tertiary">
+            Issued credentials
+          </p>
+          {!credentials && !error ? (
+            <p className="text-sm text-text-tertiary">Loading credentials…</p>
+          ) : credentials?.length ? (
+            <ul className="divide-y divide-card-border rounded-xl border border-card-border">
+              {credentials.map((credential) => (
+                <li
+                  key={credential.keyId}
+                  className="flex items-center justify-between gap-3 px-3 py-2"
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate font-mono text-xs text-text-primary">
+                      {credential.keyId}
+                    </span>
+                    <span className="block text-xs text-text-tertiary">
+                      {new Date(credential.createdAt).toLocaleString()}
+                    </span>
+                  </span>
+                  <Badge color={credential.active ? "success" : "gray"}>
+                    {credential.active ? "Active" : "Inactive"}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          ) : credentials ? (
+            <p className="text-sm text-text-tertiary">
+              No POS credentials yet.
+            </p>
+          ) : null}
+        </div>
+        {!store.active && (
+          <p className="text-sm text-text-secondary">
+            Activate this store before creating a POS credential.
+          </p>
+        )}
+        {error && (
+          <p
+            role="alert"
+            className="rounded-lg bg-badge-error-background px-3 py-2 text-sm text-badge-error-text"
+          >
+            {error}
+          </p>
+        )}
+      </DialogBody>
+      <DialogFooter>
+        <button
+          type="button"
+          disabled={pending}
+          onClick={onClose}
+          className={outlineButtonClass}
+        >
+          {issued ? "Done" : "Skip"}
+        </button>
+        <button
+          type="button"
+          disabled={pending || !store.active}
+          onClick={() => void createCredential()}
+          className={primaryButtonClass}
+        >
+          <LuKeyRound className="size-4" />
+          {pending ? "Creating…" : "Create POS credential"}
+        </button>
+      </DialogFooter>
+    </Dialog>
+  );
+}
+
+function CredentialField({
+  label,
+  value,
+  onCopy,
+}: {
+  label: string;
+  value: string;
+  onCopy: () => void;
+}) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-medium text-text-tertiary">{label}</span>
+        <button
+          type="button"
+          onClick={onCopy}
+          className="inline-flex items-center gap-1 text-xs font-semibold text-primary-500"
+        >
+          <LuCopy className="size-3.5" /> Copy
+        </button>
+      </div>
+      <p className="break-all font-mono text-xs text-text-primary">{value}</p>
+    </div>
   );
 }

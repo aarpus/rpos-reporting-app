@@ -139,7 +139,14 @@ stations**. Children must match the parent store, order and business date. Card
 transactions must refer to a payment included in this snapshot. Include failed
 card attempts when they belong in the intended history. Report IDs, sync timestamps,
 schema names, and unknown columns cannot be supplied. All child arrays are
-required, even when empty. The request limit is 1 MB and 2,000 rows per child array.
+required, even when empty. Optional `order.employee_name` and `payment.station_name`
+are text up to 100 characters. The request limit is 1 MB and 2,000 rows per child array.
+
+Post batches to `POST /api/pos/reporting/batch` and shifts to
+`POST /api/pos/reporting/shift` before relying on those codes. Each request is one
+object with `request_id`, `source_revision`, and `batch` or `shift`. A shift's
+`batch_code` must already exist for the store, so create the batch first. The order
+endpoint does not accept `batch` or `shift` objects.
 
 Persist the source revision with the POS order; increment it for every correction.
 Do not generate a new revision on retry. Persist the exact snapshot with its

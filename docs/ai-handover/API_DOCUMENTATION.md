@@ -35,6 +35,8 @@ These shapes are implemented in `src/types/{store-admin,user-admin}.ts` and `src
 | POST `/api/admin/stores` | `{storeCode,name,timezone}` | 201 `{store: AdminStore}` | 400 parser/provisioning FK/check; 409 uniqueness; 503 missing function/EXECUTE | same |
 | PATCH `/api/admin/stores/[storeCode]` | nonempty subset `{name?,timezone?,active?}` | 200 `{store}` | 400 validation; 404 missing store | `src/app/api/admin/stores/[storeCode]/route.ts` |
 | GET `/api/admin/stores/[storeCode]/access` | path code | 200 `{users: StoreAccessUser[]}` (USER accounts only) | 404 missing store | `src/app/api/admin/stores/[storeCode]/access/route.ts` |
+| GET `/api/admin/stores/[storeCode]/pos-credentials` | path code | 200 `{credentials:[{keyId,active,createdAt}]}`; no secrets | 404 missing/invalid store | `src/app/api/admin/stores/[storeCode]/pos-credentials/route.ts` |
+| POST same POS credential path | empty body | 201 `{storeCode,keyId,secret}`; secret returned once | 404 missing/invalid store; 409 inactive store; 503 missing or invalid `POS_CREDENTIAL_ENCRYPTION_KEY` | same |
 | PUT same access path | `{userIds: (number|string)[]}` | 200 `{assignedUserCount}` | 400 invalid IDs/unknown or non-USER; 404 store | same |
 | GET `/api/admin/users` | none | 200 `{users: AdminUser[]}` (USER only) | Admin 401/403 | `src/app/api/admin/users/route.ts` |
 | POST `/api/admin/users` | `{name,email,password}` | 201 `{user: AdminUser}` with USER role | 400 validation; 409 duplicate email | same |
@@ -105,7 +107,40 @@ Required envelope:
 }
 ```
 
-This is a minimal illustrative contract, not an executable signed request or a real provisioned store. Empty children are valid and intentionally reconcile to none. Each array <=2,000. See [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) for every allowed payload column, kind/default/nullability and physical SQL columns. Required fields cannot be null; server IDs/timestamps/revision/hash fields cannot be submitted in row objects. Request ID <=160, revision positive bigint. Child ownership/date/card-payment relationships are mandatory.
+This is a minimal illustrative contract, not an executable signed request or a real provisioned store. Empty children are valid and intentionally reconcile to none. Each array <=2,000. Orders may include optional `employee_name` (max 100). Payments may include optional `station_name` (max 100). Order `batch_code` and `shift_code` are text references only; create the batch and shift through their own endpoints. See [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) for every allowed payload column, kind/default/nullability and physical SQL columns. Required fields cannot be null; server IDs/timestamps/revision/hash fields cannot be submitted in row objects. Request ID <=160, revision positive bigint. Child ownership/date/card-payment relationships are mandatory. A 10-order sample is `docs/postman/store-reporting-batch-shift-10-orders.postman_data.json`.
+
+### POST `/api/pos/reporting/batch`
+
+Same POS signature, size limit, and status codes as the order endpoint. Source `src/app/api/pos/reporting/batch/route.ts`. One batch object per request. Upsert key is `batch_code`. Receipts are stored in `sync_master_requests`, separate from order receipts.
+
+```json
+{
+  "request_id": "example-batch-1-revision-1",
+  "source_revision": "1",
+  "batch": {
+    "store_code": "EXAMPLE",
+    "batch_code": "BATCH-20261014"
+  }
+}
+```
+
+### POST `/api/pos/reporting/shift`
+
+Same authentication and status codes. Source `src/app/api/pos/reporting/shift/route.ts`. One shift object per request. `batch_code` is required and must already exist on `tbl_rpt_batch` for the signed store. Create the batch before the shift. A missing batch returns 409 `Create the batch before this shift.` Upsert key is `shift_code`.
+
+```json
+{
+  "request_id": "example-shift-1-revision-1",
+  "source_revision": "1",
+  "shift": {
+    "store_code": "EXAMPLE",
+    "shift_code": "SHIFT-AM",
+    "batch_code": "BATCH-20261014"
+  }
+}
+```
+
+Sample bodies: `docs/postman/store-reporting-batch.postman_data.json` and `docs/postman/store-reporting-shift.postman_data.json`. Post the batch sample before the shift sample.
 
 Success: 201 for accepted; 200 duplicate/stale; `{status:"accepted"|"duplicate"|"stale",request_id,source_revision}`. Header Cache-Control=no-store. Retry identical snapshots after temporary failures; changed content needs a new request ID and appropriately higher source revision. See [BUSINESS_LOGIC.md](BUSINESS_LOGIC.md) for the full comparison rules and existing Postman examples in `docs/postman/`.
 
@@ -143,6 +178,7 @@ Generated from route source files, including the Auth.js handler re-export. HEAD
 | Path | Exports | Source |
 | --- | --- | --- |
 | `/api/admin/stores/[storeCode]/access` | GET, PUT | `src/app/api/admin/stores/[storeCode]/access/route.ts` |
+| `/api/admin/stores/[storeCode]/pos-credentials` | GET, POST | `src/app/api/admin/stores/[storeCode]/pos-credentials/route.ts` |
 | `/api/admin/stores/[storeCode]` | PATCH | `src/app/api/admin/stores/[storeCode]/route.ts` |
 | `/api/admin/stores` | GET, POST | `src/app/api/admin/stores/route.ts` |
 | `/api/admin/users/[userId]/access` | GET, PUT | `src/app/api/admin/users/[userId]/access/route.ts` |
@@ -154,7 +190,9 @@ Generated from route source files, including the Auth.js handler re-export. HEAD
 | `/api/notifications/read-all` | POST | `src/app/api/notifications/read-all/route.ts` |
 | `/api/notifications` | GET | `src/app/api/notifications/route.ts` |
 | `/api/pos/notification-events` | POST | `src/app/api/pos/notification-events/route.ts` |
+| `/api/pos/reporting/batch` | POST | `src/app/api/pos/reporting/batch/route.ts` |
 | `/api/pos/reporting/orders` | POST | `src/app/api/pos/reporting/orders/route.ts` |
+| `/api/pos/reporting/shift` | POST | `src/app/api/pos/reporting/shift/route.ts` |
 | `/api/push-subscriptions` | POST, DELETE | `src/app/api/push-subscriptions/route.ts` |
 | `/api/reporting/orders` | GET | `src/app/api/reporting/orders/route.ts` |
 | `/api/reporting/transaction-detail` | GET | `src/app/api/reporting/transaction-detail/route.ts` |

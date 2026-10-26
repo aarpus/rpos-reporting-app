@@ -13,6 +13,16 @@ export type OrderSnapshot = {
   payments: ReportRow[];
   card_payments: ReportRow[];
 };
+export type BatchSnapshot = {
+  request_id: string;
+  source_revision: string;
+  batch: ReportRow;
+};
+export type ShiftSnapshot = {
+  request_id: string;
+  source_revision: string;
+  shift: ReportRow;
+};
 
 export class ReportingError extends Error {
   status: number;
@@ -99,10 +109,16 @@ function parseRow(table: ReportingTable, value: unknown, storeCode: string): Rep
   return row;
 }
 
+function requestIdentity(value: ReportRow): { request_id: string; source_revision: string } {
+  if (typeof value.request_id !== "string" || !value.request_id.trim() || value.request_id.length > 160 || value.request_id.includes("\u0000")) throw new ReportingError("request_id is required (maximum 160 characters).");
+  return { request_id: value.request_id, source_revision: positiveRevision(value.source_revision) };
+}
+
 export function parseSnapshot(value: unknown, storeCode: string): OrderSnapshot {
   if (Array.isArray(value)) throw new ReportingError("This endpoint accepts one order snapshot object per request, not an array. Send each order separately to /api/pos/reporting/orders.");
-  if (!object(value) || Object.keys(value).some((key) => !["request_id", "source_revision", "order", "items", "payments", "card_payments"].includes(key))) throw new ReportingError("Invalid snapshot envelope.");
-  if (typeof value.request_id !== "string" || !value.request_id.trim() || value.request_id.length > 160 || value.request_id.includes("\u0000")) throw new ReportingError("request_id is required (maximum 160 characters).");
+  const envelopeKeys = ["request_id", "source_revision", "order", "items", "payments", "card_payments"];
+  if (!object(value) || Object.keys(value).some((key) => !envelopeKeys.includes(key))) throw new ReportingError("Invalid snapshot envelope.");
+  const identity = requestIdentity(value);
   const order = parseRow("tbl_rpt_order", value.order, storeCode);
   const envelope = value;
   function children(key: string, table: ReportingTable): ReportRow[] {
@@ -127,7 +143,23 @@ export function parseSnapshot(value: unknown, storeCode: string): OrderSnapshot 
   const cardPayments = children("card_payments", "tbl_rpt_card_payment");
   const paymentCodes = new Set(payments.map((row) => row.payment_code));
   if (cardPayments.some((row) => !paymentCodes.has(row.payment_code))) throw new ReportingError("Every card transaction must reference a payment in this snapshot.");
-  return { request_id: value.request_id, source_revision: positiveRevision(value.source_revision), order, items, payments, card_payments: cardPayments };
+  return { ...identity, order, items, payments, card_payments: cardPayments };
+}
+
+export function parseBatchSnapshot(value: unknown, storeCode: string): BatchSnapshot {
+  return parseMasterSnapshot(value, storeCode, "batch", "tbl_rpt_batch", "/api/pos/reporting/batch");
+}
+
+export function parseShiftSnapshot(value: unknown, storeCode: string): ShiftSnapshot {
+  return parseMasterSnapshot(value, storeCode, "shift", "tbl_rpt_shift", "/api/pos/reporting/shift");
+}
+
+function parseMasterSnapshot<K extends "batch" | "shift">(value: unknown, storeCode: string, key: K, table: ReportingTable, path: string): { request_id: string; source_revision: string } & Record<K, ReportRow> {
+  if (Array.isArray(value)) throw new ReportingError(`This endpoint accepts one ${key} object per request, not an array. Send each ${key} separately to ${path}.`);
+  if (!object(value) || Object.keys(value).some((entry) => !["request_id", "source_revision", key].includes(entry))) throw new ReportingError(`Invalid ${key} envelope.`);
+  const identity = requestIdentity(value);
+  const row = parseRow(table, value[key], storeCode);
+  return { ...identity, [key]: row } as { request_id: string; source_revision: string } & Record<K, ReportRow>;
 }
 
 function validateJson(value: unknown, depth = 0): void {
@@ -144,7 +176,7 @@ function canonical(value: unknown): unknown {
   return value;
 }
 
-export function snapshotHash(snapshot: OrderSnapshot): string {
+export function snapshotHash(snapshot: { request_id: string }): string {
   const { request_id: _requestId, ...content } = snapshot;
   void _requestId;
   return createHash("sha256").update(JSON.stringify(canonical(content))).digest("hex");

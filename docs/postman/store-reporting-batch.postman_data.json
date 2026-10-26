@@ -1,0 +1,16 @@
+[
+  {
+    "request_id": "batchshift-batch-001-r1",
+    "source_revision": "1",
+    "batch": {
+      "store_code": "{{storeCode}}",
+      "batch_id": "9001",
+      "batch_code": "BATCH-20261014",
+      "batchstart": "2026-10-14T08:00:00+05:30",
+      "batchend": null,
+      "isactive": 1,
+      "isbatchclose": 0,
+      "is_delete": false
+    }
+  }
+]

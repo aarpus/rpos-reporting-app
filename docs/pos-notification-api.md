@@ -10,7 +10,7 @@ Generate the server encryption key once and keep it in both `.env.local` and the
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
 
-After applying the database migration, provision a credential and save the returned secret in the matching POS installation:
+After applying the database migration, provision a credential and save the returned secret in the matching POS installation. Administrators can do this from Store Management (`/admin/stores`): creating a store opens the credential step, and each store row has a POS credential action. The same result is available from the command line:
 
 ```powershell
 npm run pos:credential -- create DT01

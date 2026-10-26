@@ -103,6 +103,10 @@ docs/ai-handover/PROJECT_OVERVIEW.md
 docs/pos-notification-api.md
 docs/pos-reporting-api.md
 docs/postman/store-reporting-10-orders.postman_collection.json
+docs/postman/store-reporting-10-orders.postman_data.json
+docs/postman/store-reporting-batch-shift-10-orders.postman_data.json
+docs/postman/store-reporting-batch.postman_data.json
+docs/postman/store-reporting-shift.postman_data.json
 docs/postman/store-reporting-single-order.json
 docs/store-reporting-sync-testing.md
 eslint.config.mjs
@@ -117,6 +121,7 @@ prisma/migrations/20260929000000_store_notifications/migration.sql
 prisma/migrations/20261009000000_customer_reporting/migration.sql
 prisma/migrations/20261012000000_store_reporting/migration.sql
 prisma/migrations/20261013000000_store_code_schema_names/migration.sql
+prisma/migrations/20261014000000_reporting_batch_shift/migration.sql
 prisma/migrations/migration_lock.toml
 prisma/repair-auto-increment-ids.sql
 prisma/schema.prisma
@@ -257,6 +262,7 @@ src/app/(dashboard)/tables/basic-tables/_component/user-table/data.ts
 src/app/(dashboard)/tables/basic-tables/_component/user-table/index.tsx
 src/app/(dashboard)/tables/basic-tables/page.tsx
 src/app/api/admin/stores/[storeCode]/access/route.ts
+src/app/api/admin/stores/[storeCode]/pos-credentials/route.ts
 src/app/api/admin/stores/[storeCode]/route.ts
 src/app/api/admin/stores/route.ts
 src/app/api/admin/users/[userId]/access/route.ts
@@ -391,6 +397,7 @@ src/lib/admin-auth.ts
 src/lib/db.ts
 src/lib/notification-types.ts
 src/lib/password.mjs
+src/lib/pos-credentials.ts
 src/lib/pos-events.ts
 src/lib/pos-signature.ts
 src/lib/push.ts
@@ -450,7 +457,7 @@ This index was extracted by reading every authored TS/TSX/MJS source file. Expor
 | `scripts/pos-credential.mjs` | 43 | Local helpers/imports/test registration |
 | `scripts/reporting-stores.mjs` | 28 | Local helpers/imports/test registration |
 | `src/app/(dashboard)/admin/stores/page.tsx` | 13 | `StoreManagementPage` |
-| `src/app/(dashboard)/admin/stores/store-management.tsx` | 765 | `StoreManagement` |
+| `src/app/(dashboard)/admin/stores/store-management.tsx` | 1007 | `StoreManagement` |
 | `src/app/(dashboard)/admin/users/page.tsx` | 12 | `UserManagementPage` |
 | `src/app/(dashboard)/admin/users/user-management.tsx` | 510 | `UserManagement` |
 | `src/app/(dashboard)/charts/bar/_components/chart-one/data.ts` | 17 | `mockBarChartOneData` |
@@ -519,6 +526,7 @@ This index was extracted by reading every authored TS/TSX/MJS source file. Expor
 | `src/app/(dashboard)/tables/basic-tables/_component/user-table/index.tsx` | 64 | `UserTable` |
 | `src/app/(dashboard)/tables/basic-tables/page.tsx` | 43 | `metadata`, `BasicTablesPage` |
 | `src/app/api/admin/stores/[storeCode]/access/route.ts` | 38 | `GET`, `PUT` |
+| `src/app/api/admin/stores/[storeCode]/pos-credentials/route.ts` | 60 | `GET`, `POST` |
 | `src/app/api/admin/stores/[storeCode]/route.ts` | 21 | `PATCH` |
 | `src/app/api/admin/stores/route.ts` | 44 | `GET`, `POST` |
 | `src/app/api/admin/users/[userId]/access/route.ts` | 36 | `GET`, `PUT` |
@@ -649,6 +657,7 @@ This index was extracted by reading every authored TS/TSX/MJS source file. Expor
 | `src/lib/db.ts` | 31 | `getDatabaseConnectionString`, `withDb` |
 | `src/lib/notification-types.ts` | 12 | `NOTIFICATION_TYPES`, `NotificationTypeKey`, `isNotificationType` |
 | `src/lib/password.mjs` | 17 | `hashPassword`, `verifyPassword` |
+| `src/lib/pos-credentials.ts` | 110 | `PosCredentialKeyError`, `listPosCredentials`, `createPosCredential` |
 | `src/lib/pos-events.ts` | 119 | `getNotificationTargetPath`, `parsePosEvent` |
 | `src/lib/pos-signature.ts` | 40 | `decryptPosSecret`, `verifyPosSignature` |
 | `src/lib/push.ts` | 64 | `PushDelivery`, `sendPushDeliveries` |
@@ -673,7 +682,7 @@ This index was extracted by reading every authored TS/TSX/MJS source file. Expor
 | `src/services/api/notifications.ts` | 43 | `InboxNotification`, `InboxResponse`, `getNotifications`, `markNotificationRead`, `markAllNotificationsRead` |
 | `src/types/cloudflare-env.d.ts` | 13 | Local helpers/imports/test registration |
 | `src/types/next-auth.d.ts` | 23 | Local helpers/imports/test registration |
-| `src/types/store-admin.ts` | 18 | `AdminStore`, `StoreAccessUser` |
+| `src/types/store-admin.ts` | 30 | `AdminStore`, `StoreAccessUser`, `PosCredentialSummary`, `IssuedPosCredential` |
 | `src/types/user-admin.ts` | 15 | `AdminUser`, `UserAccessStore` |
 | `src/utils/cn.ts` | 6 | `cn` |
 | `src/utils/delay.ts` | 3 | `delay` |

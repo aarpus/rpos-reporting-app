@@ -1,11 +1,14 @@
 import type { Client } from "pg";
-import { parseSnapshot, ReportingError, tables, type ReportRow, type ReportingTable } from "./snapshot.ts";
+import { parseSnapshot, ReportingError, tables, type ReportRow } from "./snapshot.ts";
+
+const orderTables = ["tbl_rpt_order", "tbl_rpt_order_item", "tbl_rpt_payment", "tbl_rpt_card_payment"] as const;
+type OrderTable = (typeof orderTables)[number];
 
 // Caller owns a read-only repeatable-read transaction. Read all four source tables
 // before syncing so concurrent POS updates cannot produce a mixed order snapshot.
 export async function readLegacySnapshots(db: Pick<Client, "query">, storeCode: string, timezone: string) {
-  const source = {} as Record<ReportingTable, ReportRow[]>;
-  for (const table of Object.keys(tables) as ReportingTable[]) {
+  const source = {} as Record<OrderTable, ReportRow[]>;
+  for (const table of orderTables) {
     const types = await db.query<{ column_name: string; data_type: string }>("SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = 'public' AND table_name = $1", [table]);
     const available = new Map(types.rows.map((row) => [row.column_name, row.data_type]));
     if (!available.size) throw new ReportingError(`Missing source table public.${table}.`);
