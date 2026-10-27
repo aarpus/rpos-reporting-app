@@ -56,6 +56,7 @@ import type {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
+import { RetailDashboard } from "@/components/store/retail-dashboard";
 import { useStore } from "@/components/store/store-provider";
 
 const stats: [string, string, string, IconType, string, string][] = [
@@ -310,6 +311,9 @@ function Details() {
 export default function HomePage() {
   const { selectedStore } = useStore();
   const [batch, setBatch] = useState(false);
+  if (selectedStore?.storeType === "RETAIL") {
+    return <RetailDashboard storeName={selectedStore.name} />;
+  }
   return (
     <div className="mt-6 space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3 px-2 lg:px-6">

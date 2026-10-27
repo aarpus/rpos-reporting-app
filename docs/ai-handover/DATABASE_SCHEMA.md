@@ -2,7 +2,7 @@
 
 ## Two schema sources
 
-`prisma/schema.prisma` describes current **public metadata**; datasource PostgreSQL, generated client at `src/generated/prisma`, URL supplied by `prisma.config.ts`. SQL migrations/functions and `database/reporting/001-tables.sql` describe **per-store reporting**; those report tables are not Prisma models. Raw `pg` services are the active application data-access path. Prisma helper/client usage is server-only.
+`prisma/schema.prisma` describes current **public metadata**; datasource PostgreSQL, generated client at `src/generated/prisma`, URL supplied by `prisma.config.ts`. SQL migrations/functions and `database/reporting/restaurant/001-tables.sql` describe **per-store restaurant reporting**. Retail stores read `database/reporting/retail/001-tables.sql` when that file contains `CREATE TABLE` statements. Those report tables are not Prisma models. Raw `pg` services are the active application data-access path. Prisma helper/client usage is server-only.
 
 **Current desired Prisma shape is not the same as the migration-created public shape.** Initial and notification migrations use UUID IDs/natural keys; current Prisma uses integer auto-increment surrogate IDs. No ID-conversion migration exists. The field catalog below documents source, not a queried live database. See K1 in [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 
@@ -53,10 +53,11 @@ Indexes: each report table `(store_code,business_date)`; children also `(store_c
 | `20261012000000_store_reporting` | Drops legacy membership trigger, adds store registry and provisioning, copies compatible legacy store data non-destructively; hash-based naming |
 | `20261013000000_store_code_schema_names` | Wider schema-name constraint and code-based naming for new stores; existing mappings unchanged |
 | `20261014000000_reporting_batch_shift` | Adds `employee_name` and `station_name`, creates per-store batch and shift tables, and replaces provisioning; reporting version stays 1 |
+| `20261026000000_store_type` | Adds `stores.store_type` (`RESTAURANT` or `RETAIL`, default `RESTAURANT`) and replaces provisioning so the application supplies the table SQL |
 
-Provisioning creates nine reporting tables, optionally copies matching legacy customer's four report tables and receipts for the selected store, preserves report IDs/revisions/timestamps, resets serial sequences, then registers version 1. Legacy copy selects only columns that exist in both schemas. `database/reporting/legacy-customer-001.sql` is the older customer DDL template; new writes do not use that scope. Installer reuses tracked SQL with idempotent registry/function creation and applies naming and batch/shift SQL. Public import reads the four order `public.tbl_rpt_*` tables, validates complete snapshots, converts naive timestamps in store timezone and syncs with revision 1. It leaves source data intact and can conflict with previously imported changed content.
+`public.stores.store_type` is chosen only when the store is created. Restaurant provisioning reads `database/reporting/restaurant/001-tables.sql`, creates the nine reporting tables, optionally copies matching legacy customer's four report tables and receipts for the selected store, preserves report IDs/revisions/timestamps, resets serial sequences, then registers version 1. Legacy copy selects only columns that exist in both schemas and runs only for restaurant stores. Retail provisioning runs `database/reporting/retail/001-tables.sql` inside the new schema and does not create restaurant tables. Retail POS ingestion writes `tbl_batch`, `tbl_shift`, `tbl_checkout_transaction`, `tbl_transaction_detail`, `tbl_transaction_payment`, and `tbl_transaction_gift_card` in that schema. It does not add receipt, revision, or `store_code` columns. `tbl_checkout_transaction.transactionid` and `tbl_transaction_detail.transactiondetailid` are identities without a primary-key constraint. That file is the PostgreSQL form of the supplied LPOS report table list. A later column is added by editing the type's `001-tables.sql` for new stores and adding `database/reporting/<type>/upgrades/NNN-description.sql` for stores that already exist. `database/reporting/legacy-customer-001.sql` is the older customer DDL template; new writes do not use that scope. Installer reuses tracked SQL with idempotent registry/function creation and applies naming, batch/shift, and store-type SQL. `provision_store_reporting(text, text)` executes the supplied DDL. Public import reads the four order `public.tbl_rpt_*` tables, validates complete snapshots, converts naive timestamps in store timezone and syncs with revision 1. It leaves source data intact and can conflict with previously imported changed content.
 
-Do not infer production structure from migrations or Prisma alone. Inspect actual column types, constraints, mapping/version rows, migration ledger and privileges during an explicitly authorized database task. This handover made no database changes.
+Do not infer production structure from migrations or Prisma alone. Inspect actual column types, constraints, mapping/version rows, migration ledger and privileges during an explicitly authorized database task. The store-type migration is in the tree; applying it to a database is a separate operation.
 
 ## Field catalogs
 
@@ -132,6 +133,7 @@ id        Int      @id @default(autoincrement()) @map("id")
   storeCode String   @unique @map("store_code") @db.VarChar(64)
   name      String   @db.VarChar(160)
   timezone  String   @default("UTC") @db.VarChar(80)
+  storeType StoreType @default(RESTAURANT) @map("store_type")
   active    Boolean  @default(true)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)

@@ -1,0 +1,542 @@
+[
+  {
+    "request_id": "retail-10-order-1",
+    "checkout_transaction": {
+      "transactionid": "3001",
+      "transactiondate": "2026-10-27T08:10:00Z",
+      "transactionemployeeid": "4",
+      "shiftid": "2001",
+      "transactionsubtotal": "11.00",
+      "transactiontotaltax": "0.80",
+      "transactiontotal": "11.80",
+      "transactioncashamount": "11.80",
+      "transactiontotalpaid": "11.80",
+      "TransactionNumber": "T-3001"
+    },
+    "transaction_detail": [
+      {
+        "transactiondetailid": "4001",
+        "productupcode": "UPC1001",
+        "transactiondetaildate": "2026-10-27T08:10:00Z",
+        "transactiondetailquantity": "1.00",
+        "transactiondetailretailprice": "11.00",
+        "transactiondetailextprice": "11.00",
+        "transactiondetailemployeeid": "4",
+        "transactiondetailitemname": "Item 1",
+        "taxname": "Sales Tax",
+        "departmentname": "Grocery",
+        "producttype": "ITEM",
+        "displayquantity": 1
+      }
+    ],
+    "transaction_payment": [
+      {
+        "id_payment": "5001",
+        "trans_date_time": "2026-10-27T08:10:00Z",
+        "transaction_type": "SALE",
+        "employee_id": "4",
+        "pc_charge_user_id": "cashier",
+        "store_id": "7",
+        "amount": "11.00",
+        "command": "SALE",
+        "batchid": "1001",
+        "result": "APPROVED"
+      }
+    ],
+    "transaction_gift_card": [
+      {
+        "id_transaction": "6001",
+        "transactiondate": "2026-10-27T08:10:00Z",
+        "amount": "5.00",
+        "id_gift_card": "801",
+        "avail_balance": "20.00"
+      }
+    ]
+  },
+  {
+    "request_id": "retail-10-order-2",
+    "checkout_transaction": {
+      "transactionid": "3002",
+      "transactiondate": "2026-10-27T09:10:00Z",
+      "transactionemployeeid": "4",
+      "shiftid": "2002",
+      "transactionsubtotal": "12.00",
+      "transactiontotaltax": "0.80",
+      "transactiontotal": "12.80",
+      "transactioncashamount": "12.80",
+      "transactiontotalpaid": "12.80",
+      "TransactionNumber": "T-3002"
+    },
+    "transaction_detail": [
+      {
+        "transactiondetailid": "4002",
+        "productupcode": "UPC1002",
+        "transactiondetaildate": "2026-10-27T09:10:00Z",
+        "transactiondetailquantity": "1.00",
+        "transactiondetailretailprice": "12.00",
+        "transactiondetailextprice": "12.00",
+        "transactiondetailemployeeid": "4",
+        "transactiondetailitemname": "Item 2",
+        "taxname": "Sales Tax",
+        "departmentname": "Grocery",
+        "producttype": "ITEM",
+        "displayquantity": 1
+      }
+    ],
+    "transaction_payment": [
+      {
+        "id_payment": "5002",
+        "trans_date_time": "2026-10-27T09:10:00Z",
+        "transaction_type": "SALE",
+        "employee_id": "4",
+        "pc_charge_user_id": "cashier",
+        "store_id": "7",
+        "amount": "12.00",
+        "command": "SALE",
+        "batchid": "1002",
+        "result": "APPROVED"
+      }
+    ],
+    "transaction_gift_card": [
+      {
+        "id_transaction": "6002",
+        "transactiondate": "2026-10-27T09:10:00Z",
+        "amount": "5.00",
+        "id_gift_card": "802",
+        "avail_balance": "20.00"
+      }
+    ]
+  },
+  {
+    "request_id": "retail-10-order-3",
+    "checkout_transaction": {
+      "transactionid": "3003",
+      "transactiondate": "2026-10-27T10:10:00Z",
+      "transactionemployeeid": "4",
+      "shiftid": "2003",
+      "transactionsubtotal": "13.00",
+      "transactiontotaltax": "0.80",
+      "transactiontotal": "13.80",
+      "transactioncashamount": "13.80",
+      "transactiontotalpaid": "13.80",
+      "TransactionNumber": "T-3003"
+    },
+    "transaction_detail": [
+      {
+        "transactiondetailid": "4003",
+        "productupcode": "UPC1003",
+        "transactiondetaildate": "2026-10-27T10:10:00Z",
+        "transactiondetailquantity": "1.00",
+        "transactiondetailretailprice": "13.00",
+        "transactiondetailextprice": "13.00",
+        "transactiondetailemployeeid": "4",
+        "transactiondetailitemname": "Item 3",
+        "taxname": "Sales Tax",
+        "departmentname": "Grocery",
+        "producttype": "ITEM",
+        "displayquantity": 1
+      }
+    ],
+    "transaction_payment": [
+      {
+        "id_payment": "5003",
+        "trans_date_time": "2026-10-27T10:10:00Z",
+        "transaction_type": "SALE",
+        "employee_id": "4",
+        "pc_charge_user_id": "cashier",
+        "store_id": "7",
+        "amount": "13.00",
+        "command": "SALE",
+        "batchid": "1003",
+        "result": "APPROVED"
+      }
+    ],
+    "transaction_gift_card": [
+      {
+        "id_transaction": "6003",
+        "transactiondate": "2026-10-27T10:10:00Z",
+        "amount": "5.00",
+        "id_gift_card": "803",
+        "avail_balance": "20.00"
+      }
+    ]
+  },
+  {
+    "request_id": "retail-10-order-4",
+    "checkout_transaction": {
+      "transactionid": "3004",
+      "transactiondate": "2026-10-27T11:10:00Z",
+      "transactionemployeeid": "4",
+      "shiftid": "2004",
+      "transactionsubtotal": "14.00",
+      "transactiontotaltax": "0.80",
+      "transactiontotal": "14.80",
+      "transactioncashamount": "14.80",
+      "transactiontotalpaid": "14.80",
+      "TransactionNumber": "T-3004"
+    },
+    "transaction_detail": [
+      {
+        "transactiondetailid": "4004",
+        "productupcode": "UPC1004",
+        "transactiondetaildate": "2026-10-27T11:10:00Z",
+        "transactiondetailquantity": "1.00",
+        "transactiondetailretailprice": "14.00",
+        "transactiondetailextprice": "14.00",
+        "transactiondetailemployeeid": "4",
+        "transactiondetailitemname": "Item 4",
+        "taxname": "Sales Tax",
+        "departmentname": "Grocery",
+        "producttype": "ITEM",
+        "displayquantity": 1
+      }
+    ],
+    "transaction_payment": [
+      {
+        "id_payment": "5004",
+        "trans_date_time": "2026-10-27T11:10:00Z",
+        "transaction_type": "SALE",
+        "employee_id": "4",
+        "pc_charge_user_id": "cashier",
+        "store_id": "7",
+        "amount": "14.00",
+        "command": "SALE",
+        "batchid": "1004",
+        "result": "APPROVED"
+      }
+    ],
+    "transaction_gift_card": [
+      {
+        "id_transaction": "6004",
+        "transactiondate": "2026-10-27T11:10:00Z",
+        "amount": "5.00",
+        "id_gift_card": "804",
+        "avail_balance": "20.00"
+      }
+    ]
+  },
+  {
+    "request_id": "retail-10-order-5",
+    "checkout_transaction": {
+      "transactionid": "3005",
+      "transactiondate": "2026-10-27T12:10:00Z",
+      "transactionemployeeid": "4",
+      "shiftid": "2005",
+      "transactionsubtotal": "15.00",
+      "transactiontotaltax": "0.80",
+      "transactiontotal": "15.80",
+      "transactioncashamount": "15.80",
+      "transactiontotalpaid": "15.80",
+      "TransactionNumber": "T-3005"
+    },
+    "transaction_detail": [
+      {
+        "transactiondetailid": "4005",
+        "productupcode": "UPC1005",
+        "transactiondetaildate": "2026-10-27T12:10:00Z",
+        "transactiondetailquantity": "1.00",
+        "transactiondetailretailprice": "15.00",
+        "transactiondetailextprice": "15.00",
+        "transactiondetailemployeeid": "4",
+        "transactiondetailitemname": "Item 5",
+        "taxname": "Sales Tax",
+        "departmentname": "Grocery",
+        "producttype": "ITEM",
+        "displayquantity": 1
+      }
+    ],
+    "transaction_payment": [
+      {
+        "id_payment": "5005",
+        "trans_date_time": "2026-10-27T12:10:00Z",
+        "transaction_type": "SALE",
+        "employee_id": "4",
+        "pc_charge_user_id": "cashier",
+        "store_id": "7",
+        "amount": "15.00",
+        "command": "SALE",
+        "batchid": "1005",
+        "result": "APPROVED"
+      }
+    ],
+    "transaction_gift_card": [
+      {
+        "id_transaction": "6005",
+        "transactiondate": "2026-10-27T12:10:00Z",
+        "amount": "5.00",
+        "id_gift_card": "805",
+        "avail_balance": "20.00"
+      }
+    ]
+  },
+  {
+    "request_id": "retail-10-order-6",
+    "checkout_transaction": {
+      "transactionid": "3006",
+      "transactiondate": "2026-10-27T13:10:00Z",
+      "transactionemployeeid": "4",
+      "shiftid": "2006",
+      "transactionsubtotal": "16.00",
+      "transactiontotaltax": "0.80",
+      "transactiontotal": "16.80",
+      "transactioncashamount": "16.80",
+      "transactiontotalpaid": "16.80",
+      "TransactionNumber": "T-3006"
+    },
+    "transaction_detail": [
+      {
+        "transactiondetailid": "4006",
+        "productupcode": "UPC1006",
+        "transactiondetaildate": "2026-10-27T13:10:00Z",
+        "transactiondetailquantity": "1.00",
+        "transactiondetailretailprice": "16.00",
+        "transactiondetailextprice": "16.00",
+        "transactiondetailemployeeid": "4",
+        "transactiondetailitemname": "Item 6",
+        "taxname": "Sales Tax",
+        "departmentname": "Grocery",
+        "producttype": "ITEM",
+        "displayquantity": 1
+      }
+    ],
+    "transaction_payment": [
+      {
+        "id_payment": "5006",
+        "trans_date_time": "2026-10-27T13:10:00Z",
+        "transaction_type": "SALE",
+        "employee_id": "4",
+        "pc_charge_user_id": "cashier",
+        "store_id": "7",
+        "amount": "16.00",
+        "command": "SALE",
+        "batchid": "1006",
+        "result": "APPROVED"
+      }
+    ],
+    "transaction_gift_card": [
+      {
+        "id_transaction": "6006",
+        "transactiondate": "2026-10-27T13:10:00Z",
+        "amount": "5.00",
+        "id_gift_card": "806",
+        "avail_balance": "20.00"
+      }
+    ]
+  },
+  {
+    "request_id": "retail-10-order-7",
+    "checkout_transaction": {
+      "transactionid": "3007",
+      "transactiondate": "2026-10-27T14:10:00Z",
+      "transactionemployeeid": "4",
+      "shiftid": "2007",
+      "transactionsubtotal": "17.00",
+      "transactiontotaltax": "0.80",
+      "transactiontotal": "17.80",
+      "transactioncashamount": "17.80",
+      "transactiontotalpaid": "17.80",
+      "TransactionNumber": "T-3007"
+    },
+    "transaction_detail": [
+      {
+        "transactiondetailid": "4007",
+        "productupcode": "UPC1007",
+        "transactiondetaildate": "2026-10-27T14:10:00Z",
+        "transactiondetailquantity": "1.00",
+        "transactiondetailretailprice": "17.00",
+        "transactiondetailextprice": "17.00",
+        "transactiondetailemployeeid": "4",
+        "transactiondetailitemname": "Item 7",
+        "taxname": "Sales Tax",
+        "departmentname": "Grocery",
+        "producttype": "ITEM",
+        "displayquantity": 1
+      }
+    ],
+    "transaction_payment": [
+      {
+        "id_payment": "5007",
+        "trans_date_time": "2026-10-27T14:10:00Z",
+        "transaction_type": "SALE",
+        "employee_id": "4",
+        "pc_charge_user_id": "cashier",
+        "store_id": "7",
+        "amount": "17.00",
+        "command": "SALE",
+        "batchid": "1007",
+        "result": "APPROVED"
+      }
+    ],
+    "transaction_gift_card": [
+      {
+        "id_transaction": "6007",
+        "transactiondate": "2026-10-27T14:10:00Z",
+        "amount": "5.00",
+        "id_gift_card": "807",
+        "avail_balance": "20.00"
+      }
+    ]
+  },
+  {
+    "request_id": "retail-10-order-8",
+    "checkout_transaction": {
+      "transactionid": "3008",
+      "transactiondate": "2026-10-27T15:10:00Z",
+      "transactionemployeeid": "4",
+      "shiftid": "2008",
+      "transactionsubtotal": "18.00",
+      "transactiontotaltax": "0.80",
+      "transactiontotal": "18.80",
+      "transactioncashamount": "18.80",
+      "transactiontotalpaid": "18.80",
+      "TransactionNumber": "T-3008"
+    },
+    "transaction_detail": [
+      {
+        "transactiondetailid": "4008",
+        "productupcode": "UPC1008",
+        "transactiondetaildate": "2026-10-27T15:10:00Z",
+        "transactiondetailquantity": "1.00",
+        "transactiondetailretailprice": "18.00",
+        "transactiondetailextprice": "18.00",
+        "transactiondetailemployeeid": "4",
+        "transactiondetailitemname": "Item 8",
+        "taxname": "Sales Tax",
+        "departmentname": "Grocery",
+        "producttype": "ITEM",
+        "displayquantity": 1
+      }
+    ],
+    "transaction_payment": [
+      {
+        "id_payment": "5008",
+        "trans_date_time": "2026-10-27T15:10:00Z",
+        "transaction_type": "SALE",
+        "employee_id": "4",
+        "pc_charge_user_id": "cashier",
+        "store_id": "7",
+        "amount": "18.00",
+        "command": "SALE",
+        "batchid": "1008",
+        "result": "APPROVED"
+      }
+    ],
+    "transaction_gift_card": [
+      {
+        "id_transaction": "6008",
+        "transactiondate": "2026-10-27T15:10:00Z",
+        "amount": "5.00",
+        "id_gift_card": "808",
+        "avail_balance": "20.00"
+      }
+    ]
+  },
+  {
+    "request_id": "retail-10-order-9",
+    "checkout_transaction": {
+      "transactionid": "3009",
+      "transactiondate": "2026-10-27T16:10:00Z",
+      "transactionemployeeid": "4",
+      "shiftid": "2009",
+      "transactionsubtotal": "19.00",
+      "transactiontotaltax": "0.80",
+      "transactiontotal": "19.80",
+      "transactioncashamount": "19.80",
+      "transactiontotalpaid": "19.80",
+      "TransactionNumber": "T-3009"
+    },
+    "transaction_detail": [
+      {
+        "transactiondetailid": "4009",
+        "productupcode": "UPC1009",
+        "transactiondetaildate": "2026-10-27T16:10:00Z",
+        "transactiondetailquantity": "1.00",
+        "transactiondetailretailprice": "19.00",
+        "transactiondetailextprice": "19.00",
+        "transactiondetailemployeeid": "4",
+        "transactiondetailitemname": "Item 9",
+        "taxname": "Sales Tax",
+        "departmentname": "Grocery",
+        "producttype": "ITEM",
+        "displayquantity": 1
+      }
+    ],
+    "transaction_payment": [
+      {
+        "id_payment": "5009",
+        "trans_date_time": "2026-10-27T16:10:00Z",
+        "transaction_type": "SALE",
+        "employee_id": "4",
+        "pc_charge_user_id": "cashier",
+        "store_id": "7",
+        "amount": "19.00",
+        "command": "SALE",
+        "batchid": "1009",
+        "result": "APPROVED"
+      }
+    ],
+    "transaction_gift_card": [
+      {
+        "id_transaction": "6009",
+        "transactiondate": "2026-10-27T16:10:00Z",
+        "amount": "5.00",
+        "id_gift_card": "809",
+        "avail_balance": "20.00"
+      }
+    ]
+  },
+  {
+    "request_id": "retail-10-order-10",
+    "checkout_transaction": {
+      "transactionid": "3010",
+      "transactiondate": "2026-10-27T17:10:00Z",
+      "transactionemployeeid": "4",
+      "shiftid": "2010",
+      "transactionsubtotal": "20.00",
+      "transactiontotaltax": "0.80",
+      "transactiontotal": "20.80",
+      "transactioncashamount": "20.80",
+      "transactiontotalpaid": "20.80",
+      "TransactionNumber": "T-3010"
+    },
+    "transaction_detail": [
+      {
+        "transactiondetailid": "4010",
+        "productupcode": "UPC1010",
+        "transactiondetaildate": "2026-10-27T17:10:00Z",
+        "transactiondetailquantity": "1.00",
+        "transactiondetailretailprice": "20.00",
+        "transactiondetailextprice": "20.00",
+        "transactiondetailemployeeid": "4",
+        "transactiondetailitemname": "Item 10",
+        "taxname": "Sales Tax",
+        "departmentname": "Grocery",
+        "producttype": "ITEM",
+        "displayquantity": 1
+      }
+    ],
+    "transaction_payment": [
+      {
+        "id_payment": "5010",
+        "trans_date_time": "2026-10-27T17:10:00Z",
+        "transaction_type": "SALE",
+        "employee_id": "4",
+        "pc_charge_user_id": "cashier",
+        "store_id": "7",
+        "amount": "20.00",
+        "command": "SALE",
+        "batchid": "1010",
+        "result": "APPROVED"
+      }
+    ],
+    "transaction_gift_card": [
+      {
+        "id_transaction": "6010",
+        "transactiondate": "2026-10-27T17:10:00Z",
+        "amount": "5.00",
+        "id_gift_card": "810",
+        "avail_balance": "20.00"
+      }
+    ]
+  }
+]

@@ -1,4 +1,5 @@
-import { NAV_DATA } from "./data";
+import type { StoreType } from "@/lib/store-type";
+import { navigationFor } from "./data";
 
 /**
  * Checks if the current pathname matches the target href, or if the pathname is a subpath of the target href.=
@@ -17,8 +18,8 @@ export function isPathActive(href: string, pathname: string): boolean {
  * Find the nav group whose child URLs include the current pathname.
  * Returns the group's `title` (used as the Disclosure `id`) or null.
  */
-export function findActiveGroupKey(pathname: string): string | null {
-  for (const section of NAV_DATA) {
+export function findActiveGroupKey(pathname: string, storeType: StoreType | null = null): string | null {
+  for (const section of navigationFor(storeType)) {
     for (const item of section.items) {
       if (item.items && item.items.length > 0) {
         const hasMatch = item.items.some((child) => child.url && isPathActive(child.url, pathname));

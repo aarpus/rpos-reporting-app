@@ -15,7 +15,7 @@ test("supplied dummy collection has ten valid individual snapshots for all four 
   const orderCodes = new Set();
   for (const entry of collection.item) {
     assert.equal(entry.request.method, "POST");
-    assert.equal(entry.request.url.raw, "{{baseUrl}}/api/pos/reporting/orders");
+    assert.equal(entry.request.url.raw, "{{baseUrl}}/api/pos/reporting/restaurant/orders");
     const payload = JSON.parse(entry.request.body.raw.replaceAll("{{storeCode}}", "ACUTERPOS"));
     const snapshot = parseSnapshot(payload, "ACUTERPOS");
     requestIds.add(snapshot.request_id);

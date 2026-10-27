@@ -88,7 +88,7 @@ afterward. Migration-managed databases should use the tracked migrations.
 
 ## Complete order snapshot
 
-Send `POST /api/pos/reporting/orders` with the same four HMAC headers and exact
+Send `POST /api/pos/reporting/restaurant/orders` with the same four HMAC headers and exact
 UTF-8 signing procedure documented in [POS notification API](pos-notification-api.md).
 Each request contains **one complete order**, including all current child rows.
 
@@ -142,8 +142,8 @@ schema names, and unknown columns cannot be supplied. All child arrays are
 required, even when empty. Optional `order.employee_name` and `payment.station_name`
 are text up to 100 characters. The request limit is 1 MB and 2,000 rows per child array.
 
-Post batches to `POST /api/pos/reporting/batch` and shifts to
-`POST /api/pos/reporting/shift` before relying on those codes. Each request is one
+Post batches to `POST /api/pos/reporting/restaurant/batch` and shifts to
+`POST /api/pos/reporting/restaurant/shift` before relying on those codes. Each request is one
 object with `request_id`, `source_revision`, and `batch` or `shift`. A shift's
 `batch_code` must already exist for the store, so create the batch first. The order
 endpoint does not accept `batch` or `shift` objects.

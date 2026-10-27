@@ -22,7 +22,7 @@ export async function resolveReportingScope(db: Pick<Client, "query">, user: { i
     SELECT r.schema_name, s.timezone
     FROM public.stores s JOIN public.store_reporting_schemas r ON r.store_code = s.store_code
     JOIN public.auth_users u ON u.id = $2
-    WHERE s.store_code = $1 AND s.active AND r.reporting_version = 1 AND u.active
+    WHERE s.store_code = $1 AND s.active AND s.store_type = 'RESTAURANT' AND r.reporting_version = 1 AND u.active
       AND (u.role = 'ADMIN' OR EXISTS (SELECT 1 FROM public.store_access a WHERE a.user_id = u.id AND a.store_code = s.store_code))`, [storeCode, user.id]);
   const row = result.rows[0];
   if (!row) throw new ReportingError("Store reporting is unavailable or not accessible.", 403);

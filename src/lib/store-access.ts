@@ -2,6 +2,7 @@ import "server-only";
 
 import { auth } from "@/auth";
 import { withDb } from "@/lib/db";
+import type { StoreType } from "@/lib/store-type";
 
 export const SELECTED_STORE_COOKIE = "selected_store_code";
 
@@ -9,6 +10,7 @@ export type StoreSummary = {
   storeCode: string;
   name: string;
   timezone: string;
+  storeType: StoreType;
 };
 
 export type RequestUser = {
@@ -43,10 +45,11 @@ export async function getAccessibleStores(
       store_code: string;
       name: string;
       timezone: string;
+      store_type: StoreType;
     }>(
       user.role === "ADMIN"
-        ? `SELECT s.store_code, s.name, s.timezone FROM stores s WHERE s.active ORDER BY s.name, s.store_code`
-        : `SELECT s.store_code, s.name, s.timezone
+        ? `SELECT s.store_code, s.name, s.timezone, s.store_type FROM stores s WHERE s.active ORDER BY s.name, s.store_code`
+        : `SELECT s.store_code, s.name, s.timezone, s.store_type
            FROM stores s
 
            JOIN store_access a ON a.store_code = s.store_code
@@ -58,6 +61,7 @@ export async function getAccessibleStores(
       storeCode: row.store_code,
       name: row.name,
       timezone: row.timezone,
+      storeType: row.store_type,
     }));
   });
 }
@@ -74,8 +78,9 @@ export async function requireStoreAccess(
       store_code: string;
       name: string;
       timezone: string;
+      store_type: StoreType;
     }>(
-      `SELECT s.store_code, s.name, s.timezone
+      `SELECT s.store_code, s.name, s.timezone, s.store_type
        FROM stores s
 
        WHERE s.store_code = $1 AND s.active = TRUE
@@ -87,7 +92,12 @@ export async function requireStoreAccess(
     );
     const row = result.rows[0];
     return row
-      ? { storeCode: row.store_code, name: row.name, timezone: row.timezone }
+      ? {
+          storeCode: row.store_code,
+          name: row.name,
+          timezone: row.timezone,
+          storeType: row.store_type,
+        }
       : null;
   });
 }

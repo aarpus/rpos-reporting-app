@@ -1,0 +1,142 @@
+[
+  {
+    "request_id": "retail-10-shift-1",
+    "shift": {
+      "shiftid": "2001",
+      "batchid": "1001",
+      "ShiftStart": "2026-10-27T08:10:00Z",
+      "shiftnumber": "1",
+      "employeeid": "4",
+      "isopen": 1,
+      "stationid": "3",
+      "stationname": "REG1",
+      "employeename": "Cashier 1"
+    }
+  },
+  {
+    "request_id": "retail-10-shift-2",
+    "shift": {
+      "shiftid": "2002",
+      "batchid": "1002",
+      "ShiftStart": "2026-10-27T09:10:00Z",
+      "shiftnumber": "2",
+      "employeeid": "4",
+      "isopen": 1,
+      "stationid": "3",
+      "stationname": "REG2",
+      "employeename": "Cashier 2"
+    }
+  },
+  {
+    "request_id": "retail-10-shift-3",
+    "shift": {
+      "shiftid": "2003",
+      "batchid": "1003",
+      "ShiftStart": "2026-10-27T10:10:00Z",
+      "shiftnumber": "3",
+      "employeeid": "4",
+      "isopen": 1,
+      "stationid": "3",
+      "stationname": "REG3",
+      "employeename": "Cashier 3"
+    }
+  },
+  {
+    "request_id": "retail-10-shift-4",
+    "shift": {
+      "shiftid": "2004",
+      "batchid": "1004",
+      "ShiftStart": "2026-10-27T11:10:00Z",
+      "shiftnumber": "4",
+      "employeeid": "4",
+      "isopen": 1,
+      "stationid": "3",
+      "stationname": "REG4",
+      "employeename": "Cashier 4"
+    }
+  },
+  {
+    "request_id": "retail-10-shift-5",
+    "shift": {
+      "shiftid": "2005",
+      "batchid": "1005",
+      "ShiftStart": "2026-10-27T12:10:00Z",
+      "shiftnumber": "5",
+      "employeeid": "4",
+      "isopen": 1,
+      "stationid": "3",
+      "stationname": "REG5",
+      "employeename": "Cashier 5"
+    }
+  },
+  {
+    "request_id": "retail-10-shift-6",
+    "shift": {
+      "shiftid": "2006",
+      "batchid": "1006",
+      "ShiftStart": "2026-10-27T13:10:00Z",
+      "shiftnumber": "6",
+      "employeeid": "4",
+      "isopen": 1,
+      "stationid": "3",
+      "stationname": "REG6",
+      "employeename": "Cashier 6"
+    }
+  },
+  {
+    "request_id": "retail-10-shift-7",
+    "shift": {
+      "shiftid": "2007",
+      "batchid": "1007",
+      "ShiftStart": "2026-10-27T14:10:00Z",
+      "shiftnumber": "7",
+      "employeeid": "4",
+      "isopen": 1,
+      "stationid": "3",
+      "stationname": "REG7",
+      "employeename": "Cashier 7"
+    }
+  },
+  {
+    "request_id": "retail-10-shift-8",
+    "shift": {
+      "shiftid": "2008",
+      "batchid": "1008",
+      "ShiftStart": "2026-10-27T15:10:00Z",
+      "shiftnumber": "8",
+      "employeeid": "4",
+      "isopen": 1,
+      "stationid": "3",
+      "stationname": "REG8",
+      "employeename": "Cashier 8"
+    }
+  },
+  {
+    "request_id": "retail-10-shift-9",
+    "shift": {
+      "shiftid": "2009",
+      "batchid": "1009",
+      "ShiftStart": "2026-10-27T16:10:00Z",
+      "shiftnumber": "9",
+      "employeeid": "4",
+      "isopen": 1,
+      "stationid": "3",
+      "stationname": "REG9",
+      "employeename": "Cashier 9"
+    }
+  },
+  {
+    "request_id": "retail-10-shift-10",
+    "shift": {
+      "shiftid": "2010",
+      "batchid": "1010",
+      "ShiftStart": "2026-10-27T17:10:00Z",
+      "shiftnumber": "10",
+      "employeeid": "4",
+      "isopen": 1,
+      "stationid": "3",
+      "stationname": "REG10",
+      "employeename": "Cashier 10"
+    }
+  }
+]

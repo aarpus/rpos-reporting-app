@@ -1,7 +1,12 @@
+import { isStoreType, type StoreType } from "./store-type.ts";
+
+export type { StoreType };
+
 export type StoreInput = {
   storeCode: string;
   name: string;
   timezone: string;
+  storeType: StoreType;
 };
 
 export type StoreUpdateInput = {
@@ -28,7 +33,11 @@ export function parseStoreInput(value: unknown):
   const storeCode = typeof body.storeCode === "string" ? body.storeCode.trim().toUpperCase() : "";
   const name = typeof body.name === "string" ? body.name.trim() : "";
   const timezone = typeof body.timezone === "string" ? body.timezone.trim() : "";
+  const storeType = body.storeType;
 
+  if (!isStoreType(storeType)) {
+    return { error: "Select Restaurant POS or Retail POS." };
+  }
   if (!storeCode || storeCode.length > 64) {
     return { error: "Store code is required and must be 64 characters or fewer." };
   }
@@ -36,7 +45,7 @@ export function parseStoreInput(value: unknown):
     return { error: "Store name is required and must be 160 characters or fewer." };
   }
   if (!isValidTimeZone(timezone)) return { error: "Select a valid IANA timezone." };
-  return { data: { storeCode, name, timezone } };
+  return { data: { storeCode, name, timezone, storeType } };
 }
 
 export function parseStoreUpdate(value: unknown):
@@ -44,6 +53,7 @@ export function parseStoreUpdate(value: unknown):
   | { data?: never; error: string } {
   if (!value || typeof value !== "object") return { error: "Invalid request body." };
   const body = value as Record<string, unknown>;
+  if ("storeType" in body) return { error: "Store type cannot be changed." };
   const data: StoreUpdateInput = {};
 
   if ("name" in body) {

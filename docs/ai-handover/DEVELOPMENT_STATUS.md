@@ -11,6 +11,7 @@ Status means evidence in the current source/tests, not a production acceptance c
 | Store/user management and assignment replacement | Admin pages, validators/services/APIs; validator tests, store provisioning tests |
 | Per-store reporting provisioning | SQL functions, CLI, atomic store creation; PGlite migration/cutover tests |
 | Order snapshot ingestion | Validation/sync/auth code; receipt, ownership, rollback, reconciliation tests |
+| Retail batch, shift, checkout, and the other retail table ingestion | Retail routes and PGlite sync test; no live POS call and no retail report read |
 | Live order and transaction reports/receipts | SQL read services and UI; aggregation/search/timezone tests |
 | Notification preferences/inbox/read APIs | Handlers and UI; no complete HTTP/push integration suite |
 | Signed POS notification events and Web Push | Ingestion/service worker/delivery code; HMAC test vectors only |
@@ -19,7 +20,7 @@ Status means evidence in the current source/tests, not a production acceptance c
 
 ## Partially implemented
 
-Home dashboard and old home services use fixture values. Shift/day/week/year reports render fixtures; month report renders zero/empty shells. Employee clock report filters fixture sessions and calculates display totals, without a live read/write backend. Event links to shift/day reports consequently do not guarantee matching real records. Notification API supports cursor pages but the UI does not consume later pages.
+Home dashboard and old home services use fixture values. The retail home page renders a fixture layout (KPI tiles, sales detail, sales trend, invoices, and payment reminders) with the application theme; those figures are sample preview values, not live retail totals. Shift/day/week/year reports render fixtures; month report renders zero/empty shells. Employee clock report filters fixture sessions and calculates display totals, without a live read/write backend. Event links to shift/day reports consequently do not guarantee matching real records. Notification API supports cursor pages but the UI does not consume later pages.
 
 ## Pending / absent from repository
 

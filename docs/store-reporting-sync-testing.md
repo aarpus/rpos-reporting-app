@@ -3,7 +3,7 @@
 ## Why the uploaded JSON failed
 
 `postman_reporting_10_orders_store_code_first.json` is an **array of ten snapshots**.
-`POST /api/pos/reporting/orders` accepts **one snapshot object per request**.
+`POST /api/pos/reporting/restaurant/orders` accepts **one snapshot object per request**.
 The individual orders are valid after resolving `{{storeCode}}`, but sending the
 outer array produces a 400 envelope error. An order snapshot writes its order,
 items, payments and card transactions together in one transaction.
@@ -113,7 +113,7 @@ those records. Reruns reuse the same request IDs and revisions.
 ## 5. Push endpoint and signing
 
 ```http
-POST {{baseUrl}}/api/pos/reporting/orders
+POST {{baseUrl}}/api/pos/reporting/restaurant/orders
 Content-Type: application/json
 X-Store-Code: ACUTERPOS
 X-POS-Key-Id: <issued keyId>

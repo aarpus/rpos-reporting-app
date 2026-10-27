@@ -1,0 +1,122 @@
+[
+  {
+    "request_id": "retail-10-store-1",
+    "store": {
+      "storeid": "1701",
+      "storename": "Retail Store 1",
+      "storecity": "Houston",
+      "storestate": "TX",
+      "CompnayID": "1",
+      "storesurcharge": "0.00",
+      "email": "store1@example.com"
+    }
+  },
+  {
+    "request_id": "retail-10-store-2",
+    "store": {
+      "storeid": "1702",
+      "storename": "Retail Store 2",
+      "storecity": "Houston",
+      "storestate": "TX",
+      "CompnayID": "1",
+      "storesurcharge": "0.00",
+      "email": "store2@example.com"
+    }
+  },
+  {
+    "request_id": "retail-10-store-3",
+    "store": {
+      "storeid": "1703",
+      "storename": "Retail Store 3",
+      "storecity": "Houston",
+      "storestate": "TX",
+      "CompnayID": "1",
+      "storesurcharge": "0.00",
+      "email": "store3@example.com"
+    }
+  },
+  {
+    "request_id": "retail-10-store-4",
+    "store": {
+      "storeid": "1704",
+      "storename": "Retail Store 4",
+      "storecity": "Houston",
+      "storestate": "TX",
+      "CompnayID": "1",
+      "storesurcharge": "0.00",
+      "email": "store4@example.com"
+    }
+  },
+  {
+    "request_id": "retail-10-store-5",
+    "store": {
+      "storeid": "1705",
+      "storename": "Retail Store 5",
+      "storecity": "Houston",
+      "storestate": "TX",
+      "CompnayID": "1",
+      "storesurcharge": "0.00",
+      "email": "store5@example.com"
+    }
+  },
+  {
+    "request_id": "retail-10-store-6",
+    "store": {
+      "storeid": "1706",
+      "storename": "Retail Store 6",
+      "storecity": "Houston",
+      "storestate": "TX",
+      "CompnayID": "1",
+      "storesurcharge": "0.00",
+      "email": "store6@example.com"
+    }
+  },
+  {
+    "request_id": "retail-10-store-7",
+    "store": {
+      "storeid": "1707",
+      "storename": "Retail Store 7",
+      "storecity": "Houston",
+      "storestate": "TX",
+      "CompnayID": "1",
+      "storesurcharge": "0.00",
+      "email": "store7@example.com"
+    }
+  },
+  {
+    "request_id": "retail-10-store-8",
+    "store": {
+      "storeid": "1708",
+      "storename": "Retail Store 8",
+      "storecity": "Houston",
+      "storestate": "TX",
+      "CompnayID": "1",
+      "storesurcharge": "0.00",
+      "email": "store8@example.com"
+    }
+  },
+  {
+    "request_id": "retail-10-store-9",
+    "store": {
+      "storeid": "1709",
+      "storename": "Retail Store 9",
+      "storecity": "Houston",
+      "storestate": "TX",
+      "CompnayID": "1",
+      "storesurcharge": "0.00",
+      "email": "store9@example.com"
+    }
+  },
+  {
+    "request_id": "retail-10-store-10",
+    "store": {
+      "storeid": "1710",
+      "storename": "Retail Store 10",
+      "storecity": "Houston",
+      "storestate": "TX",
+      "CompnayID": "1",
+      "storesurcharge": "0.00",
+      "email": "store10@example.com"
+    }
+  }
+]

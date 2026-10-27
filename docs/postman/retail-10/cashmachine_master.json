@@ -1,0 +1,152 @@
+[
+  {
+    "request_id": "retail-10-cashmachine-1",
+    "cashmachine_master": {
+      "cashmachine_id": 1,
+      "name": "Recycler 1",
+      "url": "https://cashmachine.example/1",
+      "client_id": "sample-client-1",
+      "client_secret": "sample-secret-1",
+      "username": "machine1",
+      "password": "sample-password-1",
+      "is_active": true,
+      "updated_by": 4,
+      "update_on": "2026-10-27T08:10:00Z"
+    }
+  },
+  {
+    "request_id": "retail-10-cashmachine-2",
+    "cashmachine_master": {
+      "cashmachine_id": 2,
+      "name": "Recycler 2",
+      "url": "https://cashmachine.example/2",
+      "client_id": "sample-client-2",
+      "client_secret": "sample-secret-2",
+      "username": "machine2",
+      "password": "sample-password-2",
+      "is_active": true,
+      "updated_by": 4,
+      "update_on": "2026-10-27T09:10:00Z"
+    }
+  },
+  {
+    "request_id": "retail-10-cashmachine-3",
+    "cashmachine_master": {
+      "cashmachine_id": 3,
+      "name": "Recycler 3",
+      "url": "https://cashmachine.example/3",
+      "client_id": "sample-client-3",
+      "client_secret": "sample-secret-3",
+      "username": "machine3",
+      "password": "sample-password-3",
+      "is_active": true,
+      "updated_by": 4,
+      "update_on": "2026-10-27T10:10:00Z"
+    }
+  },
+  {
+    "request_id": "retail-10-cashmachine-4",
+    "cashmachine_master": {
+      "cashmachine_id": 4,
+      "name": "Recycler 4",
+      "url": "https://cashmachine.example/4",
+      "client_id": "sample-client-4",
+      "client_secret": "sample-secret-4",
+      "username": "machine4",
+      "password": "sample-password-4",
+      "is_active": true,
+      "updated_by": 4,
+      "update_on": "2026-10-27T11:10:00Z"
+    }
+  },
+  {
+    "request_id": "retail-10-cashmachine-5",
+    "cashmachine_master": {
+      "cashmachine_id": 5,
+      "name": "Recycler 5",
+      "url": "https://cashmachine.example/5",
+      "client_id": "sample-client-5",
+      "client_secret": "sample-secret-5",
+      "username": "machine5",
+      "password": "sample-password-5",
+      "is_active": true,
+      "updated_by": 4,
+      "update_on": "2026-10-27T12:10:00Z"
+    }
+  },
+  {
+    "request_id": "retail-10-cashmachine-6",
+    "cashmachine_master": {
+      "cashmachine_id": 6,
+      "name": "Recycler 6",
+      "url": "https://cashmachine.example/6",
+      "client_id": "sample-client-6",
+      "client_secret": "sample-secret-6",
+      "username": "machine6",
+      "password": "sample-password-6",
+      "is_active": true,
+      "updated_by": 4,
+      "update_on": "2026-10-27T13:10:00Z"
+    }
+  },
+  {
+    "request_id": "retail-10-cashmachine-7",
+    "cashmachine_master": {
+      "cashmachine_id": 7,
+      "name": "Recycler 7",
+      "url": "https://cashmachine.example/7",
+      "client_id": "sample-client-7",
+      "client_secret": "sample-secret-7",
+      "username": "machine7",
+      "password": "sample-password-7",
+      "is_active": true,
+      "updated_by": 4,
+      "update_on": "2026-10-27T14:10:00Z"
+    }
+  },
+  {
+    "request_id": "retail-10-cashmachine-8",
+    "cashmachine_master": {
+      "cashmachine_id": 8,
+      "name": "Recycler 8",
+      "url": "https://cashmachine.example/8",
+      "client_id": "sample-client-8",
+      "client_secret": "sample-secret-8",
+      "username": "machine8",
+      "password": "sample-password-8",
+      "is_active": true,
+      "updated_by": 4,
+      "update_on": "2026-10-27T15:10:00Z"
+    }
+  },
+  {
+    "request_id": "retail-10-cashmachine-9",
+    "cashmachine_master": {
+      "cashmachine_id": 9,
+      "name": "Recycler 9",
+      "url": "https://cashmachine.example/9",
+      "client_id": "sample-client-9",
+      "client_secret": "sample-secret-9",
+      "username": "machine9",
+      "password": "sample-password-9",
+      "is_active": true,
+      "updated_by": 4,
+      "update_on": "2026-10-27T16:10:00Z"
+    }
+  },
+  {
+    "request_id": "retail-10-cashmachine-10",
+    "cashmachine_master": {
+      "cashmachine_id": 10,
+      "name": "Recycler 10",
+      "url": "https://cashmachine.example/10",
+      "client_id": "sample-client-10",
+      "client_secret": "sample-secret-10",
+      "username": "machine10",
+      "password": "sample-password-10",
+      "is_active": true,
+      "updated_by": 4,
+      "update_on": "2026-10-27T17:10:00Z"
+    }
+  }
+]

@@ -1,0 +1,15 @@
+[
+  {
+    "request_id": "example-retail-shift-1",
+    "shift": {
+      "shiftid": "201",
+      "batchid": "101",
+      "ShiftStart": "2026-10-27T04:05:00Z",
+      "shiftnumber": "1",
+      "employeeid": "4",
+      "stationid": "3",
+      "stationname": "REG1",
+      "employeename": "Ada"
+    }
+  }
+]

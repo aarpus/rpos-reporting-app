@@ -99,7 +99,7 @@
           }
         },
         "url": {
-          "raw": "{{baseUrl}}/api/pos/reporting/orders",
+          "raw": "{{baseUrl}}/api/pos/reporting/restaurant/orders",
           "host": [
             "{{baseUrl}}"
           ],
@@ -107,6 +107,7 @@
             "api",
             "pos",
             "reporting",
+            "restaurant",
             "orders"
           ]
         },
@@ -134,7 +135,7 @@
           }
         },
         "url": {
-          "raw": "{{baseUrl}}/api/pos/reporting/orders",
+          "raw": "{{baseUrl}}/api/pos/reporting/restaurant/orders",
           "host": [
             "{{baseUrl}}"
           ],
@@ -142,6 +143,7 @@
             "api",
             "pos",
             "reporting",
+            "restaurant",
             "orders"
           ]
         },
@@ -169,7 +171,7 @@
           }
         },
         "url": {
-          "raw": "{{baseUrl}}/api/pos/reporting/orders",
+          "raw": "{{baseUrl}}/api/pos/reporting/restaurant/orders",
           "host": [
             "{{baseUrl}}"
           ],
@@ -177,6 +179,7 @@
             "api",
             "pos",
             "reporting",
+            "restaurant",
             "orders"
           ]
         },
@@ -204,7 +207,7 @@
           }
         },
         "url": {
-          "raw": "{{baseUrl}}/api/pos/reporting/orders",
+          "raw": "{{baseUrl}}/api/pos/reporting/restaurant/orders",
           "host": [
             "{{baseUrl}}"
           ],
@@ -212,6 +215,7 @@
             "api",
             "pos",
             "reporting",
+            "restaurant",
             "orders"
           ]
         },
@@ -239,7 +243,7 @@
           }
         },
         "url": {
-          "raw": "{{baseUrl}}/api/pos/reporting/orders",
+          "raw": "{{baseUrl}}/api/pos/reporting/restaurant/orders",
           "host": [
             "{{baseUrl}}"
           ],
@@ -247,6 +251,7 @@
             "api",
             "pos",
             "reporting",
+            "restaurant",
             "orders"
           ]
         },
@@ -274,7 +279,7 @@
           }
         },
         "url": {
-          "raw": "{{baseUrl}}/api/pos/reporting/orders",
+          "raw": "{{baseUrl}}/api/pos/reporting/restaurant/orders",
           "host": [
             "{{baseUrl}}"
           ],
@@ -282,6 +287,7 @@
             "api",
             "pos",
             "reporting",
+            "restaurant",
             "orders"
           ]
         },
@@ -309,7 +315,7 @@
           }
         },
         "url": {
-          "raw": "{{baseUrl}}/api/pos/reporting/orders",
+          "raw": "{{baseUrl}}/api/pos/reporting/restaurant/orders",
           "host": [
             "{{baseUrl}}"
           ],
@@ -317,6 +323,7 @@
             "api",
             "pos",
             "reporting",
+            "restaurant",
             "orders"
           ]
         },
@@ -344,7 +351,7 @@
           }
         },
         "url": {
-          "raw": "{{baseUrl}}/api/pos/reporting/orders",
+          "raw": "{{baseUrl}}/api/pos/reporting/restaurant/orders",
           "host": [
             "{{baseUrl}}"
           ],
@@ -352,6 +359,7 @@
             "api",
             "pos",
             "reporting",
+            "restaurant",
             "orders"
           ]
         },
@@ -379,7 +387,7 @@
           }
         },
         "url": {
-          "raw": "{{baseUrl}}/api/pos/reporting/orders",
+          "raw": "{{baseUrl}}/api/pos/reporting/restaurant/orders",
           "host": [
             "{{baseUrl}}"
           ],
@@ -387,6 +395,7 @@
             "api",
             "pos",
             "reporting",
+            "restaurant",
             "orders"
           ]
         },
@@ -414,7 +423,7 @@
           }
         },
         "url": {
-          "raw": "{{baseUrl}}/api/pos/reporting/orders",
+          "raw": "{{baseUrl}}/api/pos/reporting/restaurant/orders",
           "host": [
             "{{baseUrl}}"
           ],
@@ -422,6 +431,7 @@
             "api",
             "pos",
             "reporting",
+            "restaurant",
             "orders"
           ]
         },

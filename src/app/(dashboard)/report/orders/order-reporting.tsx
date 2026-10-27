@@ -50,6 +50,12 @@ export default function OrderReporting() {
         Select a store to view reporting.
       </p>
     );
+  if (selectedStore.storeType !== "RESTAURANT")
+    return (
+      <p className="p-6 text-text-secondary">
+        Select a restaurant store to open order reporting.
+      </p>
+    );
   // Reset filters and detail when the scope changes; never retain another store's detail.
   return (
     <StoreOrders

@@ -8,7 +8,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import type { Key } from "react-aria-components";
-import { NAV_DATA } from "./data";
+import { useStore } from "@/components/store/store-provider";
+import { navigationFor } from "./data";
 import { CloseIcon, SidebarExpandedIcon, ThreeDots } from "./icon";
 import NavItem from "./nav-item";
 import { findActiveGroupKey } from "./utils";
@@ -27,6 +28,8 @@ export default function Sidebar({
   onItemClick?: () => void;
 }) {
   const pathname = usePathname();
+  const { selectedStore } = useStore();
+  const navigation = navigationFor(selectedStore?.storeType ?? null);
   const { resolvedTheme } = useTheme();
   const mounted = useSyncExternalStore(
     emptySubscribe,
@@ -38,8 +41,8 @@ export default function Sidebar({
 
   // Compute which group should be open based on the current route
   const activeGroupKey = useMemo(
-    () => findActiveGroupKey(pathname),
-    [pathname],
+    () => findActiveGroupKey(pathname, selectedStore?.storeType ?? null),
+    [pathname, selectedStore?.storeType],
   );
 
   const [expandedKeys, setExpandedKeys] = useState<Set<Key>>(
@@ -112,7 +115,7 @@ export default function Sidebar({
           expandedKeys={expandedKeys}
           onExpandedChange={setExpandedKeys}
         >
-          {NAV_DATA.map((section) => (
+          {navigation.map((section) => (
             <div key={section.label}>
               {/* Expanded: show section label | Collapsed: show divider between sections */}
               {isSidebarOpen ? (

@@ -8,7 +8,7 @@ Source: every `src/app/api/**/route.ts` in the working tree. Requests/responses 
 
 | Shape | Fields |
 | --- | --- |
-| StoreSummary | `storeCode`, `name`, `timezone` |
+| StoreSummary | `storeCode`, `name`, `timezone`, `storeType` (`RESTAURANT` or `RETAIL`) |
 | AdminStore | StoreSummary + `active`, `assignedUserCount`, `createdAt`, `updatedAt` (ISO timestamps) |
 | AdminUser | `id` string, `name`, `email`, `active`, `assignedStoreCount`, `createdAt` |
 | StoreAccessUser | `id` string, `name`, `email`, `active`, `assigned` |
@@ -32,8 +32,8 @@ These shapes are implemented in `src/types/{store-admin,user-admin}.ts` and `src
 | Method/path | Input | Success | Validation/errors | Source |
 | --- | --- | --- | --- | --- |
 | GET `/api/admin/stores` | none | 200 `{stores: AdminStore[]}` including inactive stores | Admin 401/403 | `src/app/api/admin/stores/route.ts` |
-| POST `/api/admin/stores` | `{storeCode,name,timezone}` | 201 `{store: AdminStore}` | 400 parser/provisioning FK/check; 409 uniqueness; 503 missing function/EXECUTE | same |
-| PATCH `/api/admin/stores/[storeCode]` | nonempty subset `{name?,timezone?,active?}` | 200 `{store}` | 400 validation; 404 missing store | `src/app/api/admin/stores/[storeCode]/route.ts` |
+| POST `/api/admin/stores` | `{storeCode,name,timezone,storeType}` where `storeType` is `RESTAURANT` or `RETAIL` | 201 `{store: AdminStore}` | 400 parser/provisioning FK/check; 409 uniqueness; 503 missing function/EXECUTE or retail table SQL | same |
+| PATCH `/api/admin/stores/[storeCode]` | nonempty subset `{name?,timezone?,active?}` | 200 `{store}` | 400 validation, including any attempt to send `storeType`; 404 missing store | `src/app/api/admin/stores/[storeCode]/route.ts` |
 | GET `/api/admin/stores/[storeCode]/access` | path code | 200 `{users: StoreAccessUser[]}` (USER accounts only) | 404 missing store | `src/app/api/admin/stores/[storeCode]/access/route.ts` |
 | GET `/api/admin/stores/[storeCode]/pos-credentials` | path code | 200 `{credentials:[{keyId,active,createdAt}]}`; no secrets | 404 missing/invalid store | `src/app/api/admin/stores/[storeCode]/pos-credentials/route.ts` |
 | POST same POS credential path | empty body | 201 `{storeCode,keyId,secret}`; secret returned once | 404 missing/invalid store; 409 inactive store; 503 missing or invalid `POS_CREDENTIAL_ENCRYPTION_KEY` | same |
@@ -85,9 +85,9 @@ Envelope: `{eventId,type,occurredAt,data,storeCode?}`. Event ID is trimmed nonem
 
 Unknown extra envelope/data fields are not strictly rejected by this parser. Success 202 `{status:"accepted",eventId,recipients,push:{delivered,failed}}`; duplicate 200 `{status:"duplicate",eventId}`. Generated title/body/targetPath come from server parser. Duplicates do not fan out/push again. Unhandled DB/decryption/push-configuration exceptions are not mapped to a uniform retry envelope. Longer generated text versus database column limits is a boundary to review.
 
-### POST `/api/pos/reporting/orders`
+### POST `/api/pos/reporting/restaurant/orders`
 
-Source `src/app/api/pos/reporting/orders/route.ts`; contract `src/lib/reporting/{pos-auth,snapshot,columns.json,sync}.ts`. Streaming body limit 1,000,000 bytes, strict UTF-8. Registered version must be 1. Errors: 400 malformed body/field/date/value; 401 invalid signature/credential/unprovisioned scope; 403 unavailable scope recheck; 413 size; 409 request/revision/content/ownership/SQL FK or uniqueness conflict; 503 unsupported schema/temporary sync failure.
+Source `src/app/api/pos/reporting/restaurant/orders/route.ts`; contract `src/lib/reporting/{pos-auth,snapshot,columns.json,sync}.ts`. Streaming body limit 1,000,000 bytes, strict UTF-8. Registered version must be 1. Errors: 400 malformed body/field/date/value; 401 invalid signature/credential/unprovisioned scope; 403 unavailable scope recheck; 413 size; 409 request/revision/content/ownership/SQL FK or uniqueness conflict; 503 unsupported schema/temporary sync failure.
 
 Required envelope:
 
@@ -109,9 +109,9 @@ Required envelope:
 
 This is a minimal illustrative contract, not an executable signed request or a real provisioned store. Empty children are valid and intentionally reconcile to none. Each array <=2,000. Orders may include optional `employee_name` (max 100). Payments may include optional `station_name` (max 100). Order `batch_code` and `shift_code` are text references only; create the batch and shift through their own endpoints. See [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) for every allowed payload column, kind/default/nullability and physical SQL columns. Required fields cannot be null; server IDs/timestamps/revision/hash fields cannot be submitted in row objects. Request ID <=160, revision positive bigint. Child ownership/date/card-payment relationships are mandatory. A 10-order sample is `docs/postman/store-reporting-batch-shift-10-orders.postman_data.json`.
 
-### POST `/api/pos/reporting/batch`
+### POST `/api/pos/reporting/restaurant/batch`
 
-Same POS signature, size limit, and status codes as the order endpoint. Source `src/app/api/pos/reporting/batch/route.ts`. One batch object per request. Upsert key is `batch_code`. Receipts are stored in `sync_master_requests`, separate from order receipts.
+Same POS signature, size limit, and status codes as the order endpoint. Source `src/app/api/pos/reporting/restaurant/batch/route.ts`. One batch object per request. Upsert key is `batch_code`. Receipts are stored in `sync_master_requests`, separate from order receipts.
 
 ```json
 {
@@ -124,9 +124,9 @@ Same POS signature, size limit, and status codes as the order endpoint. Source `
 }
 ```
 
-### POST `/api/pos/reporting/shift`
+### POST `/api/pos/reporting/restaurant/shift`
 
-Same authentication and status codes. Source `src/app/api/pos/reporting/shift/route.ts`. One shift object per request. `batch_code` is required and must already exist on `tbl_rpt_batch` for the signed store. Create the batch before the shift. A missing batch returns 409 `Create the batch before this shift.` Upsert key is `shift_code`.
+Same authentication and status codes. Source `src/app/api/pos/reporting/restaurant/shift/route.ts`. One shift object per request. `batch_code` is required and must already exist on `tbl_rpt_batch` for the signed store. Create the batch before the shift. A missing batch returns 409 `Create the batch before this shift.` Upsert key is `shift_code`.
 
 ```json
 {
@@ -142,7 +142,93 @@ Same authentication and status codes. Source `src/app/api/pos/reporting/shift/ro
 
 Sample bodies: `docs/postman/store-reporting-batch.postman_data.json` and `docs/postman/store-reporting-shift.postman_data.json`. Post the batch sample before the shift sample.
 
-Success: 201 for accepted; 200 duplicate/stale; `{status:"accepted"|"duplicate"|"stale",request_id,source_revision}`. Header Cache-Control=no-store. Retry identical snapshots after temporary failures; changed content needs a new request ID and appropriately higher source revision. See [BUSINESS_LOGIC.md](BUSINESS_LOGIC.md) for the full comparison rules and existing Postman examples in `docs/postman/`.
+These three routes accept a store only when `public.stores.store_type` is `RESTAURANT`. A retail store receives 403 `Restaurant reporting is not available for this store.` The caller does not send a store type. The signed `X-Store-Code` selects the registered store, and the server reads its type.
+
+### POST `/api/pos/reporting/retail/batch`, `/shift`, and `/orders`
+
+Sources `src/app/api/pos/reporting/retail/{batch,shift,orders}/route.ts` and `src/lib/reporting/{pos-auth.ts,retail-columns.ts,retail-snapshot.ts,retail-sync.ts}`. Same HMAC headers, 1 MB UTF-8 limit, and active credential checks as the restaurant routes. The store must be `RETAIL`; a restaurant store receives 403 `Retail reporting is not available for this store.` Registered reporting version must be 1.
+
+Retail rows use the POS column names in `database/reporting/retail/001-tables.sql`. They do not use `store_code`, `batch_code`, `order_code`, or `source_revision`. Sending those fields, or a restaurant envelope, returns 400. `request_id` is required for the response and is not stored. There is no revision or stale result: the same POS id with the same content returns 200 `{status:"duplicate",request_id,...}`; changed content overwrites that id and returns 201 `{status:"accepted",request_id,...}`. Header Cache-Control=no-store.
+
+Create the batch before the shift, and the shift before the checkout. A missing parent returns 409 `Create the batch before this shift.` or `Create the shift before this transaction.` Each request is one object, not an array. Checkout child arrays are required, may be empty, and are capped at 2,000. Empty `transaction_detail`, `transaction_payment`, or `transaction_gift_card` deletes those children for that `transactionid`. A line, payment, or gift-card id that already belongs to another checkout returns 409.
+
+Every physical column from the retail table is accepted. The POS id is required. Any other column that the table marks `NOT NULL` and that has no default is required. A nullable column that is omitted, or sent as null, is stored blank (`NULL`), including when the column has a SQL default. A `NOT NULL` column with a default is stored as that default when omitted, because the table cannot store blank. `bytea` columns (`logo`, `Coupon_img`) accept Base64. `time` columns accept `HH:MM:SS` with up to six fractional digits.
+
+Checkout money columns are stored as sent. Rows in `tbl_transaction_payment`, including card attempts, are not added into `transactioncreditcardamount` or the other checkout totals. Omitted child `transactionid`, `shiftid`, and `chkout_id` are copied from the checkout; a supplied value that differs is rejected.
+
+```json
+{
+  "request_id": "example-retail-batch-1",
+  "batch": { "batchid": "101", "BatchStart": "2026-10-27T04:00:00Z", "storeid": "7" }
+}
+```
+
+```json
+{
+  "request_id": "example-retail-shift-1",
+  "shift": {
+    "shiftid": "201",
+    "batchid": "101",
+    "ShiftStart": "2026-10-27T04:05:00Z",
+    "shiftnumber": "1",
+    "employeeid": "4",
+    "stationid": "3",
+    "stationname": "REG1",
+    "employeename": "Ada"
+  }
+}
+```
+
+```json
+{
+  "request_id": "example-retail-order-1",
+  "checkout_transaction": {
+    "transactionid": "301",
+    "transactiondate": "2026-10-27T04:10:00Z",
+    "transactionemployeeid": "4",
+    "shiftid": "201"
+  },
+  "transaction_detail": [],
+  "transaction_payment": [],
+  "transaction_gift_card": []
+}
+```
+
+POS ids are required positive integers, sent as strings except integer serial ids, which may be numbers. Payment `batchid` must equal the shift's batch. `tbl_checkout_transaction` and `tbl_transaction_detail` have no primary-key constraint in the retail SQL, so uniqueness is enforced by the API lock and a duplicate-id check, not by a new database constraint. Examples: `docs/postman/store-reporting-retail-batch.postman_data.json`, `store-reporting-retail-shift.postman_data.json`, and `store-reporting-retail-order.postman_data.json`. Ten insert bodies for every retail route are in `docs/postman/retail-10/`. Import `docs/postman/store-reporting-retail-10.postman_collection.json` and run the folders from top to bottom. Each file is an array; Postman must send one object per request.
+
+These additional retail routes use the same authentication, one-object envelope, column rules, and `201 accepted` / `200 duplicate` result. The envelope key matches the path. The response includes `request_id` and that table's POS id.
+
+| Path | Table | POS id |
+| --- | --- | --- |
+| `/api/pos/reporting/retail/station_transaction` | `tbl_station_transaction` | `stationtrasactionid` |
+| `/api/pos/reporting/retail/store_account_transaction` | `tbl_store_account_transaction` | `storeaccounttransactionid` |
+| `/api/pos/reporting/retail/station_cash_transfer` | `tbl_station_cash_transfer` | `stationcashtransferid` |
+| `/api/pos/reporting/retail/invoice` | `tbl_invoice` | `id_invoice` |
+| `/api/pos/reporting/retail/invoice_payment` | `tbl_invoice_payment` | `id_payment` |
+| `/api/pos/reporting/retail/clockin` | `tbl_clockin` | `clockinid` |
+| `/api/pos/reporting/retail/nosale` | `tbl_nosale` | `nosaleid` |
+| `/api/pos/reporting/retail/account_payment` | `tbl_account_payment` | `Acc_Pay_id` |
+| `/api/pos/reporting/retail/group_detail` | `tbl_group_detail` | `Group_Id` |
+| `/api/pos/reporting/retail/store` | `tbl_store` | `storeid` |
+| `/api/pos/reporting/retail/Coupon` | `tbl_Coupon` | `Coupon_Id` |
+| `/api/pos/reporting/retail/Online_Platform_Master` | `tbl_Online_Platform_Master` | `OLpm_id` |
+| `/api/pos/reporting/retail/cashmachine_transaction` | `tbl_cashmachine_transaction` | `id` |
+| `/api/pos/reporting/retail/cashmachine_master` | `tbl_cashmachine_master` | `cashmachine_id` |
+| `/api/pos/reporting/retail/cashmachine_batch` | `tbl_cashmachine_batch` | `cmachine_batchid` |
+
+```json
+{
+  "request_id": "example-retail-station-1",
+  "station_transaction": {
+    "stationtrasactionid": "701",
+    "employeeid": "4",
+    "shiftid": "201",
+    "stationid": "3"
+  }
+}
+```
+
+Restaurant success: 201 for accepted; 200 duplicate/stale; `{status:"accepted"|"duplicate"|"stale",request_id,source_revision}`. Header Cache-Control=no-store. Retry identical snapshots after temporary failures; changed content needs a new request ID and appropriately higher source revision. See [BUSINESS_LOGIC.md](BUSINESS_LOGIC.md) for the full comparison rules and existing Postman examples in `docs/postman/`.
 
 ## Live reporting reads
 
@@ -190,9 +276,27 @@ Generated from route source files, including the Auth.js handler re-export. HEAD
 | `/api/notifications/read-all` | POST | `src/app/api/notifications/read-all/route.ts` |
 | `/api/notifications` | GET | `src/app/api/notifications/route.ts` |
 | `/api/pos/notification-events` | POST | `src/app/api/pos/notification-events/route.ts` |
-| `/api/pos/reporting/batch` | POST | `src/app/api/pos/reporting/batch/route.ts` |
-| `/api/pos/reporting/orders` | POST | `src/app/api/pos/reporting/orders/route.ts` |
-| `/api/pos/reporting/shift` | POST | `src/app/api/pos/reporting/shift/route.ts` |
+| `/api/pos/reporting/restaurant/batch` | POST | `src/app/api/pos/reporting/restaurant/batch/route.ts` |
+| `/api/pos/reporting/restaurant/orders` | POST | `src/app/api/pos/reporting/restaurant/orders/route.ts` |
+| `/api/pos/reporting/restaurant/shift` | POST | `src/app/api/pos/reporting/restaurant/shift/route.ts` |
+| `/api/pos/reporting/retail/batch` | POST | `src/app/api/pos/reporting/retail/batch/route.ts` |
+| `/api/pos/reporting/retail/orders` | POST | `src/app/api/pos/reporting/retail/orders/route.ts` |
+| `/api/pos/reporting/retail/shift` | POST | `src/app/api/pos/reporting/retail/shift/route.ts` |
+| `/api/pos/reporting/retail/station_transaction` | POST | `src/app/api/pos/reporting/retail/station_transaction/route.ts` |
+| `/api/pos/reporting/retail/store_account_transaction` | POST | `src/app/api/pos/reporting/retail/store_account_transaction/route.ts` |
+| `/api/pos/reporting/retail/station_cash_transfer` | POST | `src/app/api/pos/reporting/retail/station_cash_transfer/route.ts` |
+| `/api/pos/reporting/retail/invoice` | POST | `src/app/api/pos/reporting/retail/invoice/route.ts` |
+| `/api/pos/reporting/retail/invoice_payment` | POST | `src/app/api/pos/reporting/retail/invoice_payment/route.ts` |
+| `/api/pos/reporting/retail/clockin` | POST | `src/app/api/pos/reporting/retail/clockin/route.ts` |
+| `/api/pos/reporting/retail/nosale` | POST | `src/app/api/pos/reporting/retail/nosale/route.ts` |
+| `/api/pos/reporting/retail/account_payment` | POST | `src/app/api/pos/reporting/retail/account_payment/route.ts` |
+| `/api/pos/reporting/retail/group_detail` | POST | `src/app/api/pos/reporting/retail/group_detail/route.ts` |
+| `/api/pos/reporting/retail/store` | POST | `src/app/api/pos/reporting/retail/store/route.ts` |
+| `/api/pos/reporting/retail/Coupon` | POST | `src/app/api/pos/reporting/retail/Coupon/route.ts` |
+| `/api/pos/reporting/retail/Online_Platform_Master` | POST | `src/app/api/pos/reporting/retail/Online_Platform_Master/route.ts` |
+| `/api/pos/reporting/retail/cashmachine_transaction` | POST | `src/app/api/pos/reporting/retail/cashmachine_transaction/route.ts` |
+| `/api/pos/reporting/retail/cashmachine_master` | POST | `src/app/api/pos/reporting/retail/cashmachine_master/route.ts` |
+| `/api/pos/reporting/retail/cashmachine_batch` | POST | `src/app/api/pos/reporting/retail/cashmachine_batch/route.ts` |
 | `/api/push-subscriptions` | POST, DELETE | `src/app/api/push-subscriptions/route.ts` |
 | `/api/reporting/orders` | GET | `src/app/api/reporting/orders/route.ts` |
 | `/api/reporting/transaction-detail` | GET | `src/app/api/reporting/transaction-detail/route.ts` |

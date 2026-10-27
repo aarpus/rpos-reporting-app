@@ -23,11 +23,11 @@ test("transaction aggregates, searches, pagination, scope, receipts and local da
     const result = await engine.query(sql, values);
     return { rows: result.rows, rowCount: result.rows.length };
   } };
-  await engine.exec(`CREATE TABLE public.stores (store_code varchar(64) PRIMARY KEY, timezone text, active boolean);
+  await engine.exec(`CREATE TABLE public.stores (store_code varchar(64) PRIMARY KEY, timezone text, active boolean, store_type text NOT NULL DEFAULT 'RESTAURANT');
     CREATE TABLE public.auth_users (id text PRIMARY KEY, role text, active boolean);
     CREATE TABLE public.store_access (user_id text, store_code text);
     CREATE TABLE public.store_reporting_schemas (store_code text, schema_name text, reporting_version int);
-    INSERT INTO public.stores VALUES ('DT01', 'Asia/Kolkata', true), ('WS01', 'America/New_York', true);
+    INSERT INTO public.stores (store_code, timezone, active) VALUES ('DT01', 'Asia/Kolkata', true), ('WS01', 'America/New_York', true);
     INSERT INTO public.auth_users VALUES ('user', 'USER', true), ('admin', 'ADMIN', true);
     INSERT INTO public.store_access VALUES ('user', 'DT01');
     INSERT INTO public.store_reporting_schemas VALUES ('DT01', 'store_dt01', 1), ('WS01', 'store_ws01', 1);`);

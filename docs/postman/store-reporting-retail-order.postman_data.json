@@ -1,0 +1,37 @@
+[
+{
+  "request_id": "example-retail-order-1",
+  "checkout_transaction": {
+    "transactionid": "301",
+    "transactiondate": "2026-10-27T04:10:00Z",
+    "transactionemployeeid": "4",
+    "shiftid": "201",
+    "transactiontotal": "12.50"
+  },
+  "transaction_detail": [
+    {
+      "transactiondetailid": "401",
+      "productupcode": "UPC1",
+      "transactiondetaildate": "2026-10-27T04:10:00Z",
+      "transactiondetailemployeeid": "4",
+      "transactiondetailitemname": "Milk",
+      "taxname": "Tax",
+      "departmentname": "Grocery",
+      "producttype": "ITEM",
+      "displayquantity": 1
+    }
+  ],
+  "transaction_payment": [
+    {
+      "id_payment": "501",
+      "trans_date_time": "2026-10-27T04:10:00Z",
+      "employee_id": "4",
+      "pc_charge_user_id": "user",
+      "store_id": "7",
+      "command": "SALE",
+      "batchid": "101"
+    }
+  ],
+  "transaction_gift_card": []
+}
+]

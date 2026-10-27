@@ -1,3 +1,4 @@
+import type { StoreType } from "@/lib/store-type";
 import {
   CalendarIcon,
   HomeIcon,
@@ -18,6 +19,28 @@ type NavigationSection = {
   label: string;
   items: NavigationItem[];
 };
+
+const RETAIL_NAV: NavigationSection[] = [
+  {
+    label: "MAIN MENU",
+    items: [
+      {
+        title: "Dashboard",
+        icon: <HomeIcon />,
+        url: "/",
+      },
+      {
+        title: "Reports",
+        icon: <TableIcon />,
+        url: "/report",
+      },
+    ],
+  },
+];
+
+export function navigationFor(storeType: StoreType | null): NavigationSection[] {
+  return storeType === "RETAIL" ? RETAIL_NAV : NAV_DATA;
+}
 
 export const NAV_DATA: NavigationSection[] = [
   {

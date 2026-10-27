@@ -1,0 +1,132 @@
+[
+  {
+    "request_id": "retail-10-invoice-payment-1",
+    "invoice_payment": {
+      "id_payment": "1201",
+      "id_invoice": "1101",
+      "payfromid": "1",
+      "employeeid": "4",
+      "date": "2026-10-27T08:10:00Z",
+      "shiftid": "2001",
+      "cash": "41.00",
+      "payment_type": "CASH"
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-payment-2",
+    "invoice_payment": {
+      "id_payment": "1202",
+      "id_invoice": "1102",
+      "payfromid": "1",
+      "employeeid": "4",
+      "date": "2026-10-27T09:10:00Z",
+      "shiftid": "2002",
+      "cash": "42.00",
+      "payment_type": "CASH"
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-payment-3",
+    "invoice_payment": {
+      "id_payment": "1203",
+      "id_invoice": "1103",
+      "payfromid": "1",
+      "employeeid": "4",
+      "date": "2026-10-27T10:10:00Z",
+      "shiftid": "2003",
+      "cash": "43.00",
+      "payment_type": "CASH"
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-payment-4",
+    "invoice_payment": {
+      "id_payment": "1204",
+      "id_invoice": "1104",
+      "payfromid": "1",
+      "employeeid": "4",
+      "date": "2026-10-27T11:10:00Z",
+      "shiftid": "2004",
+      "cash": "44.00",
+      "payment_type": "CASH"
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-payment-5",
+    "invoice_payment": {
+      "id_payment": "1205",
+      "id_invoice": "1105",
+      "payfromid": "1",
+      "employeeid": "4",
+      "date": "2026-10-27T12:10:00Z",
+      "shiftid": "2005",
+      "cash": "45.00",
+      "payment_type": "CASH"
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-payment-6",
+    "invoice_payment": {
+      "id_payment": "1206",
+      "id_invoice": "1106",
+      "payfromid": "1",
+      "employeeid": "4",
+      "date": "2026-10-27T13:10:00Z",
+      "shiftid": "2006",
+      "cash": "46.00",
+      "payment_type": "CASH"
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-payment-7",
+    "invoice_payment": {
+      "id_payment": "1207",
+      "id_invoice": "1107",
+      "payfromid": "1",
+      "employeeid": "4",
+      "date": "2026-10-27T14:10:00Z",
+      "shiftid": "2007",
+      "cash": "47.00",
+      "payment_type": "CASH"
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-payment-8",
+    "invoice_payment": {
+      "id_payment": "1208",
+      "id_invoice": "1108",
+      "payfromid": "1",
+      "employeeid": "4",
+      "date": "2026-10-27T15:10:00Z",
+      "shiftid": "2008",
+      "cash": "48.00",
+      "payment_type": "CASH"
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-payment-9",
+    "invoice_payment": {
+      "id_payment": "1209",
+      "id_invoice": "1109",
+      "payfromid": "1",
+      "employeeid": "4",
+      "date": "2026-10-27T16:10:00Z",
+      "shiftid": "2009",
+      "cash": "49.00",
+      "payment_type": "CASH"
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-payment-10",
+    "invoice_payment": {
+      "id_payment": "1210",
+      "id_invoice": "1110",
+      "payfromid": "1",
+      "employeeid": "4",
+      "date": "2026-10-27T17:10:00Z",
+      "shiftid": "2010",
+      "cash": "50.00",
+      "payment_type": "CASH"
+    }
+  }
+]

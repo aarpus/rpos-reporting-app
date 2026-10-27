@@ -24,6 +24,14 @@ import {
   StoreReportingSetupError,
 } from "../src/lib/reporting/store-creation.ts";
 
+const restaurantDdlUrl = new URL("../database/reporting/restaurant/001-tables.sql", import.meta.url);
+const storeTypeMigrationUrl = new URL("../prisma/migrations/20261026000000_store_type/migration.sql", import.meta.url);
+
+async function provisionRestaurant(db, storeCode) {
+  const ddl = await readFile(restaurantDdlUrl, "utf8");
+  return db.query("SELECT public.provision_store_reporting($1::text, $2::text) AS schema_name", [storeCode, ddl]);
+}
+
 function snapshot(
   store = "DT01",
   revision = "1",
@@ -138,6 +146,7 @@ test("missing SQL provisioning function is repairable without resetting a db-pus
     storeCode: "CREATE-TEST",
     name: "Store creation test",
     timezone: "Asia/Kolkata",
+    storeType: "RESTAURANT",
   };
   await assert.rejects(
     createStoreWithReporting(db, input),
@@ -160,14 +169,18 @@ test("missing SQL provisioning function is repairable without resetting a db-pus
     "utf8",
   );
   await engine.exec(reportingInstallationSql(migration));
-  await createStoreWithReporting(db, { ...input, storeCode: "LEGACY-TEST" });
-  const legacySchema = (await db.query("SELECT schema_name FROM public.store_reporting_schemas WHERE store_code = 'LEGACY-TEST'")).rows[0].schema_name;
+  await db.query(
+    "INSERT INTO public.stores (store_code, name, timezone, updated_at) VALUES ('LEGACY-TEST', $1, $2, NOW())",
+    [input.name, input.timezone],
+  );
+  const legacySchema = (await db.query("SELECT public.provision_store_reporting('LEGACY-TEST') AS schema_name")).rows[0].schema_name;
   assert.match(legacySchema, /^store_[a-f0-9]{32}$/);
   await engine.exec(await readFile(new URL("../prisma/migrations/20261013000000_store_code_schema_names/migration.sql", import.meta.url), "utf8"));
   await engine.exec(await readFile(new URL("../prisma/migrations/20261014000000_reporting_batch_shift/migration.sql", import.meta.url), "utf8"));
   assert.equal((await db.query("SELECT count(*)::int AS n FROM information_schema.columns WHERE table_schema = $1 AND table_name = 'tbl_rpt_order' AND column_name = 'employee_name'", [legacySchema])).rows[0].n, 1);
   assert.equal((await db.query("SELECT count(*)::int AS n FROM information_schema.tables WHERE table_schema = $1 AND table_name IN ('tbl_rpt_batch', 'tbl_rpt_shift')", [legacySchema])).rows[0].n, 2);
   assert.equal((await db.query("SELECT public.provision_store_reporting('LEGACY-TEST') AS schema_name")).rows[0].schema_name, legacySchema);
+  await engine.exec(await readFile(storeTypeMigrationUrl, "utf8"));
   const created = await createStoreWithReporting(db, input);
   assert.equal(created.store_code, input.storeCode);
   const mapping = (
@@ -230,6 +243,12 @@ test("missing SQL provisioning function is repairable without resetting a db-pus
     createStoreWithReporting(db, input),
     (error) => error.code === "23505",
   );
+  const retail = await createStoreWithReporting(db, { ...input, storeCode: "RETAIL1", storeType: "RETAIL" });
+  assert.equal(retail.store_type, "RETAIL");
+  const retailSchema = (await db.query("SELECT schema_name FROM public.store_reporting_schemas WHERE store_code = 'RETAIL1'")).rows[0].schema_name;
+  assert.equal(retailSchema, "store_retail1");
+  assert.equal((await db.query("SELECT count(*)::int AS n FROM information_schema.tables WHERE table_schema = $1", [retailSchema])).rows[0].n, 22);
+  assert.equal((await db.query("SELECT count(*)::int AS n FROM information_schema.tables WHERE table_schema = $1 AND table_name = 'tbl_rpt_order'", [retailSchema])).rows[0].n, 0);
 });
 
 test("snapshot validation enforces complete arrays, store ownership, relations, and precise values", () => {
@@ -360,16 +379,9 @@ test("customer-to-store cutover preserves each store's data, revisions, receipts
   );
   await engine.exec(await readFile(new URL("../prisma/migrations/20261013000000_store_code_schema_names/migration.sql", import.meta.url), "utf8"));
   await engine.exec(await readFile(new URL("../prisma/migrations/20261014000000_reporting_batch_shift/migration.sql", import.meta.url), "utf8"));
-  const dt = (
-    await db.query(
-      "SELECT public.provision_store_reporting('DT01') AS schema_name",
-    )
-  ).rows[0].schema_name;
-  const ap = (
-    await db.query(
-      "SELECT public.provision_store_reporting('AP01') AS schema_name",
-    )
-  ).rows[0].schema_name;
+  await engine.exec(await readFile(storeTypeMigrationUrl, "utf8"));
+  const dt = (await provisionRestaurant(db, "DT01")).rows[0].schema_name;
+  const ap = (await provisionRestaurant(db, "AP01")).rows[0].schema_name;
   assert.notEqual(dt, ap);
   assert.equal(
     (await db.query(`SELECT count(*)::int AS n FROM ${dt}.tbl_rpt_order`))
@@ -415,9 +427,7 @@ test("customer-to-store cutover preserves each store's data, revisions, receipts
   );
   assert.equal(
     (
-      await db.query(
-        "SELECT public.provision_store_reporting('DT01') AS schema_name",
-      )
+      await provisionRestaurant(db, "DT01")
     ).rows[0].schema_name,
     dt,
   );
@@ -531,8 +541,9 @@ test("PostgreSQL reporting migrations, atomic snapshots, isolation and aggregati
   );
   await engine.exec(await readFile(new URL("../prisma/migrations/20261013000000_store_code_schema_names/migration.sql", import.meta.url), "utf8"));
   await engine.exec(await readFile(new URL("../prisma/migrations/20261014000000_reporting_batch_shift/migration.sql", import.meta.url), "utf8"));
+  await engine.exec(await readFile(storeTypeMigrationUrl, "utf8"));
   for (const store of ["DT01", "AP01", "WS01"])
-    await db.query("SELECT public.provision_store_reporting($1)", [store]);
+    await provisionRestaurant(db, store);
   const scope = {
     schemaName: "store_dt01",
     storeCode: "DT01",

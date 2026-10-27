@@ -1,0 +1,142 @@
+[
+  {
+    "request_id": "retail-10-invoice-1",
+    "invoice": {
+      "id_invoice": "1101",
+      "InvoiceNumber": "INV-1101",
+      "Amount": "41.00",
+      "Date": "2026-10-27T08:10:00Z",
+      "Tax": "2.00",
+      "created_by": "4",
+      "shiftid": "2001",
+      "storeid": "7",
+      "ispaid": 0
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-2",
+    "invoice": {
+      "id_invoice": "1102",
+      "InvoiceNumber": "INV-1102",
+      "Amount": "42.00",
+      "Date": "2026-10-27T09:10:00Z",
+      "Tax": "2.00",
+      "created_by": "4",
+      "shiftid": "2002",
+      "storeid": "7",
+      "ispaid": 0
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-3",
+    "invoice": {
+      "id_invoice": "1103",
+      "InvoiceNumber": "INV-1103",
+      "Amount": "43.00",
+      "Date": "2026-10-27T10:10:00Z",
+      "Tax": "2.00",
+      "created_by": "4",
+      "shiftid": "2003",
+      "storeid": "7",
+      "ispaid": 0
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-4",
+    "invoice": {
+      "id_invoice": "1104",
+      "InvoiceNumber": "INV-1104",
+      "Amount": "44.00",
+      "Date": "2026-10-27T11:10:00Z",
+      "Tax": "2.00",
+      "created_by": "4",
+      "shiftid": "2004",
+      "storeid": "7",
+      "ispaid": 0
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-5",
+    "invoice": {
+      "id_invoice": "1105",
+      "InvoiceNumber": "INV-1105",
+      "Amount": "45.00",
+      "Date": "2026-10-27T12:10:00Z",
+      "Tax": "2.00",
+      "created_by": "4",
+      "shiftid": "2005",
+      "storeid": "7",
+      "ispaid": 0
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-6",
+    "invoice": {
+      "id_invoice": "1106",
+      "InvoiceNumber": "INV-1106",
+      "Amount": "46.00",
+      "Date": "2026-10-27T13:10:00Z",
+      "Tax": "2.00",
+      "created_by": "4",
+      "shiftid": "2006",
+      "storeid": "7",
+      "ispaid": 0
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-7",
+    "invoice": {
+      "id_invoice": "1107",
+      "InvoiceNumber": "INV-1107",
+      "Amount": "47.00",
+      "Date": "2026-10-27T14:10:00Z",
+      "Tax": "2.00",
+      "created_by": "4",
+      "shiftid": "2007",
+      "storeid": "7",
+      "ispaid": 0
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-8",
+    "invoice": {
+      "id_invoice": "1108",
+      "InvoiceNumber": "INV-1108",
+      "Amount": "48.00",
+      "Date": "2026-10-27T15:10:00Z",
+      "Tax": "2.00",
+      "created_by": "4",
+      "shiftid": "2008",
+      "storeid": "7",
+      "ispaid": 0
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-9",
+    "invoice": {
+      "id_invoice": "1109",
+      "InvoiceNumber": "INV-1109",
+      "Amount": "49.00",
+      "Date": "2026-10-27T16:10:00Z",
+      "Tax": "2.00",
+      "created_by": "4",
+      "shiftid": "2009",
+      "storeid": "7",
+      "ispaid": 0
+    }
+  },
+  {
+    "request_id": "retail-10-invoice-10",
+    "invoice": {
+      "id_invoice": "1110",
+      "InvoiceNumber": "INV-1110",
+      "Amount": "50.00",
+      "Date": "2026-10-27T17:10:00Z",
+      "Tax": "2.00",
+      "created_by": "4",
+      "shiftid": "2010",
+      "storeid": "7",
+      "ispaid": 0
+    }
+  }
+]

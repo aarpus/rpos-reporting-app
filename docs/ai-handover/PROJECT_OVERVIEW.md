@@ -19,7 +19,7 @@ Next.js 16.3.4 App Router, React/React DOM 19.2.8, strict TypeScript, Tailwind C
 | Sign-in | `src/auth.ts`, `src/app/auth/` | Credentials, scrypt, database throttle, eight-hour JWT session |
 | Store context | `src/lib/store-access.ts`, `src/components/store/` | ADMIN sees active stores; USER sees active assigned stores; cookie selection |
 | Administration | `src/app/(dashboard)/admin/`, `src/lib/*-admin.ts` | Create/update stores and USER accounts; replace assignments; no delete API |
-| POS reporting | `src/lib/reporting/`, `src/app/api/pos/reporting/orders/route.ts` | Atomic full snapshots, revisions, idempotency, per-store PostgreSQL schemas |
+| POS reporting | `src/lib/reporting/`, `src/app/api/pos/reporting/restaurant/orders/route.ts` | Atomic full snapshots, revisions, idempotency, per-store PostgreSQL schemas |
 | Live reporting | `/report/orders`, `/report/transaction-detail`, receipt `[id]` | Date filters, SQL totals, pagination, store-scoped detail |
 | Notifications | `src/app/api/notifications/`, `src/lib/pos-events.ts`, `src/lib/push.ts` | Signed events, opt-in fanout, read state, device subscriptions |
 | PWA | `src/app/manifest.ts`, `public/sw.js`, install prompt | Installation and push lifecycle; authenticated traffic stays on network |

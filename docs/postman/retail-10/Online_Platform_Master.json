@@ -1,0 +1,102 @@
+[
+  {
+    "request_id": "retail-10-platform-1",
+    "Online_Platform_Master": {
+      "OLpm_id": 1,
+      "Name": "Platform 1",
+      "is_Active": 1,
+      "is_online_order": 1,
+      "visible_on_weborder": 1
+    }
+  },
+  {
+    "request_id": "retail-10-platform-2",
+    "Online_Platform_Master": {
+      "OLpm_id": 2,
+      "Name": "Platform 2",
+      "is_Active": 1,
+      "is_online_order": 1,
+      "visible_on_weborder": 1
+    }
+  },
+  {
+    "request_id": "retail-10-platform-3",
+    "Online_Platform_Master": {
+      "OLpm_id": 3,
+      "Name": "Platform 3",
+      "is_Active": 1,
+      "is_online_order": 1,
+      "visible_on_weborder": 1
+    }
+  },
+  {
+    "request_id": "retail-10-platform-4",
+    "Online_Platform_Master": {
+      "OLpm_id": 4,
+      "Name": "Platform 4",
+      "is_Active": 1,
+      "is_online_order": 1,
+      "visible_on_weborder": 1
+    }
+  },
+  {
+    "request_id": "retail-10-platform-5",
+    "Online_Platform_Master": {
+      "OLpm_id": 5,
+      "Name": "Platform 5",
+      "is_Active": 1,
+      "is_online_order": 1,
+      "visible_on_weborder": 1
+    }
+  },
+  {
+    "request_id": "retail-10-platform-6",
+    "Online_Platform_Master": {
+      "OLpm_id": 6,
+      "Name": "Platform 6",
+      "is_Active": 1,
+      "is_online_order": 1,
+      "visible_on_weborder": 1
+    }
+  },
+  {
+    "request_id": "retail-10-platform-7",
+    "Online_Platform_Master": {
+      "OLpm_id": 7,
+      "Name": "Platform 7",
+      "is_Active": 1,
+      "is_online_order": 1,
+      "visible_on_weborder": 1
+    }
+  },
+  {
+    "request_id": "retail-10-platform-8",
+    "Online_Platform_Master": {
+      "OLpm_id": 8,
+      "Name": "Platform 8",
+      "is_Active": 1,
+      "is_online_order": 1,
+      "visible_on_weborder": 1
+    }
+  },
+  {
+    "request_id": "retail-10-platform-9",
+    "Online_Platform_Master": {
+      "OLpm_id": 9,
+      "Name": "Platform 9",
+      "is_Active": 1,
+      "is_online_order": 1,
+      "visible_on_weborder": 1
+    }
+  },
+  {
+    "request_id": "retail-10-platform-10",
+    "Online_Platform_Master": {
+      "OLpm_id": 10,
+      "Name": "Platform 10",
+      "is_Active": 1,
+      "is_online_order": 1,
+      "visible_on_weborder": 1
+    }
+  }
+]

@@ -5,6 +5,7 @@ import type {
   StoreInput,
   StoreUpdateInput,
 } from "@/lib/store-admin-validation";
+import type { StoreType } from "@/lib/store-type";
 import type { AdminStore, StoreAccessUser } from "@/types/store-admin";
 import { createStoreWithReporting } from "@/lib/reporting/store-creation";
 
@@ -12,6 +13,7 @@ type StoreRow = {
   store_code: string;
   name: string;
   timezone: string;
+  store_type: StoreType;
   active: boolean;
   assigned_user_count: number;
   created_at: Date;
@@ -23,6 +25,7 @@ function toAdminStore(row: StoreRow): AdminStore {
     storeCode: row.store_code,
     name: row.name,
     timezone: row.timezone,
+    storeType: row.store_type,
     active: row.active,
     assignedUserCount: Number(row.assigned_user_count),
     createdAt: row.created_at.toISOString(),
@@ -31,7 +34,7 @@ function toAdminStore(row: StoreRow): AdminStore {
 }
 
 const STORE_SELECT = `
-  SELECT s.store_code, s.name, s.timezone, s.active, s.created_at, s.updated_at,
+  SELECT s.store_code, s.name, s.timezone, s.store_type, s.active, s.created_at, s.updated_at,
          COUNT(u.id)::int AS assigned_user_count
   FROM stores s
   LEFT JOIN store_access a ON a.store_code = s.store_code
@@ -41,7 +44,7 @@ const STORE_SELECT = `
 export async function listAdminStores(): Promise<AdminStore[]> {
   return withDb(async (db) => {
     const result = await db.query<StoreRow>(`${STORE_SELECT}
-      GROUP BY s.store_code, s.name, s.timezone, s.active, s.created_at, s.updated_at
+      GROUP BY s.store_code, s.name, s.timezone, s.store_type, s.active, s.created_at, s.updated_at
       ORDER BY s.name, s.store_code`);
     return result.rows.map(toAdminStore);
   });
@@ -66,7 +69,7 @@ export async function updateStore(
           active = COALESCE($4, active),
           updated_at = NOW()
       WHERE store_code = $1
-      RETURNING store_code, name, timezone, active, created_at, updated_at,
+      RETURNING store_code, name, timezone, store_type, active, created_at, updated_at,
         (SELECT COUNT(*)::int FROM store_access a
          JOIN auth_users u ON u.id = a.user_id AND u.role = 'USER'
          WHERE a.store_code = stores.store_code) AS assigned_user_count`,

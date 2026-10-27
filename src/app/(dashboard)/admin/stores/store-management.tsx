@@ -40,6 +40,7 @@ import {
 } from "react-icons/lu";
 import { toast } from "sonner";
 import type { IconType } from "react-icons";
+import { storeTypeLabel, type StoreType } from "@/lib/store-type";
 
 const inputClass =
   "h-10 w-full rounded-lg border border-card-border bg-input-background px-3 text-sm text-text-primary outline-none focus:border-input-primary-focus-border focus:ring-4 focus:ring-input-primary-focus-border/20 disabled:cursor-not-allowed disabled:opacity-60";
@@ -88,6 +89,8 @@ export function StoreManagement({
         store.storeCode,
         store.name,
         store.timezone,
+        store.storeType,
+        storeTypeLabel(store.storeType),
         store.active ? "active" : "inactive",
       ].some((value) => value.toLowerCase().includes(term)),
     );
@@ -204,6 +207,7 @@ export function StoreManagement({
                 <thead className="bg-background-gray-secondary text-xs text-text-tertiary">
                   <tr>
                     <th className="px-5 py-3 font-medium">Store</th>
+                    <th className="px-5 py-3 font-medium">Type</th>
                     <th className="px-5 py-3 font-medium">Timezone</th>
                     <th className="px-5 py-3 font-medium">Status</th>
                     <th className="px-5 py-3 font-medium">Users</th>
@@ -222,6 +226,9 @@ export function StoreManagement({
                         <p className="mt-0.5 text-xs text-text-tertiary">
                           {store.storeCode}
                         </p>
+                      </td>
+                      <td className="px-5 py-4 text-sm text-text-secondary">
+                        {storeTypeLabel(store.storeType)}
                       </td>
                       <td className="px-5 py-4 text-sm text-text-secondary">
                         {store.timezone}
@@ -256,7 +263,8 @@ export function StoreManagement({
                         {store.name}
                       </h3>
                       <p className="mt-0.5 text-xs text-text-tertiary">
-                        {store.storeCode} · {store.timezone}
+                        {store.storeCode} · {storeTypeLabel(store.storeType)} ·{" "}
+                        {store.timezone}
                       </p>
                     </div>
                     <StoreStatus active={store.active} />
@@ -409,6 +417,9 @@ function StoreFormDialog({
   const [storeCode, setStoreCode] = useState(store?.storeCode ?? "");
   const [name, setName] = useState(store?.name ?? "");
   const [timezone, setTimezone] = useState(store?.timezone ?? "UTC");
+  const [storeType, setStoreType] = useState<StoreType>(
+    store?.storeType ?? "RESTAURANT",
+  );
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const timezones = useMemo(
@@ -429,7 +440,9 @@ function StoreFormDialog({
           method: store ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(
-            store ? { name, timezone } : { storeCode, name, timezone },
+            store
+              ? { name, timezone }
+              : { storeCode, name, timezone, storeType },
           ),
         },
       );
@@ -462,7 +475,7 @@ function StoreFormDialog({
           <DialogDescription>
             {store
               ? "Update the store name or operating timezone."
-              : "Create a new location for reporting and user access."}
+              : "Create a new location and choose Restaurant POS or Retail POS."}
           </DialogDescription>
         </DialogHeader>
         <DialogBody className="space-y-4">
@@ -499,6 +512,35 @@ function StoreFormDialog({
               placeholder="Downtown Store"
             />
           </label>
+          {!store && (
+            <Select
+              value={storeType}
+              isDisabled={pending}
+              onChange={(key) => {
+                if (key === "RESTAURANT" || key === "RETAIL") setStoreType(key);
+              }}
+              className="gap-1.5"
+            >
+              <SelectLabel>Store type</SelectLabel>
+              <SelectTrigger className="h-10">
+                <SelectValue />
+                <SelectIndicator />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem id="RESTAURANT" textValue="Restaurant POS">
+                  Restaurant POS
+                </SelectItem>
+                <SelectItem id="RETAIL" textValue="Retail POS">
+                  Retail POS
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          {store && (
+            <p className="text-sm text-text-secondary">
+              Store type: {storeTypeLabel(store.storeType)} for the life of this store.
+            </p>
+          )}
           <Select
             value={timezone}
             isDisabled={pending}

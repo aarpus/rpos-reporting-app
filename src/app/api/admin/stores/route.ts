@@ -1,7 +1,12 @@
 import { getAdminAuthorization } from "@/lib/admin-auth";
 import { createStore, listAdminStores } from "@/lib/store-admin";
 import { parseStoreInput } from "@/lib/store-admin-validation";
-import { StoreReportingSetupError } from "@/lib/reporting/store-creation";
+import {
+  RetailReportingTablesError,
+  StoreReportingSetupError,
+} from "@/lib/reporting/store-creation";
+
+export const runtime = "nodejs";
 
 export async function GET() {
   const authorization = await getAdminAuthorization();
@@ -22,7 +27,10 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
-    if (error instanceof StoreReportingSetupError) {
+    if (
+      error instanceof StoreReportingSetupError ||
+      error instanceof RetailReportingTablesError
+    ) {
       console.error(
         "Store reporting setup is incomplete. Run npm run reporting:install against the application's database and grant the backend role EXECUTE if roles differ.",
       );

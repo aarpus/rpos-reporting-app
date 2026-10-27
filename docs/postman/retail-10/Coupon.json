@@ -1,0 +1,112 @@
+[
+  {
+    "request_id": "retail-10-coupon-1",
+    "Coupon": {
+      "Coupon_Id": "1801",
+      "Coupon_Name": "Save 1",
+      "Coupon_code": "SAVE1",
+      "Discount_Amount": "1.00",
+      "Is_active": 1,
+      "Mastcode": "5001"
+    }
+  },
+  {
+    "request_id": "retail-10-coupon-2",
+    "Coupon": {
+      "Coupon_Id": "1802",
+      "Coupon_Name": "Save 2",
+      "Coupon_code": "SAVE2",
+      "Discount_Amount": "2.00",
+      "Is_active": 1,
+      "Mastcode": "5002"
+    }
+  },
+  {
+    "request_id": "retail-10-coupon-3",
+    "Coupon": {
+      "Coupon_Id": "1803",
+      "Coupon_Name": "Save 3",
+      "Coupon_code": "SAVE3",
+      "Discount_Amount": "3.00",
+      "Is_active": 1,
+      "Mastcode": "5003"
+    }
+  },
+  {
+    "request_id": "retail-10-coupon-4",
+    "Coupon": {
+      "Coupon_Id": "1804",
+      "Coupon_Name": "Save 4",
+      "Coupon_code": "SAVE4",
+      "Discount_Amount": "4.00",
+      "Is_active": 1,
+      "Mastcode": "5004"
+    }
+  },
+  {
+    "request_id": "retail-10-coupon-5",
+    "Coupon": {
+      "Coupon_Id": "1805",
+      "Coupon_Name": "Save 5",
+      "Coupon_code": "SAVE5",
+      "Discount_Amount": "5.00",
+      "Is_active": 1,
+      "Mastcode": "5005"
+    }
+  },
+  {
+    "request_id": "retail-10-coupon-6",
+    "Coupon": {
+      "Coupon_Id": "1806",
+      "Coupon_Name": "Save 6",
+      "Coupon_code": "SAVE6",
+      "Discount_Amount": "6.00",
+      "Is_active": 1,
+      "Mastcode": "5006"
+    }
+  },
+  {
+    "request_id": "retail-10-coupon-7",
+    "Coupon": {
+      "Coupon_Id": "1807",
+      "Coupon_Name": "Save 7",
+      "Coupon_code": "SAVE7",
+      "Discount_Amount": "7.00",
+      "Is_active": 1,
+      "Mastcode": "5007"
+    }
+  },
+  {
+    "request_id": "retail-10-coupon-8",
+    "Coupon": {
+      "Coupon_Id": "1808",
+      "Coupon_Name": "Save 8",
+      "Coupon_code": "SAVE8",
+      "Discount_Amount": "8.00",
+      "Is_active": 1,
+      "Mastcode": "5008"
+    }
+  },
+  {
+    "request_id": "retail-10-coupon-9",
+    "Coupon": {
+      "Coupon_Id": "1809",
+      "Coupon_Name": "Save 9",
+      "Coupon_code": "SAVE9",
+      "Discount_Amount": "9.00",
+      "Is_active": 1,
+      "Mastcode": "5009"
+    }
+  },
+  {
+    "request_id": "retail-10-coupon-10",
+    "Coupon": {
+      "Coupon_Id": "1810",
+      "Coupon_Name": "Save 10",
+      "Coupon_code": "SAVE10",
+      "Discount_Amount": "10.00",
+      "Is_active": 1,
+      "Mastcode": "5010"
+    }
+  }
+]

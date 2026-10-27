@@ -1,0 +1,142 @@
+[
+  {
+    "request_id": "retail-10-station-transaction-1",
+    "station_transaction": {
+      "stationtrasactionid": "7001",
+      "stationtransactionopendate": "2026-10-27T08:10:00Z",
+      "employeeid": "4",
+      "shiftid": "2001",
+      "stationid": "3",
+      "isregisteropen": 1,
+      "openingbalance": "100.00",
+      "currentbalance": "101.00",
+      "regactualbalance": "101.00"
+    }
+  },
+  {
+    "request_id": "retail-10-station-transaction-2",
+    "station_transaction": {
+      "stationtrasactionid": "7002",
+      "stationtransactionopendate": "2026-10-27T09:10:00Z",
+      "employeeid": "4",
+      "shiftid": "2002",
+      "stationid": "3",
+      "isregisteropen": 1,
+      "openingbalance": "100.00",
+      "currentbalance": "102.00",
+      "regactualbalance": "102.00"
+    }
+  },
+  {
+    "request_id": "retail-10-station-transaction-3",
+    "station_transaction": {
+      "stationtrasactionid": "7003",
+      "stationtransactionopendate": "2026-10-27T10:10:00Z",
+      "employeeid": "4",
+      "shiftid": "2003",
+      "stationid": "3",
+      "isregisteropen": 1,
+      "openingbalance": "100.00",
+      "currentbalance": "103.00",
+      "regactualbalance": "103.00"
+    }
+  },
+  {
+    "request_id": "retail-10-station-transaction-4",
+    "station_transaction": {
+      "stationtrasactionid": "7004",
+      "stationtransactionopendate": "2026-10-27T11:10:00Z",
+      "employeeid": "4",
+      "shiftid": "2004",
+      "stationid": "3",
+      "isregisteropen": 1,
+      "openingbalance": "100.00",
+      "currentbalance": "104.00",
+      "regactualbalance": "104.00"
+    }
+  },
+  {
+    "request_id": "retail-10-station-transaction-5",
+    "station_transaction": {
+      "stationtrasactionid": "7005",
+      "stationtransactionopendate": "2026-10-27T12:10:00Z",
+      "employeeid": "4",
+      "shiftid": "2005",
+      "stationid": "3",
+      "isregisteropen": 1,
+      "openingbalance": "100.00",
+      "currentbalance": "105.00",
+      "regactualbalance": "105.00"
+    }
+  },
+  {
+    "request_id": "retail-10-station-transaction-6",
+    "station_transaction": {
+      "stationtrasactionid": "7006",
+      "stationtransactionopendate": "2026-10-27T13:10:00Z",
+      "employeeid": "4",
+      "shiftid": "2006",
+      "stationid": "3",
+      "isregisteropen": 1,
+      "openingbalance": "100.00",
+      "currentbalance": "106.00",
+      "regactualbalance": "106.00"
+    }
+  },
+  {
+    "request_id": "retail-10-station-transaction-7",
+    "station_transaction": {
+      "stationtrasactionid": "7007",
+      "stationtransactionopendate": "2026-10-27T14:10:00Z",
+      "employeeid": "4",
+      "shiftid": "2007",
+      "stationid": "3",
+      "isregisteropen": 1,
+      "openingbalance": "100.00",
+      "currentbalance": "107.00",
+      "regactualbalance": "107.00"
+    }
+  },
+  {
+    "request_id": "retail-10-station-transaction-8",
+    "station_transaction": {
+      "stationtrasactionid": "7008",
+      "stationtransactionopendate": "2026-10-27T15:10:00Z",
+      "employeeid": "4",
+      "shiftid": "2008",
+      "stationid": "3",
+      "isregisteropen": 1,
+      "openingbalance": "100.00",
+      "currentbalance": "108.00",
+      "regactualbalance": "108.00"
+    }
+  },
+  {
+    "request_id": "retail-10-station-transaction-9",
+    "station_transaction": {
+      "stationtrasactionid": "7009",
+      "stationtransactionopendate": "2026-10-27T16:10:00Z",
+      "employeeid": "4",
+      "shiftid": "2009",
+      "stationid": "3",
+      "isregisteropen": 1,
+      "openingbalance": "100.00",
+      "currentbalance": "109.00",
+      "regactualbalance": "109.00"
+    }
+  },
+  {
+    "request_id": "retail-10-station-transaction-10",
+    "station_transaction": {
+      "stationtrasactionid": "7010",
+      "stationtransactionopendate": "2026-10-27T17:10:00Z",
+      "employeeid": "4",
+      "shiftid": "2010",
+      "stationid": "3",
+      "isregisteropen": 1,
+      "openingbalance": "100.00",
+      "currentbalance": "110.00",
+      "regactualbalance": "110.00"
+    }
+  }
+]

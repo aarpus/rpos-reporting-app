@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
   },
   // OpenNext must copy the full package so its `workerd` export is available.
   serverExternalPackages: ["pg-cloudflare"],
+  outputFileTracingIncludes: {
+    "/api/admin/stores": ["./database/reporting/**/*.sql"],
+  },
   async headers() {
     return [
       {

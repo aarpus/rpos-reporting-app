@@ -1,7 +1,10 @@
+import type { StoreType } from "@/lib/store-type";
+
 export type AdminStore = {
   storeCode: string;
   name: string;
   timezone: string;
+  storeType: StoreType;
   active: boolean;
   assignedUserCount: number;
   createdAt: string;

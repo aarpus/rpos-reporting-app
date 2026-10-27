@@ -1,0 +1,102 @@
+[
+  {
+    "request_id": "retail-10-batch-1",
+    "batch": {
+      "batchid": "1001",
+      "BatchStart": "2026-10-27T08:10:00Z",
+      "storeid": "7",
+      "isactive": 1,
+      "Isbatchclose": 0
+    }
+  },
+  {
+    "request_id": "retail-10-batch-2",
+    "batch": {
+      "batchid": "1002",
+      "BatchStart": "2026-10-27T09:10:00Z",
+      "storeid": "7",
+      "isactive": 1,
+      "Isbatchclose": 0
+    }
+  },
+  {
+    "request_id": "retail-10-batch-3",
+    "batch": {
+      "batchid": "1003",
+      "BatchStart": "2026-10-27T10:10:00Z",
+      "storeid": "7",
+      "isactive": 1,
+      "Isbatchclose": 0
+    }
+  },
+  {
+    "request_id": "retail-10-batch-4",
+    "batch": {
+      "batchid": "1004",
+      "BatchStart": "2026-10-27T11:10:00Z",
+      "storeid": "7",
+      "isactive": 1,
+      "Isbatchclose": 0
+    }
+  },
+  {
+    "request_id": "retail-10-batch-5",
+    "batch": {
+      "batchid": "1005",
+      "BatchStart": "2026-10-27T12:10:00Z",
+      "storeid": "7",
+      "isactive": 1,
+      "Isbatchclose": 0
+    }
+  },
+  {
+    "request_id": "retail-10-batch-6",
+    "batch": {
+      "batchid": "1006",
+      "BatchStart": "2026-10-27T13:10:00Z",
+      "storeid": "7",
+      "isactive": 1,
+      "Isbatchclose": 0
+    }
+  },
+  {
+    "request_id": "retail-10-batch-7",
+    "batch": {
+      "batchid": "1007",
+      "BatchStart": "2026-10-27T14:10:00Z",
+      "storeid": "7",
+      "isactive": 1,
+      "Isbatchclose": 0
+    }
+  },
+  {
+    "request_id": "retail-10-batch-8",
+    "batch": {
+      "batchid": "1008",
+      "BatchStart": "2026-10-27T15:10:00Z",
+      "storeid": "7",
+      "isactive": 1,
+      "Isbatchclose": 0
+    }
+  },
+  {
+    "request_id": "retail-10-batch-9",
+    "batch": {
+      "batchid": "1009",
+      "BatchStart": "2026-10-27T16:10:00Z",
+      "storeid": "7",
+      "isactive": 1,
+      "Isbatchclose": 0
+    }
+  },
+  {
+    "request_id": "retail-10-batch-10",
+    "batch": {
+      "batchid": "1010",
+      "BatchStart": "2026-10-27T17:10:00Z",
+      "storeid": "7",
+      "isactive": 1,
+      "Isbatchclose": 0
+    }
+  }
+]

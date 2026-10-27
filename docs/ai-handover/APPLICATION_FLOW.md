@@ -7,26 +7,27 @@
 3. `src/auth.ts` lowercases email, validates basic format/length, atomically increments the email throttle, loads an active user, and checks scrypt (including a dummy hash for missing users). More than ten attempts in the 15-minute window denies authorization; success deletes that email's attempt record.
 4. Auth.js places identity/role into an eight-hour JWT session. The dashboard layout checks that session and resolves active accessible stores. The current layout uses the session role; APIs use a fresh active database user check.
 5. The selected store cookie is accepted only if it is accessible; otherwise the first accessible store is selected. Ordinary users with no active assignments see the no-access screen. Administrators can still open admin pages without stores.
-6. Switching stores posts the desired code, checks access server-side, sets the HttpOnly cookie, invalidates query data and refreshes the layout.
+6. Switching stores posts the desired code, checks access server-side, sets the HttpOnly cookie, invalidates query data and refreshes the layout. The accessible store list includes `storeType` from `public.stores`. The sidebar, home page, and report index follow that type. The cookie remains a store code.
 
 Sources: `src/app/auth/`, `src/auth.ts`, `src/lib/store-access.ts`, `src/app/(dashboard)/layout.tsx`, `src/components/store/store-provider.tsx`.
 
 ## Administration
 
-Admin pages call `getRequestUser` and enforce ADMIN, loading initial lists server-side. Client management forms use admin APIs and display failures. Creating a store normalizes code, validates name/timezone, checks the provisioning function/EXECUTE privilege, inserts the store, provisions its schema, and commits atomically. The create dialog then offers a POS credential; the same action is available from each store row. The plaintext secret is returned once and is not stored in the clear. Editing does not rename store codes. Creating a user hashes the password and always sets USER. Editing/resetting passwords targets USER accounts only. Access PUT endpoints replace the full assignment set, not append it; empty arrays revoke all relevant assignments. Both orientations of assignment editing are supported.
+Admin pages call `getRequestUser` and enforce ADMIN, loading initial lists server-side. Client management forms use admin APIs and display failures. Creating a store normalizes code, validates name/timezone/store type, checks the two-argument provisioning function/EXECUTE privilege, reads that type's SQL file, inserts the store, provisions its schema, and commits atomically. Restaurant POS runs `database/reporting/restaurant/001-tables.sql`. Retail POS runs `database/reporting/retail/001-tables.sql`. The create dialog then offers a POS credential; the same action is available from each store row. The plaintext secret is returned once and is not stored in the clear. Editing does not rename store codes or change store type. Creating a user hashes the password and always sets USER. Editing/resetting passwords targets USER accounts only. Access PUT endpoints replace the full assignment set, not append it; empty arrays revoke all relevant assignments. Both orientations of assignment editing are supported.
 
 Sources: `src/lib/store-admin.ts`, `src/lib/pos-credentials.ts`, `src/lib/user-admin.ts`, validators and `reporting/store-creation.ts`.
 
 ## POS orders and live report reads
 
 1. Provision each store and a POS credential; securely configure its shared secret outside this repository.
-2. POS sends one order envelope with monotonically increasing revision and complete item/payment/card arrays. Sign the exact serialized body with HMAC and current epoch seconds.
-3. API verifies size, UTF-8, timestamp, active credential/store, registered schema/version and signature, then validates every permitted field and relationship.
+2. Restaurant POS sends one order envelope with monotonically increasing revision and complete item/payment/card arrays to `POST /api/pos/reporting/restaurant/orders`. Batches and shifts use `POST /api/pos/reporting/restaurant/batch` and `POST /api/pos/reporting/restaurant/shift`. Sign the exact serialized body with HMAC and current epoch seconds.
+3. API verifies size, UTF-8, timestamp, active credential/store, restaurant store type, registered schema/version and signature, then validates every permitted field and relationship. Restaurant order and transaction reads also require `store_type = RESTAURANT` on the authorized store.
 4. `syncOrderSnapshot` rechecks active scope, locks request and order identities, compares receipt/hash and revision, applies accepted content and reconciles deleted children, and records the result transactionally.
-5. `/report/orders` fetches inclusive business-date aggregates and pages of orders. Viewing detail adds `order_code` to the same request; aggregate totals/list still cover the date range.
-6. Transaction report waits until filters are applied, queries by store-local `created_at` day boundaries, and aggregates items/payments once per order. Receipt route `[id]` sends the order code directly and can retrieve older orders outside current list filters.
+5. Retail POS uses `/api/pos/reporting/retail/batch`, `/shift`, and `/orders`, plus one route for each remaining retail table (`station_transaction`, `store_account_transaction`, `station_cash_transfer`, `invoice`, `invoice_payment`, `clockin`, `nosale`, `account_payment`, `group_detail`, `store`, `Coupon`, `Online_Platform_Master`, `cashmachine_transaction`, `cashmachine_master`, and `cashmachine_batch`). The same signature check loads `store_type`. Only `RETAIL` continues. Checkout uses `checkout_transaction`, `transaction_detail`, `transaction_payment`, and `transaction_gift_card`. Omitted nullable columns are stored blank. Retail does not use the restaurant revision receipt. Same content is duplicate; changed content overwrites the POS id. Dashboard retail pages do not read these rows yet.
+6. `/report/orders` fetches inclusive business-date aggregates and pages of orders. Viewing detail adds `order_code` to the same request; aggregate totals/list still cover the date range.
+7. Transaction report waits until filters are applied, queries by store-local `created_at` day boundaries, and aggregates items/payments once per order. Receipt route `[id]` sends the order code directly and can retrieve older orders outside current list filters.
 
-Sources: `src/lib/reporting/{pos-auth,snapshot,sync,read,transaction-read}.ts`, `src/app/(dashboard)/report/orders/order-reporting.tsx`, transaction detail component.
+Sources: `src/lib/reporting/{pos-auth,snapshot,sync,retail-snapshot,retail-sync,read,transaction-read}.ts`, `src/app/(dashboard)/report/orders/order-reporting.tsx`, transaction detail component.
 
 ## Notifications and PWA
 

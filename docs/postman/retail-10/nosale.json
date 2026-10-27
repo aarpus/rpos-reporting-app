@@ -1,0 +1,132 @@
+[
+  {
+    "request_id": "retail-10-nosale-1",
+    "nosale": {
+      "nosaleid": "1401",
+      "nosaledate": "2026-10-27T08:10:00Z",
+      "employeeid": "4",
+      "stationid": "3",
+      "shiftid": "2001",
+      "nosalereason": "Drawer check",
+      "stationname": "REG1",
+      "employeename": "Cashier 1"
+    }
+  },
+  {
+    "request_id": "retail-10-nosale-2",
+    "nosale": {
+      "nosaleid": "1402",
+      "nosaledate": "2026-10-27T09:10:00Z",
+      "employeeid": "4",
+      "stationid": "3",
+      "shiftid": "2002",
+      "nosalereason": "Drawer check",
+      "stationname": "REG2",
+      "employeename": "Cashier 2"
+    }
+  },
+  {
+    "request_id": "retail-10-nosale-3",
+    "nosale": {
+      "nosaleid": "1403",
+      "nosaledate": "2026-10-27T10:10:00Z",
+      "employeeid": "4",
+      "stationid": "3",
+      "shiftid": "2003",
+      "nosalereason": "Drawer check",
+      "stationname": "REG3",
+      "employeename": "Cashier 3"
+    }
+  },
+  {
+    "request_id": "retail-10-nosale-4",
+    "nosale": {
+      "nosaleid": "1404",
+      "nosaledate": "2026-10-27T11:10:00Z",
+      "employeeid": "4",
+      "stationid": "3",
+      "shiftid": "2004",
+      "nosalereason": "Drawer check",
+      "stationname": "REG4",
+      "employeename": "Cashier 4"
+    }
+  },
+  {
+    "request_id": "retail-10-nosale-5",
+    "nosale": {
+      "nosaleid": "1405",
+      "nosaledate": "2026-10-27T12:10:00Z",
+      "employeeid": "4",
+      "stationid": "3",
+      "shiftid": "2005",
+      "nosalereason": "Drawer check",
+      "stationname": "REG5",
+      "employeename": "Cashier 5"
+    }
+  },
+  {
+    "request_id": "retail-10-nosale-6",
+    "nosale": {
+      "nosaleid": "1406",
+      "nosaledate": "2026-10-27T13:10:00Z",
+      "employeeid": "4",
+      "stationid": "3",
+      "shiftid": "2006",
+      "nosalereason": "Drawer check",
+      "stationname": "REG6",
+      "employeename": "Cashier 6"
+    }
+  },
+  {
+    "request_id": "retail-10-nosale-7",
+    "nosale": {
+      "nosaleid": "1407",
+      "nosaledate": "2026-10-27T14:10:00Z",
+      "employeeid": "4",
+      "stationid": "3",
+      "shiftid": "2007",
+      "nosalereason": "Drawer check",
+      "stationname": "REG7",
+      "employeename": "Cashier 7"
+    }
+  },
+  {
+    "request_id": "retail-10-nosale-8",
+    "nosale": {
+      "nosaleid": "1408",
+      "nosaledate": "2026-10-27T15:10:00Z",
+      "employeeid": "4",
+      "stationid": "3",
+      "shiftid": "2008",
+      "nosalereason": "Drawer check",
+      "stationname": "REG8",
+      "employeename": "Cashier 8"
+    }
+  },
+  {
+    "request_id": "retail-10-nosale-9",
+    "nosale": {
+      "nosaleid": "1409",
+      "nosaledate": "2026-10-27T16:10:00Z",
+      "employeeid": "4",
+      "stationid": "3",
+      "shiftid": "2009",
+      "nosalereason": "Drawer check",
+      "stationname": "REG9",
+      "employeename": "Cashier 9"
+    }
+  },
+  {
+    "request_id": "retail-10-nosale-10",
+    "nosale": {
+      "nosaleid": "1410",
+      "nosaledate": "2026-10-27T17:10:00Z",
+      "employeeid": "4",
+      "stationid": "3",
+      "shiftid": "2010",
+      "nosalereason": "Drawer check",
+      "stationname": "REG10",
+      "employeename": "Cashier 10"
+    }
+  }
+]

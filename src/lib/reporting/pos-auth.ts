@@ -2,11 +2,13 @@ import "server-only";
 import { withDb } from "@/lib/db";
 import { decryptPosSecret, verifyPosSignature } from "@/lib/pos-signature";
 import { normalizeStoreCode } from "@/lib/store-access";
+import type { StoreType } from "@/lib/store-type";
 import { ReportingError } from "./snapshot";
 import type { ReportingScope } from "./sync";
 
 export async function authenticateReportingPos(
   request: Request,
+  storeType: StoreType = "RESTAURANT",
 ): Promise<{ scope: ReportingScope; body: unknown }> {
   const storeCode = normalizeStoreCode(request.headers.get("x-store-code"));
   const keyId = request.headers.get("x-pos-key-id")?.trim();
@@ -59,8 +61,9 @@ export async function authenticateReportingPos(
           iv: string;
           schema_name: string;
           reporting_version: number;
+          store_type: string;
         }>(
-          `SELECT p.encrypted_secret, p.iv, r.schema_name, r.reporting_version
+          `SELECT p.encrypted_secret, p.iv, r.schema_name, r.reporting_version, s.store_type
     FROM public.pos_credentials p JOIN public.stores s ON s.store_code = p.store_code
     JOIN public.store_reporting_schemas r ON r.store_code = s.store_code
     WHERE p.store_code = $1 AND p.key_id = $2 AND p.active AND s.active`,
@@ -85,6 +88,13 @@ export async function authenticateReportingPos(
     ))
   )
     throw new ReportingError("Invalid POS signature.", 401);
+  if (credential.store_type !== storeType)
+    throw new ReportingError(
+      storeType === "RETAIL"
+        ? "Retail reporting is not available for this store."
+        : "Restaurant reporting is not available for this store.",
+      403,
+    );
   if (credential.reporting_version !== 1)
     throw new ReportingError("Store reporting schema is not ready.", 503);
   let body: unknown;

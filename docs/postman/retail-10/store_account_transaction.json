@@ -1,0 +1,182 @@
+[
+  {
+    "request_id": "retail-10-store-account-1",
+    "store_account_transaction": {
+      "storeaccounttransactionid": "8001",
+      "toaccountid": "2",
+      "storeaccountname": "Safe 1",
+      "fromaccountid": "1",
+      "transactionbyemp": "4",
+      "transactiondate": "2026-10-27T08:10:00Z",
+      "batchid": "1001",
+      "shiftid": "2001",
+      "transamount": "26.00",
+      "isbetweenstoreaccount": 0,
+      "isfromstation": 1,
+      "isfromsafe": 0,
+      "referenceNo": "SA-1"
+    }
+  },
+  {
+    "request_id": "retail-10-store-account-2",
+    "store_account_transaction": {
+      "storeaccounttransactionid": "8002",
+      "toaccountid": "2",
+      "storeaccountname": "Safe 2",
+      "fromaccountid": "1",
+      "transactionbyemp": "4",
+      "transactiondate": "2026-10-27T09:10:00Z",
+      "batchid": "1002",
+      "shiftid": "2002",
+      "transamount": "27.00",
+      "isbetweenstoreaccount": 0,
+      "isfromstation": 1,
+      "isfromsafe": 0,
+      "referenceNo": "SA-2"
+    }
+  },
+  {
+    "request_id": "retail-10-store-account-3",
+    "store_account_transaction": {
+      "storeaccounttransactionid": "8003",
+      "toaccountid": "2",
+      "storeaccountname": "Safe 3",
+      "fromaccountid": "1",
+      "transactionbyemp": "4",
+      "transactiondate": "2026-10-27T10:10:00Z",
+      "batchid": "1003",
+      "shiftid": "2003",
+      "transamount": "28.00",
+      "isbetweenstoreaccount": 0,
+      "isfromstation": 1,
+      "isfromsafe": 0,
+      "referenceNo": "SA-3"
+    }
+  },
+  {
+    "request_id": "retail-10-store-account-4",
+    "store_account_transaction": {
+      "storeaccounttransactionid": "8004",
+      "toaccountid": "2",
+      "storeaccountname": "Safe 4",
+      "fromaccountid": "1",
+      "transactionbyemp": "4",
+      "transactiondate": "2026-10-27T11:10:00Z",
+      "batchid": "1004",
+      "shiftid": "2004",
+      "transamount": "29.00",
+      "isbetweenstoreaccount": 0,
+      "isfromstation": 1,
+      "isfromsafe": 0,
+      "referenceNo": "SA-4"
+    }
+  },
+  {
+    "request_id": "retail-10-store-account-5",
+    "store_account_transaction": {
+      "storeaccounttransactionid": "8005",
+      "toaccountid": "2",
+      "storeaccountname": "Safe 5",
+      "fromaccountid": "1",
+      "transactionbyemp": "4",
+      "transactiondate": "2026-10-27T12:10:00Z",
+      "batchid": "1005",
+      "shiftid": "2005",
+      "transamount": "30.00",
+      "isbetweenstoreaccount": 0,
+      "isfromstation": 1,
+      "isfromsafe": 0,
+      "referenceNo": "SA-5"
+    }
+  },
+  {
+    "request_id": "retail-10-store-account-6",
+    "store_account_transaction": {
+      "storeaccounttransactionid": "8006",
+      "toaccountid": "2",
+      "storeaccountname": "Safe 6",
+      "fromaccountid": "1",
+      "transactionbyemp": "4",
+      "transactiondate": "2026-10-27T13:10:00Z",
+      "batchid": "1006",
+      "shiftid": "2006",
+      "transamount": "31.00",
+      "isbetweenstoreaccount": 0,
+      "isfromstation": 1,
+      "isfromsafe": 0,
+      "referenceNo": "SA-6"
+    }
+  },
+  {
+    "request_id": "retail-10-store-account-7",
+    "store_account_transaction": {
+      "storeaccounttransactionid": "8007",
+      "toaccountid": "2",
+      "storeaccountname": "Safe 7",
+      "fromaccountid": "1",
+      "transactionbyemp": "4",
+      "transactiondate": "2026-10-27T14:10:00Z",
+      "batchid": "1007",
+      "shiftid": "2007",
+      "transamount": "32.00",
+      "isbetweenstoreaccount": 0,
+      "isfromstation": 1,
+      "isfromsafe": 0,
+      "referenceNo": "SA-7"
+    }
+  },
+  {
+    "request_id": "retail-10-store-account-8",
+    "store_account_transaction": {
+      "storeaccounttransactionid": "8008",
+      "toaccountid": "2",
+      "storeaccountname": "Safe 8",
+      "fromaccountid": "1",
+      "transactionbyemp": "4",
+      "transactiondate": "2026-10-27T15:10:00Z",
+      "batchid": "1008",
+      "shiftid": "2008",
+      "transamount": "33.00",
+      "isbetweenstoreaccount": 0,
+      "isfromstation": 1,
+      "isfromsafe": 0,
+      "referenceNo": "SA-8"
+    }
+  },
+  {
+    "request_id": "retail-10-store-account-9",
+    "store_account_transaction": {
+      "storeaccounttransactionid": "8009",
+      "toaccountid": "2",
+      "storeaccountname": "Safe 9",
+      "fromaccountid": "1",
+      "transactionbyemp": "4",
+      "transactiondate": "2026-10-27T16:10:00Z",
+      "batchid": "1009",
+      "shiftid": "2009",
+      "transamount": "34.00",
+      "isbetweenstoreaccount": 0,
+      "isfromstation": 1,
+      "isfromsafe": 0,
+      "referenceNo": "SA-9"
+    }
+  },
+  {
+    "request_id": "retail-10-store-account-10",
+    "store_account_transaction": {
+      "storeaccounttransactionid": "8010",
+      "toaccountid": "2",
+      "storeaccountname": "Safe 10",
+      "fromaccountid": "1",
+      "transactionbyemp": "4",
+      "transactiondate": "2026-10-27T17:10:00Z",
+      "batchid": "1010",
+      "shiftid": "2010",
+      "transamount": "35.00",
+      "isbetweenstoreaccount": 0,
+      "isfromstation": 1,
+      "isfromsafe": 0,
+      "referenceNo": "SA-10"
+    }
+  }
+]

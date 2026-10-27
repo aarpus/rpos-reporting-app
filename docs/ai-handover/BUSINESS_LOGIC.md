@@ -15,7 +15,7 @@ Assignments deduplicate up to 10,000 positive user IDs or normalized store codes
 Sources: `src/lib/reporting/snapshot.ts`, `columns.json`, `sync.ts`, SQL tables.
 
 - Exactly one order envelope per request. Only `request_id`, `source_revision`, `order`, `items`, `payments`, and `card_payments` are accepted. Every child array is required and capped at 2,000.
-- Batch and shift use `POST /api/pos/reporting/batch` and `POST /api/pos/reporting/shift`. Each envelope is `request_id`, `source_revision`, and one `batch` or `shift` object. Create the batch before any shift that references its `batch_code`. A shift whose batch is missing is rejected and not stored.
+- Batch and shift use `POST /api/pos/reporting/restaurant/batch` and `POST /api/pos/reporting/restaurant/shift`. Each envelope is `request_id`, `source_revision`, and one `batch` or `shift` object. Create the batch before any shift that references its `batch_code`. A shift whose batch is missing is rejected and not stored.
 - Unknown/server-managed row fields are rejected. Missing required fields fail. Missing optional fields become their declared default or null. Explicit null fails for required fields or fields with non-null defaults.
 - Child `store_code`, `order_code`, and `business_date` must match the parent; cards must reference a payment in the same snapshot. Child codes are unique in their array and cannot move between orders in SQL upsert logic.
 - Large integers must be strings; bigint bounds are enforced. Revisions are positive bigint values. Decimals fit numeric(18,2), normalize to two decimal places, and signed values are retained. JSON objects/arrays cannot contain null characters and nesting is limited to 30.
@@ -25,6 +25,15 @@ Sources: `src/lib/reporting/snapshot.ts`, `columns.json`, `sync.ts`, SQL tables.
 - Accepted order snapshots upsert all supplied fields, remove omitted children (cards before payments before items), and retain server IDs/creation timestamps on updates. Empty arrays intentionally remove all children. Parent, children, and the order receipt either all commit or all roll back. Order `batch_code` and `shift_code` do not insert or delete batch and shift rows.
 - Accepted batch and shift snapshots upsert by `batch_code` or `shift_code`, keep their own `source_revision` and `snapshot_hash`, and record receipts in `sync_master_requests`. The same request-id, revision, and hash rules apply. A shift write also requires the referenced batch row and shares that transaction with its receipt.
 - POS flags and totals are retained without deriving a new order state machine or reconciling money. No validation guarantees totals equal item sums, low-stock quantity is below threshold, or payment status matches flags.
+
+## Retail snapshot contract
+
+Sources: `src/lib/reporting/retail-snapshot.ts`, `retail-sync.ts`, `retail-columns.ts`, and `database/reporting/retail/001-tables.sql`.
+
+- Restaurant ingestion is `POST /api/pos/reporting/restaurant/batch`, `/shift`, and `/orders`. Retail ingestion is `POST /api/pos/reporting/retail/batch`, `/shift`, and `/orders`. The registered `store_type` is the only selector. Restaurant routes reject `RETAIL`; retail routes reject `RESTAURANT`.
+- Retail checkout envelopes are `request_id`, `checkout_transaction`, `transaction_detail`, `transaction_payment`, and `transaction_gift_card`. The other retail routes are one `request_id` plus one row whose key matches the path (`station_transaction`, `store_account_transaction`, `station_cash_transfer`, `invoice`, `invoice_payment`, `clockin`, `nosale`, `account_payment`, `group_detail`, `store`, `Coupon`, `Online_Platform_Master`, `cashmachine_transaction`, `cashmachine_master`, `cashmachine_batch`). Every physical column is accepted. The POS id is required. There is no `source_revision`. Identical stored content returns duplicate. Different content for the same POS id overwrites it. Nullable columns that are omitted are stored blank. `NOT NULL` columns with a default use that default when omitted. `NOT NULL` columns without a default must be sent.
+- Create batch, then shift, then checkout. Shift `batchid` and checkout `shiftid` must already exist. Payment `batchid` must match that shift. Child ids cannot move to another checkout. Omitted children are deleted.
+- Column rules follow the retail SQL type, nullability, default, and numeric scale. Checkout totals are stored as supplied. Payment rows are not summed into those totals, so a card attempt does not become checkout revenue by itself.
 
 ## Calculations and date semantics
 

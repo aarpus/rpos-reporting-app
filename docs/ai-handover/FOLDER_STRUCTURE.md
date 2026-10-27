@@ -13,7 +13,7 @@ Paths below are relative to the project root. The inventory covers application s
 | `src/app/api/` | All Web Request/Response endpoints; see API_DOCUMENTATION |
 | `src/components/common/` | Header, sidebar, mobile navigation, preview wrappers |
 | `src/components/layout/` | Responsive dashboard chrome and store provider boundary |
-| `src/components/store/`, `notifications/` | Store selection/context, preferences/device settings |
+| `src/components/store/`, `notifications/` | Store selection/context, retail home fixture dashboard, preferences/device settings |
 | `src/components/dashboard/home/` | Older composable dashboard widgets with fixtures/services |
 | `src/components/tailgrids/core/` | Shared accessible component wrappers, variants, icons/spinners |
 | `src/lib/` | DB, password, authorization, admin parsing/services, POS events/signatures/push |
@@ -85,6 +85,7 @@ CLOUDFLARE_DEPLOYMENT.md
 README.md
 database/001-auth.sql
 database/reporting/001-tables.sql
+database/reporting/restaurant/001-tables.sql
 database/reporting/legacy-customer-001.sql
 docs/ai-handover/API_DOCUMENTATION.md
 docs/ai-handover/APPLICATION_FLOW.md
@@ -274,7 +275,27 @@ src/app/api/notifications/[id]/read/route.ts
 src/app/api/notifications/read-all/route.ts
 src/app/api/notifications/route.ts
 src/app/api/pos/notification-events/route.ts
-src/app/api/pos/reporting/orders/route.ts
+src/app/api/pos/reporting/restaurant/batch/route.ts
+src/app/api/pos/reporting/restaurant/orders/route.ts
+src/app/api/pos/reporting/restaurant/shift/route.ts
+src/app/api/pos/reporting/retail/batch/route.ts
+src/app/api/pos/reporting/retail/orders/route.ts
+src/app/api/pos/reporting/retail/shift/route.ts
+src/app/api/pos/reporting/retail/station_transaction/route.ts
+src/app/api/pos/reporting/retail/store_account_transaction/route.ts
+src/app/api/pos/reporting/retail/station_cash_transfer/route.ts
+src/app/api/pos/reporting/retail/invoice/route.ts
+src/app/api/pos/reporting/retail/invoice_payment/route.ts
+src/app/api/pos/reporting/retail/clockin/route.ts
+src/app/api/pos/reporting/retail/nosale/route.ts
+src/app/api/pos/reporting/retail/account_payment/route.ts
+src/app/api/pos/reporting/retail/group_detail/route.ts
+src/app/api/pos/reporting/retail/store/route.ts
+src/app/api/pos/reporting/retail/Coupon/route.ts
+src/app/api/pos/reporting/retail/Online_Platform_Master/route.ts
+src/app/api/pos/reporting/retail/cashmachine_transaction/route.ts
+src/app/api/pos/reporting/retail/cashmachine_master/route.ts
+src/app/api/pos/reporting/retail/cashmachine_batch/route.ts
 src/app/api/push-subscriptions/route.ts
 src/app/api/reporting/orders/route.ts
 src/app/api/reporting/transaction-detail/route.ts
@@ -538,7 +559,7 @@ This index was extracted by reading every authored TS/TSX/MJS source file. Expor
 | `src/app/api/notifications/read-all/route.ts` | 16 | `POST` |
 | `src/app/api/notifications/route.ts` | 70 | `GET` |
 | `src/app/api/pos/notification-events/route.ts` | 185 | `runtime`, `POST` |
-| `src/app/api/pos/reporting/orders/route.ts` | 45 | `runtime`, `POST` |
+| `src/app/api/pos/reporting/restaurant/orders/route.ts` | 22 | `runtime`, `POST` |
 | `src/app/api/push-subscriptions/route.ts` | 46 | `POST`, `DELETE` |
 | `src/app/api/reporting/orders/route.ts` | 49 | `runtime`, `GET` |
 | `src/app/api/reporting/transaction-detail/route.ts` | 46 | `runtime`, `GET` |

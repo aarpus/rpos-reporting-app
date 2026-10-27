@@ -1,0 +1,152 @@
+[
+  {
+    "request_id": "retail-10-cash-transfer-1",
+    "station_cash_transfer": {
+      "stationcashtransferid": "9001",
+      "stationcashtransferdate": "2026-10-27T08:10:00Z",
+      "stationcashtrasnferfromid": "3",
+      "stationcashtransferamount": "16.00",
+      "stationcashtrfrbyempid": "4",
+      "sourceshiftid": "2001",
+      "receivedbyemployee": "5",
+      "destinationstation": "4",
+      "batchid": "1001",
+      "destinationshift": "2001"
+    }
+  },
+  {
+    "request_id": "retail-10-cash-transfer-2",
+    "station_cash_transfer": {
+      "stationcashtransferid": "9002",
+      "stationcashtransferdate": "2026-10-27T09:10:00Z",
+      "stationcashtrasnferfromid": "3",
+      "stationcashtransferamount": "17.00",
+      "stationcashtrfrbyempid": "4",
+      "sourceshiftid": "2002",
+      "receivedbyemployee": "5",
+      "destinationstation": "4",
+      "batchid": "1002",
+      "destinationshift": "2002"
+    }
+  },
+  {
+    "request_id": "retail-10-cash-transfer-3",
+    "station_cash_transfer": {
+      "stationcashtransferid": "9003",
+      "stationcashtransferdate": "2026-10-27T10:10:00Z",
+      "stationcashtrasnferfromid": "3",
+      "stationcashtransferamount": "18.00",
+      "stationcashtrfrbyempid": "4",
+      "sourceshiftid": "2003",
+      "receivedbyemployee": "5",
+      "destinationstation": "4",
+      "batchid": "1003",
+      "destinationshift": "2003"
+    }
+  },
+  {
+    "request_id": "retail-10-cash-transfer-4",
+    "station_cash_transfer": {
+      "stationcashtransferid": "9004",
+      "stationcashtransferdate": "2026-10-27T11:10:00Z",
+      "stationcashtrasnferfromid": "3",
+      "stationcashtransferamount": "19.00",
+      "stationcashtrfrbyempid": "4",
+      "sourceshiftid": "2004",
+      "receivedbyemployee": "5",
+      "destinationstation": "4",
+      "batchid": "1004",
+      "destinationshift": "2004"
+    }
+  },
+  {
+    "request_id": "retail-10-cash-transfer-5",
+    "station_cash_transfer": {
+      "stationcashtransferid": "9005",
+      "stationcashtransferdate": "2026-10-27T12:10:00Z",
+      "stationcashtrasnferfromid": "3",
+      "stationcashtransferamount": "20.00",
+      "stationcashtrfrbyempid": "4",
+      "sourceshiftid": "2005",
+      "receivedbyemployee": "5",
+      "destinationstation": "4",
+      "batchid": "1005",
+      "destinationshift": "2005"
+    }
+  },
+  {
+    "request_id": "retail-10-cash-transfer-6",
+    "station_cash_transfer": {
+      "stationcashtransferid": "9006",
+      "stationcashtransferdate": "2026-10-27T13:10:00Z",
+      "stationcashtrasnferfromid": "3",
+      "stationcashtransferamount": "21.00",
+      "stationcashtrfrbyempid": "4",
+      "sourceshiftid": "2006",
+      "receivedbyemployee": "5",
+      "destinationstation": "4",
+      "batchid": "1006",
+      "destinationshift": "2006"
+    }
+  },
+  {
+    "request_id": "retail-10-cash-transfer-7",
+    "station_cash_transfer": {
+      "stationcashtransferid": "9007",
+      "stationcashtransferdate": "2026-10-27T14:10:00Z",
+      "stationcashtrasnferfromid": "3",
+      "stationcashtransferamount": "22.00",
+      "stationcashtrfrbyempid": "4",
+      "sourceshiftid": "2007",
+      "receivedbyemployee": "5",
+      "destinationstation": "4",
+      "batchid": "1007",
+      "destinationshift": "2007"
+    }
+  },
+  {
+    "request_id": "retail-10-cash-transfer-8",
+    "station_cash_transfer": {
+      "stationcashtransferid": "9008",
+      "stationcashtransferdate": "2026-10-27T15:10:00Z",
+      "stationcashtrasnferfromid": "3",
+      "stationcashtransferamount": "23.00",
+      "stationcashtrfrbyempid": "4",
+      "sourceshiftid": "2008",
+      "receivedbyemployee": "5",
+      "destinationstation": "4",
+      "batchid": "1008",
+      "destinationshift": "2008"
+    }
+  },
+  {
+    "request_id": "retail-10-cash-transfer-9",
+    "station_cash_transfer": {
+      "stationcashtransferid": "9009",
+      "stationcashtransferdate": "2026-10-27T16:10:00Z",
+      "stationcashtrasnferfromid": "3",
+      "stationcashtransferamount": "24.00",
+      "stationcashtrfrbyempid": "4",
+      "sourceshiftid": "2009",
+      "receivedbyemployee": "5",
+      "destinationstation": "4",
+      "batchid": "1009",
+      "destinationshift": "2009"
+    }
+  },
+  {
+    "request_id": "retail-10-cash-transfer-10",
+    "station_cash_transfer": {
+      "stationcashtransferid": "9010",
+      "stationcashtransferdate": "2026-10-27T17:10:00Z",
+      "stationcashtrasnferfromid": "3",
+      "stationcashtransferamount": "25.00",
+      "stationcashtrfrbyempid": "4",
+      "sourceshiftid": "2010",
+      "receivedbyemployee": "5",
+      "destinationstation": "4",
+      "batchid": "1010",
+      "destinationshift": "2010"
+    }
+  }
+]

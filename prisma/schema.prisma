@@ -12,6 +12,11 @@ enum AuthRole {
   USER
 }
 
+enum StoreType {
+  RESTAURANT
+  RETAIL
+}
+
 model AuthUser {
   id           Int      @id @default(autoincrement())
   name         String   @db.VarChar(120)
@@ -66,6 +71,7 @@ model Store {
   storeCode String   @unique @map("store_code") @db.VarChar(64)
   name      String   @db.VarChar(160)
   timezone  String   @default("UTC") @db.VarChar(80)
+  storeType StoreType @default(RESTAURANT) @map("store_type")
   active    Boolean  @default(true)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)

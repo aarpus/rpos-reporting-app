@@ -1,0 +1,102 @@
+[
+  {
+    "request_id": "retail-10-clockin-1",
+    "clockin": {
+      "clockinid": "1301",
+      "clockintime": "2026-10-27T08:10:00Z",
+      "employeeid": "4",
+      "isclockedin": 1,
+      "batchid": "1001"
+    }
+  },
+  {
+    "request_id": "retail-10-clockin-2",
+    "clockin": {
+      "clockinid": "1302",
+      "clockintime": "2026-10-27T09:10:00Z",
+      "employeeid": "4",
+      "isclockedin": 1,
+      "batchid": "1002"
+    }
+  },
+  {
+    "request_id": "retail-10-clockin-3",
+    "clockin": {
+      "clockinid": "1303",
+      "clockintime": "2026-10-27T10:10:00Z",
+      "employeeid": "4",
+      "isclockedin": 1,
+      "batchid": "1003"
+    }
+  },
+  {
+    "request_id": "retail-10-clockin-4",
+    "clockin": {
+      "clockinid": "1304",
+      "clockintime": "2026-10-27T11:10:00Z",
+      "employeeid": "4",
+      "isclockedin": 1,
+      "batchid": "1004"
+    }
+  },
+  {
+    "request_id": "retail-10-clockin-5",
+    "clockin": {
+      "clockinid": "1305",
+      "clockintime": "2026-10-27T12:10:00Z",
+      "employeeid": "4",
+      "isclockedin": 1,
+      "batchid": "1005"
+    }
+  },
+  {
+    "request_id": "retail-10-clockin-6",
+    "clockin": {
+      "clockinid": "1306",
+      "clockintime": "2026-10-27T13:10:00Z",
+      "employeeid": "4",
+      "isclockedin": 1,
+      "batchid": "1006"
+    }
+  },
+  {
+    "request_id": "retail-10-clockin-7",
+    "clockin": {
+      "clockinid": "1307",
+      "clockintime": "2026-10-27T14:10:00Z",
+      "employeeid": "4",
+      "isclockedin": 1,
+      "batchid": "1007"
+    }
+  },
+  {
+    "request_id": "retail-10-clockin-8",
+    "clockin": {
+      "clockinid": "1308",
+      "clockintime": "2026-10-27T15:10:00Z",
+      "employeeid": "4",
+      "isclockedin": 1,
+      "batchid": "1008"
+    }
+  },
+  {
+    "request_id": "retail-10-clockin-9",
+    "clockin": {
+      "clockinid": "1309",
+      "clockintime": "2026-10-27T16:10:00Z",
+      "employeeid": "4",
+      "isclockedin": 1,
+      "batchid": "1009"
+    }
+  },
+  {
+    "request_id": "retail-10-clockin-10",
+    "clockin": {
+      "clockinid": "1310",
+      "clockintime": "2026-10-27T17:10:00Z",
+      "employeeid": "4",
+      "isclockedin": 1,
+      "batchid": "1010"
+    }
+  }
+]

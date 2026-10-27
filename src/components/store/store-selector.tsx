@@ -1,6 +1,7 @@
 "use client";
 
 import { useStore } from "@/components/store/store-provider";
+import { storeTypeLabel } from "@/lib/store-type";
 import {
   Select,
   SelectContent,
@@ -61,9 +62,9 @@ export function StoreSelector({
           <SelectItem
             key={store.storeCode}
             id={store.storeCode}
-            textValue={compact ? `${store.storeCode} · ${store.name}` : `${store.name} (${store.storeCode})`}
+            textValue={compact ? `${store.storeCode} · ${store.name}` : `${storeTypeLabel(store.storeType)} · ${store.name} (${store.storeCode})`}
           >
-            {compact ? `${store.storeCode} · ${store.name}` : `${store.name} (${store.storeCode})`}
+            {compact ? `${store.storeCode} · ${store.name}` : `${storeTypeLabel(store.storeType)} · ${store.name} (${store.storeCode})`}
           </SelectItem>
         ))}
       </SelectContent>
@@ -88,7 +89,7 @@ export function SelectedStoreHighlight() {
       </span>
       <span className="min-w-0">
         <span className="block text-[10px] font-semibold tracking-wider text-primary-500 uppercase">
-          Selected store
+          {storeTypeLabel(selectedStore.storeType)}
         </span>
         <span className="block truncate text-sm font-semibold text-text-primary">
           {selectedStore.name}

@@ -195,6 +195,9 @@ function Field({
 export default function TransactionDetailList() {
   const { selectedStore } = useStore();
   if (!selectedStore) return <p className="p-6 text-text-secondary">Select a store to view transactions.</p>;
+  if (selectedStore.storeType !== "RESTAURANT") {
+    return <p className="p-6 text-text-secondary">Select a restaurant store to open transaction detail.</p>;
+  }
   return <StoreTransactions key={selectedStore.storeCode} storeCode={selectedStore.storeCode} timezone={selectedStore.timezone} />;
 }
 
@@ -788,6 +791,9 @@ function AmountCell({ value, strong }: { value: number; strong?: boolean }) {
 export function TransactionReceipt({ id }: { id: string }) {
   const { selectedStore } = useStore();
   if (!selectedStore) return <p className="p-6 text-text-secondary">Select a store to view this transaction.</p>;
+  if (selectedStore.storeType !== "RESTAURANT") {
+    return <p className="p-6 text-text-secondary">Select a restaurant store to open this transaction.</p>;
+  }
   return <StoreReceipt key={selectedStore.storeCode} id={id} storeCode={selectedStore.storeCode} timezone={selectedStore.timezone} />;
 }
 

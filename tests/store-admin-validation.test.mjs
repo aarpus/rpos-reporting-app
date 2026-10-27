@@ -12,16 +12,25 @@ test("store input normalizes the code and trims editable fields", () => {
     storeCode: " dt01 ",
     name: " Downtown Store ",
     timezone: " Asia/Kolkata ",
+    storeType: "RESTAURANT",
   }), {
-    data: { storeCode: "DT01", name: "Downtown Store", timezone: "Asia/Kolkata" },
+    data: { storeCode: "DT01", name: "Downtown Store", timezone: "Asia/Kolkata", storeType: "RESTAURANT" },
   });
+  assert.equal(parseStoreInput({
+    storeCode: "RT01",
+    name: "Retail",
+    timezone: "UTC",
+    storeType: "RETAIL",
+  }).data.storeType, "RETAIL");
 });
 
 test("store input rejects missing fields, oversized values, and invalid timezones", () => {
-  assert.equal("error" in parseStoreInput({ storeCode: "", name: "Store", timezone: "UTC" }), true);
-  assert.equal("error" in parseStoreInput({ storeCode: "A".repeat(65), name: "Store", timezone: "UTC" }), true);
-  assert.equal("error" in parseStoreInput({ storeCode: "A", name: " ", timezone: "UTC" }), true);
-  assert.equal("error" in parseStoreInput({ storeCode: "A", name: "Store", timezone: "Moon/Base" }), true);
+  assert.equal("error" in parseStoreInput({ storeCode: "", name: "Store", timezone: "UTC", storeType: "RESTAURANT" }), true);
+  assert.equal("error" in parseStoreInput({ storeCode: "A".repeat(65), name: "Store", timezone: "UTC", storeType: "RESTAURANT" }), true);
+  assert.equal("error" in parseStoreInput({ storeCode: "A", name: " ", timezone: "UTC", storeType: "RESTAURANT" }), true);
+  assert.equal("error" in parseStoreInput({ storeCode: "A", name: "Store", timezone: "Moon/Base", storeType: "RESTAURANT" }), true);
+  assert.equal("error" in parseStoreInput({ storeCode: "A", name: "Store", timezone: "UTC" }), true);
+  assert.equal("error" in parseStoreInput({ storeCode: "A", name: "Store", timezone: "UTC", storeType: "WAREHOUSE" }), true);
   assert.equal(isValidTimeZone("UTC"), true);
 });
 
@@ -31,6 +40,7 @@ test("store update accepts supported fields and rejects empty updates", () => {
   });
   assert.equal("error" in parseStoreUpdate({}), true);
   assert.equal("error" in parseStoreUpdate({ active: "yes" }), true);
+  assert.equal("error" in parseStoreUpdate({ name: "Airport", storeType: "RETAIL" }), true);
 });
 
 test("access user IDs are positive integers and are deduplicated", () => {

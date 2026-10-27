@@ -115,7 +115,7 @@ function requestIdentity(value: ReportRow): { request_id: string; source_revisio
 }
 
 export function parseSnapshot(value: unknown, storeCode: string): OrderSnapshot {
-  if (Array.isArray(value)) throw new ReportingError("This endpoint accepts one order snapshot object per request, not an array. Send each order separately to /api/pos/reporting/orders.");
+  if (Array.isArray(value)) throw new ReportingError("This endpoint accepts one order snapshot object per request, not an array. Send each order separately to /api/pos/reporting/restaurant/orders.");
   const envelopeKeys = ["request_id", "source_revision", "order", "items", "payments", "card_payments"];
   if (!object(value) || Object.keys(value).some((key) => !envelopeKeys.includes(key))) throw new ReportingError("Invalid snapshot envelope.");
   const identity = requestIdentity(value);
@@ -147,11 +147,11 @@ export function parseSnapshot(value: unknown, storeCode: string): OrderSnapshot 
 }
 
 export function parseBatchSnapshot(value: unknown, storeCode: string): BatchSnapshot {
-  return parseMasterSnapshot(value, storeCode, "batch", "tbl_rpt_batch", "/api/pos/reporting/batch");
+  return parseMasterSnapshot(value, storeCode, "batch", "tbl_rpt_batch", "/api/pos/reporting/restaurant/batch");
 }
 
 export function parseShiftSnapshot(value: unknown, storeCode: string): ShiftSnapshot {
-  return parseMasterSnapshot(value, storeCode, "shift", "tbl_rpt_shift", "/api/pos/reporting/shift");
+  return parseMasterSnapshot(value, storeCode, "shift", "tbl_rpt_shift", "/api/pos/reporting/restaurant/shift");
 }
 
 function parseMasterSnapshot<K extends "batch" | "shift">(value: unknown, storeCode: string, key: K, table: ReportingTable, path: string): { request_id: string; source_revision: string } & Record<K, ReportRow> {

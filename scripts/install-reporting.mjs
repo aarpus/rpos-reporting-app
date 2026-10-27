@@ -8,7 +8,8 @@ if (!process.env.DATABASE_URL) throw new Error("Set DATABASE_URL first.");
 const baseSql = reportingInstallationSql(await readFile(new URL("../prisma/migrations/20261012000000_store_reporting/migration.sql", import.meta.url), "utf8"));
 const namingSql = await readFile(new URL("../prisma/migrations/20261013000000_store_code_schema_names/migration.sql", import.meta.url), "utf8");
 const batchShiftSql = await readFile(new URL("../prisma/migrations/20261014000000_reporting_batch_shift/migration.sql", import.meta.url), "utf8");
-const sql = baseSql + "\n" + namingSql + "\n" + batchShiftSql;
+const storeTypeSql = await readFile(new URL("../prisma/migrations/20261026000000_store_type/migration.sql", import.meta.url), "utf8");
+const sql = baseSql + "\n" + namingSql + "\n" + batchShiftSql + "\n" + storeTypeSql;
 const db = new Client({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 5000 });
 await db.connect();
 try {

@@ -1,7 +1,8 @@
 'use client';
 
 import { SearchIcon } from '@/components/common/header/icons';
-import { NAV_DATA } from '@/components/common/sidebar/data';
+import { useStore } from '@/components/store/store-provider';
+import { navigationFor } from '@/components/common/sidebar/data';
 import {
     InputGroup,
     InputGroupAddon,
@@ -23,6 +24,7 @@ interface SearchItem {
 export default function SearchBar() {
     const [open, setOpen] = useState(false);
     const router = useRouter();
+    const { selectedStore } = useStore();
 
     // Keyboard shortcut listener (Cmd+K / Ctrl+K)
     useEffect(() => {
@@ -41,7 +43,7 @@ export default function SearchBar() {
     const { itemsBySection } = useMemo(() => {
         const sectionsMap: Record<string, SearchItem[]> = {};
 
-        NAV_DATA.forEach((section) => {
+        navigationFor(selectedStore?.storeType ?? null).forEach((section) => {
             const sectionLabel = section.label || 'PAGES';
 
             section.items.forEach((item) => {
@@ -79,7 +81,7 @@ export default function SearchBar() {
         });
 
         return { itemsBySection: sectionsMap };
-    }, []);
+    }, [selectedStore?.storeType]);
 
     const handleSelect = (url: string) => {
         setOpen(false);

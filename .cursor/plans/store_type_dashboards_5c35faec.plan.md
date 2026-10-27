@@ -4,16 +4,16 @@ overview: Add a store type at store creation. Restaurant stores keep today’s r
 todos:
   - id: store-type-column
     content: Add immutable StoreType on public stores (Prisma model, migration, default RESTAURANT) and accept it only on create.
-    status: in_progress
+    status: completed
   - id: file-provision
     content: Provision new stores by reading database/reporting/restaurant or retail SQL and executing it in the existing provision transaction. Keep restaurant legacy copy. Reject restaurant POS sync for retail stores.
-    status: pending
+    status: completed
   - id: dashboard-switch
     content: Load storeType with authorized stores and switch sidebar, home, and report index. Keep restaurant report queries off retail stores.
-    status: pending
+    status: completed
   - id: retail-after-paste
     content: When the user pastes retail CREATE TABLE SQL, save it as database/reporting/retail/001-tables.sql and run that file when a retail store is created. Do not invent columns. Live retail report pages still wait for the report-to-table map.
-    status: pending
+    status: completed
 isProject: false
 ---
 
