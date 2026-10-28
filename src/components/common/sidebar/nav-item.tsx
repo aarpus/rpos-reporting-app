@@ -120,9 +120,34 @@ export default function NavItem({
     );
   }
 
+  if (!href) {
+    if (collapsed) {
+      return (
+        <div className="flex justify-center">
+          <Tooltip placement="right">
+            <TooltipTrigger asChild>
+              <span className="flex items-center justify-center rounded-lg px-3 py-2.5 text-icon-tertiary">
+                {icon}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{label}</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-text-tertiary">
+        <span className="text-icon-tertiary">{icon}</span>
+        <span>{label}</span>
+      </div>
+    );
+  }
+
   // Expanded: simple link
   return (
-    href && (
       <Link
         href={href}
         onClick={onItemClick}
@@ -136,6 +161,5 @@ export default function NavItem({
         <span className="text-icon-tertiary">{icon}</span>
         <span>{label}</span>
       </Link>
-    )
   );
 }

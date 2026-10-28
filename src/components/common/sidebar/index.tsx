@@ -29,7 +29,9 @@ export default function Sidebar({
 }) {
   const pathname = usePathname();
   const { selectedStore } = useStore();
-  const navigation = navigationFor(selectedStore?.storeType ?? null);
+  const navigation = navigationFor(selectedStore?.storeType ?? null, {
+    includeMobileReports: isMobileSheet,
+  });
   const { resolvedTheme } = useTheme();
   const mounted = useSyncExternalStore(
     emptySubscribe,

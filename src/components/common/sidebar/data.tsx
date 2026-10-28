@@ -20,26 +20,49 @@ type NavigationSection = {
   items: NavigationItem[];
 };
 
-const RETAIL_NAV: NavigationSection[] = [
-  {
-    label: "MAIN MENU",
-    items: [
-      {
-        title: "Dashboard",
-        icon: <HomeIcon />,
-        url: "/",
-      },
-      {
-        title: "Reports",
-        icon: <TableIcon />,
-        url: "/report",
-      },
-    ],
-  },
+const RETAIL_QUICK_REPORTS: NavigationItem[] = [
+  { title: "Transaction Journal", icon: <TableIcon /> },
+  { title: "Day-End Report", icon: <CalendarIcon /> },
+  { title: "Shift End Report", icon: <CalendarIcon />, url: "/report/shift-report" },
+  { title: "Credit Card Transaction Details", icon: <InvoiceIcon /> },
+  { title: "Week End Report", icon: <CalendarIcon /> },
+  { title: "Month End Report", icon: <CalendarIcon /> },
+  { title: "Year End Report", icon: <CalendarIcon /> },
+  { title: "Monthly Sales and Tax Report", icon: <TableIcon /> },
+  { title: "Invoice Report", icon: <InvoiceIcon /> },
+  { title: "NoUPC Details Report", icon: <TableIcon /> },
 ];
 
-export function navigationFor(storeType: StoreType | null): NavigationSection[] {
-  return storeType === "RETAIL" ? RETAIL_NAV : NAV_DATA;
+function retailNavigation(includeMobileReports: boolean): NavigationSection[] {
+  return [
+    {
+      label: "MAIN MENU",
+      items: [
+        {
+          title: "Dashboard",
+          icon: <HomeIcon />,
+          url: "/",
+        },
+        ...(includeMobileReports
+          ? [{ title: "Reports", icon: <TableIcon />, url: "/report" }]
+          : []),
+      ],
+    },
+    {
+      label: "QUICK REPORTS",
+      items: RETAIL_QUICK_REPORTS,
+    },
+  ];
+}
+
+export function navigationFor(
+  storeType: StoreType | null,
+  options?: { includeMobileReports?: boolean },
+): NavigationSection[] {
+  if (storeType === "RETAIL") {
+    return retailNavigation(options?.includeMobileReports ?? false);
+  }
+  return NAV_DATA;
 }
 
 export const NAV_DATA: NavigationSection[] = [

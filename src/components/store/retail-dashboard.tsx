@@ -41,12 +41,19 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { IconType } from "react-icons";
 import {
   LuBan,
+  LuBarcode,
   LuBoxes,
   LuCalendar,
+  LuCalendarClock,
+  LuCalendarDays,
+  LuCalendarRange,
+  LuCalendarSync,
   LuChartColumn,
   LuChevronDown,
   LuChevronRight,
   LuClock,
+  LuClock3,
+  LuCreditCard,
   LuDatabase,
   LuDollarSign,
   LuFileText,
@@ -55,6 +62,7 @@ import {
   LuLayers,
   LuPackage,
   LuReceipt,
+  LuReceiptText,
   LuRefreshCw,
   LuShoppingCart,
   LuTrash2,
@@ -73,8 +81,8 @@ type Metric = {
   value: string;
   detail?: string;
   icon: IconType;
-  surface: string;
-  chip: string;
+  accent: string;
+  iconStyle: string;
 };
 
 type Shortcut = {
@@ -116,51 +124,51 @@ const metrics: Metric[] = [
     label: "# Transactions",
     value: "2",
     icon: LuHash,
-    surface: "bg-badge-primary-background text-badge-primary-text",
-    chip: "bg-card-surface-area shadow-xs",
+    accent: "border-t-primary-500",
+    iconStyle: "bg-badge-primary-background text-badge-primary-icon-color",
   },
   {
     label: "Gross Sale",
     value: "$41.40",
     icon: LuDollarSign,
-    surface: "bg-badge-success-background text-badge-success-text",
-    chip: "bg-card-surface-area shadow-xs",
+    accent: "border-t-success-500",
+    iconStyle: "bg-badge-success-background text-badge-success-icon-color",
   },
   {
     label: "Net Sale",
     value: "$37.98",
     icon: LuChartColumn,
-    surface: "bg-badge-violet-background text-badge-violet-text",
-    chip: "bg-card-surface-area shadow-xs",
+    accent: "border-t-violet-500",
+    iconStyle: "bg-badge-violet-background text-badge-violet-icon-color",
   },
   {
     label: "# Hold Trans",
     value: "10",
     icon: LuHourglass,
-    surface: "bg-badge-warning-background text-badge-warning-text",
-    chip: "bg-card-surface-area shadow-xs",
+    accent: "border-t-warning-500",
+    iconStyle: "bg-badge-warning-background text-badge-warning-icon-color",
   },
   {
     label: "Hold Sale",
     value: "$1,379.71",
     icon: LuBoxes,
-    surface: "bg-badge-cyan-background text-badge-cyan-text",
-    chip: "bg-card-surface-area shadow-xs",
+    accent: "border-t-info-500",
+    iconStyle: "bg-badge-cyan-background text-badge-cyan-icon-color",
   },
   {
     label: "Inventory",
     value: "9107",
     detail: "20864U",
     icon: LuPackage,
-    surface: "bg-badge-error-background text-badge-error-text",
-    chip: "bg-card-surface-area shadow-xs",
+    accent: "border-t-error-500",
+    iconStyle: "bg-badge-error-background text-badge-error-icon-color",
   },
   {
     label: "Inventory Value",
     value: "$1,006,093.92",
     icon: LuDatabase,
-    surface: "bg-badge-orange-background text-badge-orange-text",
-    chip: "bg-card-surface-area shadow-xs",
+    accent: "border-t-orange-500",
+    iconStyle: "bg-badge-orange-background text-badge-orange-icon-color",
   },
 ];
 
@@ -365,32 +373,34 @@ function MetricTile({
   value,
   detail,
   icon: Icon,
-  surface,
-  chip,
+  accent,
+  iconStyle,
 }: Metric) {
   return (
     <article
       className={cn(
-        "flex h-full min-h-[76px] items-center gap-3 rounded-xl px-3 py-3 shadow-xs",
-        surface,
+        "h-full rounded-2xl border border-card-border border-t-[3px] bg-card-surface-area p-4 shadow-xs",
+        accent,
       )}
     >
-      <span
-        className={cn(
-          "grid size-10 shrink-0 place-items-center rounded-lg",
-          chip,
-        )}
-      >
-        <Icon className="size-5" aria-hidden="true" />
-      </span>
-      <div className="min-w-0">
-        <p className="truncate text-xs font-medium opacity-80">{label}</p>
-        <p className="mt-0.5 text-lg font-semibold tracking-tight sm:text-xl">
-          {value}
-        </p>
-        {detail ? (
-          <p className="text-xs font-medium opacity-75">{detail}</p>
-        ) : null}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-text-secondary">{label}</p>
+          <p className="mt-3 text-2xl font-semibold tracking-tight text-text-primary">
+            {value}
+          </p>
+          {detail ? (
+            <p className="mt-1 text-xs font-medium text-text-tertiary">{detail}</p>
+          ) : null}
+        </div>
+        <span
+          className={cn(
+            "grid size-10 shrink-0 place-items-center rounded-xl",
+            iconStyle,
+          )}
+        >
+          <Icon className="size-5" aria-hidden="true" />
+        </span>
       </div>
     </article>
   );
@@ -650,7 +660,7 @@ export function RetailDashboard({ storeName }: { storeName: string }) {
 
       <section
         aria-label="Sales and inventory summary"
-        className="grid grid-cols-[repeat(auto-fit,minmax(168px,1fr))] gap-3"
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7"
       >
         {metrics.map((item) => (
           <MetricTile key={item.label} {...item} />
@@ -917,6 +927,76 @@ export function RetailDashboard({ storeName }: { storeName: string }) {
   );
 }
 
+const quickReports: Array<{
+  title: string;
+  description: string;
+  href?: string;
+  icon: IconType;
+  iconClassName: string;
+}> = [
+  {
+    title: "Transaction Journal",
+    description: "Review posted sales transactions.",
+    icon: LuReceiptText,
+    iconClassName: "bg-badge-primary-background text-badge-primary-icon-color",
+  },
+  {
+    title: "Day-End Report",
+    description: "Review completed day-end batches and totals.",
+    icon: LuCalendarClock,
+    iconClassName: "bg-badge-sky-background text-badge-sky-icon-color",
+  },
+  {
+    title: "Shift End Report",
+    description: "Find shifts by a single date or a date range.",
+    href: "/report/shift-report",
+    icon: LuClock3,
+    iconClassName: "bg-badge-pink-background text-badge-pink-icon-color",
+  },
+  {
+    title: "Credit Card Transaction Details",
+    description: "Review card payments and settlement details.",
+    icon: LuCreditCard,
+    iconClassName: "bg-badge-violet-background text-badge-violet-icon-color",
+  },
+  {
+    title: "Week End Report",
+    description: "Summarize sales for a selected week.",
+    icon: LuCalendarRange,
+    iconClassName: "bg-badge-success-background text-badge-success-icon-color",
+  },
+  {
+    title: "Month End Report",
+    description: "Summarize sales for a selected month.",
+    icon: LuCalendarDays,
+    iconClassName: "bg-badge-warning-background text-badge-warning-icon-color",
+  },
+  {
+    title: "Year End Report",
+    description: "Summarize sales for a selected year.",
+    icon: LuCalendarSync,
+    iconClassName: "bg-badge-orange-background text-badge-orange-icon-color",
+  },
+  {
+    title: "Monthly Sales and Tax Report",
+    description: "Review monthly sales totals and tax collected.",
+    icon: LuChartColumn,
+    iconClassName: "bg-badge-cyan-background text-badge-cyan-icon-color",
+  },
+  {
+    title: "Invoice Report",
+    description: "Review supplier invoices and payments.",
+    icon: LuFileText,
+    iconClassName: "bg-badge-error-background text-badge-error-icon-color",
+  },
+  {
+    title: "NoUPC Details Report",
+    description: "Review items sold without a UPC.",
+    icon: LuBarcode,
+    iconClassName: "bg-badge-primary-background text-badge-primary-icon-color",
+  },
+];
+
 export function RetailReports({ storeName }: { storeName: string }) {
   return (
     <div className="space-y-6 px-3 py-6 sm:px-5 lg:px-6">
@@ -926,9 +1006,58 @@ export function RetailReports({ storeName }: { storeName: string }) {
           Retail reports
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-text-tertiary">
-          No retail reports are configured for {storeName} yet.
+          Quick reports for {storeName}.
         </p>
       </div>
+
+      <section aria-label="Quick reports" className="space-y-3">
+        <h2 className="text-xs font-semibold tracking-wide text-text-tertiary uppercase">
+          Quick reports
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {quickReports.map((report) => {
+            const Icon = report.icon;
+            const body = (
+              <>
+                <div className="flex items-start justify-between gap-4">
+                  <span className={`grid size-11 place-items-center rounded-xl ${report.iconClassName}`}>
+                    <Icon className="size-5" aria-hidden="true" />
+                  </span>
+                  {report.href ? (
+                    <LuChevronRight className="size-5 text-icon-tertiary transition-transform group-hover:translate-x-1 group-hover:text-primary-500" />
+                  ) : null}
+                </div>
+                <h3 className="mt-4 text-base font-semibold text-text-primary">{report.title}</h3>
+                <p className="mt-1 text-sm leading-5 text-text-tertiary">{report.description}</p>
+                {report.href ? null : (
+                  <p className="mt-3 text-xs font-medium text-text-tertiary">Coming next</p>
+                )}
+              </>
+            );
+
+            if (report.href) {
+              return (
+                <Link
+                  key={report.title}
+                  href={report.href}
+                  className="group flex min-h-36 flex-col rounded-2xl border border-card-border bg-card-surface-area p-5 shadow-xs transition hover:-translate-y-0.5 hover:border-primary-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-500/20"
+                >
+                  {body}
+                </Link>
+              );
+            }
+
+            return (
+              <article
+                key={report.title}
+                className="flex min-h-36 flex-col rounded-2xl border border-card-border bg-card-surface-area p-5 shadow-xs"
+              >
+                {body}
+              </article>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }

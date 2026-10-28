@@ -219,6 +219,9 @@ src/app/(dashboard)/layout.tsx
 src/app/(dashboard)/notifications/page.tsx
 src/app/(dashboard)/page.tsx
 src/app/(dashboard)/report/_components/report-ui.tsx
+src/app/(dashboard)/report/_components/retail-date-range-filter.tsx
+src/app/(dashboard)/report/_components/retail-report-date-filter.tsx
+src/app/(dashboard)/report/_components/retail-report-table.tsx
 src/app/(dashboard)/report/day-end-report/[id]/page.tsx
 src/app/(dashboard)/report/day-end-report/_components/data.ts
 src/app/(dashboard)/report/day-end-report/_components/day-end-report.tsx
@@ -233,7 +236,12 @@ src/app/(dashboard)/report/orders/page.tsx
 src/app/(dashboard)/report/page.tsx
 src/app/(dashboard)/report/shift-report/[id]/page.tsx
 src/app/(dashboard)/report/shift-report/_components/data.ts
+src/app/(dashboard)/report/shift-report/_components/retail-shift-data.ts
+src/app/(dashboard)/report/shift-report/_components/retail-shift-end-detail.tsx
+src/app/(dashboard)/report/shift-report/_components/retail-shift-end-list.tsx
+src/app/(dashboard)/report/shift-report/_components/shift-report-detail-entry.tsx
 src/app/(dashboard)/report/shift-report/_components/shift-end-report.tsx
+src/app/(dashboard)/report/shift-report/_components/shift-report-entry.tsx
 src/app/(dashboard)/report/shift-report/_components/shift-report-list.tsx
 src/app/(dashboard)/report/shift-report/page.tsx
 src/app/(dashboard)/report/transaction-detail/[id]/page.tsx

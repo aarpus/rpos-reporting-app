@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import ShiftReportList from "./_components/shift-report-list";
+import { ShiftReportEntry } from "./_components/shift-report-entry";
 
 export const metadata: Metadata = {
-  title: "Shift Report",
+  title: "Shift End Report",
 };
 
 export default function ShiftReportPage() {
-  return <ShiftReportList />;
+  return <ShiftReportEntry />;
 }
