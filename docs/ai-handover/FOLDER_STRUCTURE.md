@@ -59,6 +59,9 @@ The tree below lists every discovered non-generated project file in the reviewed
 | `/report/day-end-report` | `src/app/(dashboard)/report/day-end-report/page.tsx` |
 | `/report/employee-clock-in-out` | `src/app/(dashboard)/report/employee-clock-in-out/page.tsx` |
 | `/report/month-end-report` | `src/app/(dashboard)/report/month-end-report/page.tsx` |
+| `/report/credit-card-transaction` | `src/app/(dashboard)/report/credit-card-transaction/page.tsx` |
+| `/report/credit-card-transaction/details` | `src/app/(dashboard)/report/credit-card-transaction/details/page.tsx` |
+| `/report/monthly-sales-tax` | `src/app/(dashboard)/report/monthly-sales-tax/page.tsx` |
 | `/report/orders` | `src/app/(dashboard)/report/orders/page.tsx` |
 | `/report` | `src/app/(dashboard)/report/page.tsx` |
 | `/report/shift-report/[id]` | `src/app/(dashboard)/report/shift-report/[id]/page.tsx` |
@@ -224,13 +227,33 @@ src/app/(dashboard)/report/_components/retail-report-date-filter.tsx
 src/app/(dashboard)/report/_components/retail-report-table.tsx
 src/app/(dashboard)/report/day-end-report/[id]/page.tsx
 src/app/(dashboard)/report/day-end-report/_components/data.ts
+src/app/(dashboard)/report/day-end-report/_components/day-end-report-detail-entry.tsx
+src/app/(dashboard)/report/day-end-report/_components/day-end-report-entry.tsx
 src/app/(dashboard)/report/day-end-report/_components/day-end-report.tsx
+src/app/(dashboard)/report/day-end-report/_components/retail-day-end-data.ts
+src/app/(dashboard)/report/day-end-report/_components/retail-day-end-detail.tsx
+src/app/(dashboard)/report/day-end-report/_components/retail-day-end-list.tsx
 src/app/(dashboard)/report/day-end-report/page.tsx
 src/app/(dashboard)/report/employee-clock-in-out/_components/data.ts
 src/app/(dashboard)/report/employee-clock-in-out/_components/employee-clock-report.tsx
 src/app/(dashboard)/report/employee-clock-in-out/page.tsx
+src/app/(dashboard)/report/month-end-report/_components/month-end-report-entry.tsx
 src/app/(dashboard)/report/month-end-report/_components/month-end-report.tsx
+src/app/(dashboard)/report/month-end-report/_components/retail-month-end-data.ts
+src/app/(dashboard)/report/month-end-report/_components/retail-month-end-report.tsx
 src/app/(dashboard)/report/month-end-report/page.tsx
+src/app/(dashboard)/report/credit-card-transaction/_components/credit-card-transaction-detail-entry.tsx
+src/app/(dashboard)/report/credit-card-transaction/_components/credit-card-transaction-entry.tsx
+src/app/(dashboard)/report/credit-card-transaction/_components/retail-credit-card-data.ts
+src/app/(dashboard)/report/credit-card-transaction/_components/retail-credit-card-detail.tsx
+src/app/(dashboard)/report/credit-card-transaction/_components/retail-credit-card-list.tsx
+src/app/(dashboard)/report/credit-card-transaction/details/page.tsx
+src/app/(dashboard)/report/credit-card-transaction/page.tsx
+src/app/(dashboard)/report/monthly-sales-tax/_components/monthly-sales-tax-entry.tsx
+src/app/(dashboard)/report/monthly-sales-tax/_components/retail-monthly-sales-tax-data.ts
+src/app/(dashboard)/report/monthly-sales-tax/_components/retail-monthly-sales-tax-report.tsx
+src/app/(dashboard)/report/monthly-sales-tax/page.tsx
+src/app/(dashboard)/report/_components/retail-month-year-filter.tsx
 src/app/(dashboard)/report/orders/order-reporting.tsx
 src/app/(dashboard)/report/orders/page.tsx
 src/app/(dashboard)/report/page.tsx
@@ -249,6 +272,9 @@ src/app/(dashboard)/report/transaction-detail/_components/data.ts
 src/app/(dashboard)/report/transaction-detail/_components/transaction-detail.tsx
 src/app/(dashboard)/report/transaction-detail/page.tsx
 src/app/(dashboard)/report/week-end-report/_components/data.ts
+src/app/(dashboard)/report/week-end-report/_components/retail-week-end-data.ts
+src/app/(dashboard)/report/week-end-report/_components/retail-week-end-report.tsx
+src/app/(dashboard)/report/week-end-report/_components/week-end-report-entry.tsx
 src/app/(dashboard)/report/week-end-report/_components/week-end-report.tsx
 src/app/(dashboard)/report/week-end-report/page.tsx
 src/app/(dashboard)/report/year-end-report/_components/data.ts

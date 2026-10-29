@@ -21,7 +21,7 @@ import {
   getLocalTimeZone,
   type DateValue,
 } from "@internationalized/date";
-import { useContext, useState, type ContextType } from "react";
+import { useContext, useState, type ContextType, type ReactNode } from "react";
 import { Button as AriaButton, CalendarStateContext } from "react-aria-components";
 import { LuRotateCcw } from "react-icons/lu";
 import {
@@ -214,9 +214,11 @@ function formatDay(value: DateValue) {
 export function RetailReportDateFilter({
   onSearch,
   onReset,
+  extraActions,
 }: {
   onSearch: (filter: RetailAppliedDateFilter) => void;
   onReset: () => void;
+  extraActions?: ReactNode;
 }) {
   const [singleDate, setSingleDate] = useState<CalendarDate | null>(null);
   const [range, setRange] = useState<CalendarRange | null>(null);
@@ -358,6 +360,7 @@ export function RetailReportDateFilter({
         >
           <LuRotateCcw /> Reset
         </Button>
+        {extraActions}
       </div>
     </section>
   );

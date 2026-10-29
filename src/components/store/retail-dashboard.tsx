@@ -74,7 +74,12 @@ import {
   LabelList,
   XAxis,
   YAxis,
+  type TooltipContentProps,
 } from "recharts";
+import type {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
 
 type Metric = {
   label: string;
@@ -494,11 +499,7 @@ function TrendTooltip({
   active,
   payload,
   label,
-}: {
-  active?: boolean;
-  payload?: Array<{ value?: number | string }>;
-  label?: string;
-}) {
+}: TooltipContentProps<ValueType, NameType>) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-card-border bg-dropdowns-background px-3 py-2 text-xs shadow-md">
@@ -942,7 +943,8 @@ const quickReports: Array<{
   },
   {
     title: "Day-End Report",
-    description: "Review completed day-end batches and totals.",
+    description: "Find day-end batches by a single date or a date range.",
+    href: "/report/day-end-report",
     icon: LuCalendarClock,
     iconClassName: "bg-badge-sky-background text-badge-sky-icon-color",
   },
@@ -955,19 +957,22 @@ const quickReports: Array<{
   },
   {
     title: "Credit Card Transaction Details",
-    description: "Review card payments and settlement details.",
+    description: "Find card transactions by a single date or a date range.",
+    href: "/report/credit-card-transaction",
     icon: LuCreditCard,
     iconClassName: "bg-badge-violet-background text-badge-violet-icon-color",
   },
   {
     title: "Week End Report",
-    description: "Summarize sales for a selected week.",
+    description: "Choose a month and week to view the consolidated report.",
+    href: "/report/week-end-report",
     icon: LuCalendarRange,
     iconClassName: "bg-badge-success-background text-badge-success-icon-color",
   },
   {
     title: "Month End Report",
-    description: "Summarize sales for a selected month.",
+    description: "Choose a year and month to view the consolidated report.",
+    href: "/report/month-end-report",
     icon: LuCalendarDays,
     iconClassName: "bg-badge-warning-background text-badge-warning-icon-color",
   },
@@ -979,7 +984,8 @@ const quickReports: Array<{
   },
   {
     title: "Monthly Sales and Tax Report",
-    description: "Review monthly sales totals and tax collected.",
+    description: "Choose a year and month to review sales and tax totals.",
+    href: "/report/monthly-sales-tax",
     icon: LuChartColumn,
     iconClassName: "bg-badge-cyan-background text-badge-cyan-icon-color",
   },

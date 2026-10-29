@@ -1,5 +1,4 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import retailReportingSql from "../../../database/reporting/retail/001-tables.sql";
 import { ReportingError } from "./snapshot.ts";
 
 export const retailSyncTables = [
@@ -44,13 +43,7 @@ export type RetailTable = { name: RetailTableName; key: string; fields: RetailFi
 const quoteIdent = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 function retailSql() {
-  const path = join(process.cwd(), "database", "reporting", "retail", "001-tables.sql");
-  let sql = "";
-  try {
-    sql = readFileSync(path, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-  }
+  const sql = retailReportingSql;
   if (!sql.includes("tbl_checkout_transaction") || sql.includes("tbl_rpt_order") || !/create\s+table/i.test(sql))
     throw new ReportingError("Retail reporting tables are not available yet.", 503);
   return sql;

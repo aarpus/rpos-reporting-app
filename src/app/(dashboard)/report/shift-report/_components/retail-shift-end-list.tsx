@@ -23,7 +23,11 @@ import { retailShifts, type RetailShiftRow } from "./retail-shift-data";
 
 const noRows: RetailShiftRow[] = [];
 
-function overlaps(row: RetailShiftRow, from: RetailShiftRow["start"], to: RetailShiftRow["start"]) {
+function overlaps(
+  row: RetailShiftRow,
+  from: RetailShiftRow["start"],
+  to: RetailShiftRow["start"],
+) {
   return row.start.compare(to) <= 0 && row.end.compare(from) >= 0;
 }
 

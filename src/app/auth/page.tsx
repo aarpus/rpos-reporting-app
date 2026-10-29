@@ -100,6 +100,7 @@ export default async function AuthPage({
                   sizes="244px"
                   className="auth-logo-light object-contain"
                   priority
+                  loading="eager"
                 />
                 <Image
                   src="/images/logo-light.png"

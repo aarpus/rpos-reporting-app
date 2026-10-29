@@ -18,7 +18,7 @@ flowchart LR
   SW --> Browser
 ```
 
-Deployment code targets OpenNext on Cloudflare Workers with `nodejs_compat`. `wrangler.jsonc` points to `.open-next/worker.js` and `.open-next/assets`, binds `HYPERDRIVE`, and enables observability. Neon is the database provider described in the deployment guide, not a special database SDK dependency. No deployment was performed for this handover.
+Deployment code targets OpenNext on Cloudflare Workers with `nodejs_compat`. `wrangler.jsonc` points to `.open-next/worker.js` and `.open-next/assets`, binds `HYPERDRIVE`, and enables observability. Store provisioning SQL from `database/reporting/*/001-tables.sql` is inlined into the Worker; the Worker filesystem does not contain those files. Neon is the database provider described in the deployment guide, not a special database SDK dependency. No deployment was performed for this handover.
 
 ## Frontend
 

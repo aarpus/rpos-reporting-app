@@ -2,7 +2,7 @@
 
 ## Two schema sources
 
-`prisma/schema.prisma` describes current **public metadata**; datasource PostgreSQL, generated client at `src/generated/prisma`, URL supplied by `prisma.config.ts`. SQL migrations/functions and `database/reporting/restaurant/001-tables.sql` describe **per-store restaurant reporting**. Retail stores read `database/reporting/retail/001-tables.sql` when that file contains `CREATE TABLE` statements. Those report tables are not Prisma models. Raw `pg` services are the active application data-access path. Prisma helper/client usage is server-only.
+`prisma/schema.prisma` describes current **public metadata**; datasource PostgreSQL, generated client at `src/generated/prisma`, URL supplied by `prisma.config.ts`. SQL migrations/functions and `database/reporting/restaurant/001-tables.sql` describe **per-store restaurant reporting**. Retail stores use the bundled `database/reporting/retail/001-tables.sql` when that file contains `CREATE TABLE` statements. Those report tables are not Prisma models. Raw `pg` services are the active application data-access path. Prisma helper/client usage is server-only.
 
 **Current desired Prisma shape is not the same as the migration-created public shape.** Initial and notification migrations use UUID IDs/natural keys; current Prisma uses integer auto-increment surrogate IDs. No ID-conversion migration exists. The field catalog below documents source, not a queried live database. See K1 in [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 

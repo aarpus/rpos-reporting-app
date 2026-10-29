@@ -21,14 +21,37 @@ type NavigationSection = {
 };
 
 const RETAIL_QUICK_REPORTS: NavigationItem[] = [
+  {
+    title: "Shift End Report",
+    icon: <CalendarIcon />,
+    url: "/report/shift-report",
+  },
+  {
+    title: "Day-End Report",
+    icon: <CalendarIcon />,
+    url: "/report/day-end-report",
+  },
+  {
+    title: "Week End Report",
+    icon: <CalendarIcon />,
+    url: "/report/week-end-report",
+  },
+  {
+    title: "Month End Report",
+    icon: <CalendarIcon />,
+    url: "/report/month-end-report",
+  },
   { title: "Transaction Journal", icon: <TableIcon /> },
-  { title: "Day-End Report", icon: <CalendarIcon /> },
-  { title: "Shift End Report", icon: <CalendarIcon />, url: "/report/shift-report" },
-  { title: "Credit Card Transaction Details", icon: <InvoiceIcon /> },
-  { title: "Week End Report", icon: <CalendarIcon /> },
-  { title: "Month End Report", icon: <CalendarIcon /> },
-  { title: "Year End Report", icon: <CalendarIcon /> },
-  { title: "Monthly Sales and Tax Report", icon: <TableIcon /> },
+  {
+    title: "Credit Card Transaction",
+    icon: <InvoiceIcon />,
+    url: "/report/credit-card-transaction",
+  },
+  {
+    title: "Monthly Sales and Tax",
+    icon: <TableIcon />,
+    url: "/report/monthly-sales-tax",
+  },
   { title: "Invoice Report", icon: <InvoiceIcon /> },
   { title: "NoUPC Details Report", icon: <TableIcon /> },
 ];

@@ -27,9 +27,9 @@
     "db:bootstrap-admin": "node scripts/database.mjs bootstrap-admin",
     "pos:credential": "node scripts/pos-credential.mjs",
     "push:generate-vapid": "node scripts/generate-vapid.mjs",
-    "test:auth": "node --test --test-isolation=none tests/*.test.mjs",
+    "test:auth": "node --import ./scripts/register-sql-text.mjs --test --test-isolation=none tests/*.test.mjs",
     "reporting:import-public": "node scripts/import-public-reporting.mjs",
-    "test:reporting": "node --test --test-isolation=none tests/reporting.test.mjs tests/transaction-reporting.test.mjs",
+    "test:reporting": "node --import ./scripts/register-sql-text.mjs --test --test-isolation=none tests/reporting.test.mjs tests/transaction-reporting.test.mjs",
     "reporting:stores": "node scripts/reporting-stores.mjs",
     "reporting:install": "node scripts/install-reporting.mjs"
   },

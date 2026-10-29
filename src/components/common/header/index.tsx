@@ -10,7 +10,10 @@ import { useTheme } from "next-themes";
 import React from "react";
 import { NotificationsButton } from "./notifications";
 import SearchBar from "./searchbar";
-import { SelectedStoreHighlight, StoreSelector } from "@/components/store/store-selector";
+import {
+  SelectedStoreHighlight,
+  StoreSelector,
+} from "@/components/store/store-selector";
 
 const emptySubscribe = () => () => {};
 
@@ -18,7 +21,11 @@ const emptySubscribe = () => () => {};
 export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const { resolvedTheme } = useTheme();
-  const mounted = React.useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const mounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
   const isDark = mounted && resolvedTheme === "dark";
 
   return (
@@ -47,6 +54,7 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
               height={64}
               className="h-8 w-auto max-w-full object-contain"
               priority
+              loading="eager"
             />
           </div>
 
@@ -73,7 +81,9 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         <div className="hidden grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-5 xl:grid">
           {/* Left Side - Search */}
           <div className="min-w-0">
-            <div className="max-w-xs"><SearchBar /></div>
+            <div className="max-w-xs">
+              <SearchBar />
+            </div>
           </div>
 
           {/* Center - Active store */}

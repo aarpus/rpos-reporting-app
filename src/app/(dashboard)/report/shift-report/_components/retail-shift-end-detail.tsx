@@ -53,7 +53,20 @@ const printStyles = `
 `;
 
 function formatPrintedAt(date: Date) {
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const month = months[date.getMonth()];
   const day = String(date.getDate()).padStart(2, "0");
   const hours24 = date.getHours();
@@ -68,7 +81,9 @@ function MetaRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="grid grid-cols-[8.5rem_1fr] gap-x-3 py-1 text-sm">
       <dt className="text-text-secondary">{label}</dt>
-      <dd className="font-medium whitespace-nowrap text-text-primary">{value}</dd>
+      <dd className="font-medium whitespace-nowrap text-text-primary">
+        {value}
+      </dd>
     </div>
   );
 }
@@ -89,7 +104,11 @@ function Section({ title, rows }: { title: string; rows: RetailShiftLine[] }) {
               row.divider && "border-t border-card-border",
             )}
           >
-            <dt className={row.emphasize ? "text-text-primary" : "text-text-secondary"}>
+            <dt
+              className={
+                row.emphasize ? "text-text-primary" : "text-text-secondary"
+              }
+            >
               {row.label}
             </dt>
             <dd className="tabular-nums text-text-primary">{row.value}</dd>
@@ -100,7 +119,11 @@ function Section({ title, rows }: { title: string; rows: RetailShiftLine[] }) {
   );
 }
 
-export default function RetailShiftEndDetail({ shift }: { shift: RetailShiftRow }) {
+export default function RetailShiftEndDetail({
+  shift,
+}: {
+  shift: RetailShiftRow;
+}) {
   const router = useRouter();
   const { selectedStore } = useStore();
   const detail = retailShiftDetail(shift.id);
@@ -137,22 +160,27 @@ export default function RetailShiftEndDetail({ shift }: { shift: RetailShiftRow 
           <ArrowLeft />
           Back
         </Button>
-        <Button appearance="outline" size="sm" className="w-fit gap-1.5" onPress={exportPdf}>
+        <Button
+          appearance="outline"
+          size="sm"
+          className="w-fit gap-1.5"
+          onPress={exportPdf}
+        >
           <LuUpload />
           Export
         </Button>
       </div>
-
-      <p className="text-center text-sm font-semibold tracking-wide text-text-primary uppercase">
-        {selectedStore?.storeCode}
-      </p>
-      <div className="shift-title-bar mt-3 bg-text-primary px-4 py-2 text-center text-sm font-semibold tracking-wide text-card-surface-area">
-        SHIFT END REPORT {titleDate}
+      <div className="border border-card-border rounded-lg py-4 px-2">
+        <p className="text-center text-sm font-semibold tracking-wide text-text-primary uppercase">
+          {selectedStore?.storeCode}
+        </p>
+        <div className="shift-title-bar mt-3 bg-text-primary px-4 py-2 text-center text-sm font-semibold tracking-wide text-card-surface-area">
+          SHIFT END REPORT {titleDate}
+        </div>
+        <p className="mt-3 text-sm text-text-secondary">
+          Date & Time: {printedAt}
+        </p>
       </div>
-      <p className="mt-3 text-sm text-text-secondary">
-        Date & Time: {printedAt}
-      </p>
-
       <div className="mt-4 grid gap-6 border-y border-card-border py-4 sm:grid-cols-2">
         <dl>
           <MetaRow label="Station :" value={shift.terminal} />

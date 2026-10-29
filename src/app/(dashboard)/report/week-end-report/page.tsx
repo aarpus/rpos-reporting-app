@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import WeekEndReportView from "./_components/week-end-report";
+import { WeekEndReportEntry } from "./_components/week-end-report-entry";
 
 export const metadata: Metadata = {
   title: "Week End Report",
 };
 
 export default function WeekEndReportPage() {
-  return <WeekEndReportView />;
+  return <WeekEndReportEntry />;
 }

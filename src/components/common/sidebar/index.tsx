@@ -70,6 +70,7 @@ export default function Sidebar({
                   width={300}
                   height={64}
                   className="h-10 w-auto"
+                  loading="eager"
                 />
               ) : (
                 <Image
@@ -78,6 +79,7 @@ export default function Sidebar({
                   width={300}
                   height={64}
                   className="h-10 w-auto"
+                  loading="eager"
                 />
               )}
             </>

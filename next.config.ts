@@ -1,7 +1,16 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    rules: {
+      "*.sql": {
+        loaders: [path.join(process.cwd(), "scripts", "sql-text-loader.cjs")],
+        as: "*.js",
+      },
+    },
+  },
   typescript: {
     tsconfigPath:
       process.env.NODE_ENV === "production"
