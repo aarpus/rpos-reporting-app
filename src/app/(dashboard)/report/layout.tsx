@@ -15,7 +15,8 @@ function isRetailReportPage(pathname: string) {
     pathname === "/report/month-end-report" ||
     pathname === "/report/credit-card-transaction" ||
     pathname === "/report/credit-card-transaction/details" ||
-    pathname === "/report/monthly-sales-tax"
+    pathname === "/report/monthly-sales-tax" ||
+    pathname === "/report/invoice-report"
   );
 }
 

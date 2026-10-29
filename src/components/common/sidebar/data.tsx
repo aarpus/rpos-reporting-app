@@ -52,7 +52,11 @@ const RETAIL_QUICK_REPORTS: NavigationItem[] = [
     icon: <TableIcon />,
     url: "/report/monthly-sales-tax",
   },
-  { title: "Invoice Report", icon: <InvoiceIcon /> },
+  {
+    title: "Invoice Report",
+    icon: <InvoiceIcon />,
+    url: "/report/invoice-report",
+  },
   { title: "NoUPC Details Report", icon: <TableIcon /> },
 ];
 

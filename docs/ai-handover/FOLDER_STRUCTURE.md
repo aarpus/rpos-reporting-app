@@ -62,6 +62,7 @@ The tree below lists every discovered non-generated project file in the reviewed
 | `/report/credit-card-transaction` | `src/app/(dashboard)/report/credit-card-transaction/page.tsx` |
 | `/report/credit-card-transaction/details` | `src/app/(dashboard)/report/credit-card-transaction/details/page.tsx` |
 | `/report/monthly-sales-tax` | `src/app/(dashboard)/report/monthly-sales-tax/page.tsx` |
+| `/report/invoice-report` | `src/app/(dashboard)/report/invoice-report/page.tsx` |
 | `/report/orders` | `src/app/(dashboard)/report/orders/page.tsx` |
 | `/report` | `src/app/(dashboard)/report/page.tsx` |
 | `/report/shift-report/[id]` | `src/app/(dashboard)/report/shift-report/[id]/page.tsx` |
@@ -253,6 +254,10 @@ src/app/(dashboard)/report/monthly-sales-tax/_components/monthly-sales-tax-entry
 src/app/(dashboard)/report/monthly-sales-tax/_components/retail-monthly-sales-tax-data.ts
 src/app/(dashboard)/report/monthly-sales-tax/_components/retail-monthly-sales-tax-report.tsx
 src/app/(dashboard)/report/monthly-sales-tax/page.tsx
+src/app/(dashboard)/report/invoice-report/_components/invoice-report-entry.tsx
+src/app/(dashboard)/report/invoice-report/_components/retail-invoice-data.ts
+src/app/(dashboard)/report/invoice-report/_components/retail-invoice-list.tsx
+src/app/(dashboard)/report/invoice-report/page.tsx
 src/app/(dashboard)/report/_components/retail-month-year-filter.tsx
 src/app/(dashboard)/report/orders/order-reporting.tsx
 src/app/(dashboard)/report/orders/page.tsx

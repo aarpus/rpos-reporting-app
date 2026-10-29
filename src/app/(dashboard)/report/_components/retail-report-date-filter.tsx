@@ -215,10 +215,12 @@ export function RetailReportDateFilter({
   onSearch,
   onReset,
   extraActions,
+  extraFields,
 }: {
   onSearch: (filter: RetailAppliedDateFilter) => void;
   onReset: () => void;
   extraActions?: ReactNode;
+  extraFields?: ReactNode;
 }) {
   const [singleDate, setSingleDate] = useState<CalendarDate | null>(null);
   const [range, setRange] = useState<CalendarRange | null>(null);
@@ -340,6 +342,7 @@ export function RetailReportDateFilter({
             }}
           />
         </div>
+        {extraFields}
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">

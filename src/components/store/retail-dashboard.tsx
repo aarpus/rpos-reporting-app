@@ -991,7 +991,8 @@ const quickReports: Array<{
   },
   {
     title: "Invoice Report",
-    description: "Review supplier invoices and payments.",
+    description: "Find supplier invoices by date, amount, and invoice number.",
+    href: "/report/invoice-report",
     icon: LuFileText,
     iconClassName: "bg-badge-error-background text-badge-error-icon-color",
   },
