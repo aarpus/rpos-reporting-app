@@ -216,14 +216,23 @@ export function RetailReportDateFilter({
   onReset,
   extraActions,
   extraFields,
+  initialFilter = null,
 }: {
   onSearch: (filter: RetailAppliedDateFilter) => void;
   onReset: () => void;
   extraActions?: ReactNode;
   extraFields?: ReactNode;
+  /** Restores date controls when the parent remounts with a saved filter. */
+  initialFilter?: RetailAppliedDateFilter | null;
 }) {
-  const [singleDate, setSingleDate] = useState<CalendarDate | null>(null);
-  const [range, setRange] = useState<CalendarRange | null>(null);
+  const [singleDate, setSingleDate] = useState<CalendarDate | null>(() =>
+    initialFilter?.kind === "single" ? initialFilter.date : null,
+  );
+  const [range, setRange] = useState<CalendarRange | null>(() =>
+    initialFilter?.kind === "range"
+      ? { start: initialFilter.from, end: initialFilter.to }
+      : null,
+  );
   const [singleOpen, setSingleOpen] = useState(false);
   const [calendarPanel, setCalendarPanel] = useState<CalendarPanel>("days");
   const [filterKey, setFilterKey] = useState(0);

@@ -16,7 +16,14 @@ function isRetailReportPage(pathname: string) {
     pathname === "/report/credit-card-transaction" ||
     pathname === "/report/credit-card-transaction/details" ||
     pathname === "/report/monthly-sales-tax" ||
-    pathname === "/report/invoice-report"
+    pathname === "/report/transaction-journal" ||
+    pathname === "/report/transaction-journal/print-detail" ||
+    /^\/report\/transaction-journal\/view\/[^/]+$/.test(pathname) ||
+    pathname === "/report/invoice-report" ||
+    /^\/report\/invoice-report\/view\/[^/]+\/[^/]+$/.test(pathname) ||
+    /^\/report\/invoice-report\/profit-margin\/[^/]+\/[^/]+$/.test(pathname) ||
+    /^\/report\/invoice-report\/cost-variance\/[^/]+\/[^/]+$/.test(pathname) ||
+    /^\/report\/invoice-report\/qty-variance\/[^/]+\/[^/]+$/.test(pathname)
   );
 }
 

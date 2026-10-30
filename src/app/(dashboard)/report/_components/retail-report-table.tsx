@@ -43,6 +43,8 @@ export function RetailReportTable<Row>({
   emptyMessage,
   recordLabel,
   minWidthClassName = "min-w-[52rem]",
+  footerCell,
+  pageSizeOverride = null,
 }: {
   columns: RetailReportColumn<Row>[];
   rows: Row[];
@@ -50,10 +52,16 @@ export function RetailReportTable<Row>({
   emptyMessage: string;
   recordLabel: string;
   minWidthClassName?: string;
+  /** Optional footer cell renderer (e.g. totals). Skipped for empty tables. */
+  footerCell?: (column: RetailReportColumn<Row>) => ReactNode;
+  /** When set, forces that page size (e.g. print all rows). */
+  pageSizeOverride?: number | null;
 }) {
   const [pageSize, setPageSize] = useState(20);
   const [page, setPage] = useState(1);
   const rowsRef = useRef(rows);
+  const effectivePageSize =
+    pageSizeOverride && pageSizeOverride > 0 ? pageSizeOverride : pageSize;
 
   useEffect(() => {
     if (rowsRef.current === rows) return;
@@ -61,19 +69,19 @@ export function RetailReportTable<Row>({
     setPage(1);
   }, [rows]);
 
-  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+  const pageCount = Math.max(1, Math.ceil(rows.length / effectivePageSize));
   const currentPage = Math.min(page, pageCount);
   const pageRows = rows.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize,
+    (currentPage - 1) * effectivePageSize,
+    currentPage * effectivePageSize,
   );
-  const fromRow = rows.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-  const toRow = Math.min(currentPage * pageSize, rows.length);
+  const fromRow = rows.length === 0 ? 0 : (currentPage - 1) * effectivePageSize + 1;
+  const toRow = Math.min(currentPage * effectivePageSize, rows.length);
   const detailColumns = columns.filter((column) => !isActionColumn(column));
   const actionColumns = columns.filter((column) => isActionColumn(column));
 
   const pagination = (
-    <div className="flex flex-col gap-3 border-t border-card-border px-3 py-3 lg:flex-row lg:items-center lg:justify-between">
+    <div className="retail-report-no-print flex flex-col gap-3 border-t border-card-border px-3 py-3 lg:flex-row lg:items-center lg:justify-between">
       <p className="text-center text-xs text-text-tertiary sm:text-left">
         Showing {fromRow} to {toRow} of {rows.length} {recordLabel}
       </p>
@@ -84,7 +92,7 @@ export function RetailReportTable<Row>({
           </span>
           <Select
             aria-label="Rows per page"
-            value={String(pageSize)}
+            value={String(effectivePageSize)}
             onChange={(value) => {
               setPage(1);
               setPageSize(Number(value));
@@ -144,7 +152,7 @@ export function RetailReportTable<Row>({
   return (
     <Card className="overflow-hidden p-0">
       {/* Mobile: stacked cards so all fields stay readable without horizontal scroll */}
-      <div className="md:hidden">
+      <div className="md:hidden print:hidden">
         {pageRows.length === 0 ? (
           <p className="px-4 py-10 text-center text-sm text-text-tertiary">
             {emptyMessage}
@@ -175,7 +183,7 @@ export function RetailReportTable<Row>({
                   ))}
                 </dl>
                 {actionColumns.length > 0 && (
-                  <div className="flex flex-wrap items-center justify-center gap-2 border-t border-card-border pt-3">
+                  <div className="retail-report-no-print flex flex-wrap items-center justify-center gap-2 border-t border-card-border pt-3">
                     {actionColumns.map((column) => (
                       <div key={column.id}>{column.cell(row)}</div>
                     ))}
@@ -183,12 +191,35 @@ export function RetailReportTable<Row>({
                 )}
               </li>
             ))}
+            {footerCell && pageRows.length > 0 && (
+              <li className="space-y-2 bg-background-gray-secondary_alt_2 px-4 py-3">
+                <dl className="space-y-2">
+                  {detailColumns.map((column) => {
+                    const content = footerCell(column);
+                    if (content == null || content === false) return null;
+                    return (
+                      <div
+                        key={column.id}
+                        className="flex items-start justify-between gap-4"
+                      >
+                        <dt className="shrink-0 text-xs font-semibold text-text-secondary">
+                          {column.header}
+                        </dt>
+                        <dd className="min-w-0 text-right text-xs font-semibold tabular-nums text-text-primary">
+                          {content}
+                        </dd>
+                      </div>
+                    );
+                  })}
+                </dl>
+              </li>
+            )}
           </ul>
         )}
       </div>
 
       {/* Desktop / tablet: full table */}
-      <div className="hidden md:block">
+      <div className="hidden md:block print:block">
         <TableRoot
           className={cn("w-full rounded-none border-none", minWidthClassName)}
         >
@@ -199,6 +230,7 @@ export function RetailReportTable<Row>({
                   key={column.id}
                   className={cn(
                     "px-3 py-2.5 text-xs font-semibold whitespace-nowrap text-text-secondary",
+                    isActionColumn(column) && "retail-report-no-print",
                     column.headerClassName,
                   )}
                 >
@@ -218,18 +250,40 @@ export function RetailReportTable<Row>({
                 </TableCell>
               </TableRow>
             ) : (
-              pageRows.map((row) => (
-                <TableRow key={rowKey(row)}>
-                  {columns.map((column) => (
-                    <TableCell
-                      key={column.id}
-                      className={cn("px-3 py-2.5 text-xs", column.cellClassName)}
-                    >
-                      {column.cell(row)}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              <>
+                {pageRows.map((row) => (
+                  <TableRow key={rowKey(row)}>
+                    {columns.map((column) => (
+                      <TableCell
+                        key={column.id}
+                        className={cn(
+                          "px-3 py-2.5 text-xs",
+                          isActionColumn(column) && "retail-report-no-print",
+                          column.cellClassName,
+                        )}
+                      >
+                        {column.cell(row)}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+                {footerCell && (
+                  <TableRow className="bg-background-gray-secondary_alt_2">
+                    {columns.map((column) => (
+                      <TableCell
+                        key={column.id}
+                        className={cn(
+                          "px-3 py-2.5 text-xs font-semibold text-text-primary",
+                          isActionColumn(column) && "retail-report-no-print",
+                          column.cellClassName,
+                        )}
+                      >
+                        {footerCell(column)}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )}
+              </>
             )}
           </TableBody>
         </TableRoot>

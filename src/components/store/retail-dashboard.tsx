@@ -937,7 +937,8 @@ const quickReports: Array<{
 }> = [
   {
     title: "Transaction Journal",
-    description: "Review posted sales transactions.",
+    description: "Find posted sales by date or transaction number.",
+    href: "/report/transaction-journal",
     icon: LuReceiptText,
     iconClassName: "bg-badge-primary-background text-badge-primary-icon-color",
   },

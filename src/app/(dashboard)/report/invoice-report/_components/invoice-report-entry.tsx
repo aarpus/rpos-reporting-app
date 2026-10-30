@@ -1,6 +1,7 @@
 "use client";
 
 import { useStore } from "@/components/store/store-provider";
+import { Suspense } from "react";
 import RetailInvoiceList from "./retail-invoice-list";
 
 export function InvoiceReportEntry() {
@@ -12,5 +13,15 @@ export function InvoiceReportEntry() {
       </div>
     );
   }
-  return <RetailInvoiceList />;
+  return (
+    <Suspense
+      fallback={
+        <div className="px-4 py-6 text-sm text-text-secondary sm:px-6">
+          Loading invoice report…
+        </div>
+      }
+    >
+      <RetailInvoiceList />
+    </Suspense>
+  );
 }

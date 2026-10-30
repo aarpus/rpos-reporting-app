@@ -41,7 +41,11 @@ const RETAIL_QUICK_REPORTS: NavigationItem[] = [
     icon: <CalendarIcon />,
     url: "/report/month-end-report",
   },
-  { title: "Transaction Journal", icon: <TableIcon /> },
+  {
+    title: "Transaction Journal",
+    icon: <TableIcon />,
+    url: "/report/transaction-journal",
+  },
   {
     title: "Credit Card Transaction",
     icon: <InvoiceIcon />,

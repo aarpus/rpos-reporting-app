@@ -62,7 +62,14 @@ The tree below lists every discovered non-generated project file in the reviewed
 | `/report/credit-card-transaction` | `src/app/(dashboard)/report/credit-card-transaction/page.tsx` |
 | `/report/credit-card-transaction/details` | `src/app/(dashboard)/report/credit-card-transaction/details/page.tsx` |
 | `/report/monthly-sales-tax` | `src/app/(dashboard)/report/monthly-sales-tax/page.tsx` |
+| `/report/transaction-journal` | `src/app/(dashboard)/report/transaction-journal/page.tsx` |
+| `/report/transaction-journal/view/[id]` | `src/app/(dashboard)/report/transaction-journal/view/[id]/page.tsx` |
+| `/report/transaction-journal/print-detail` | `src/app/(dashboard)/report/transaction-journal/print-detail/page.tsx` |
 | `/report/invoice-report` | `src/app/(dashboard)/report/invoice-report/page.tsx` |
+| `/report/invoice-report/view/[id]/[type]` | `src/app/(dashboard)/report/invoice-report/view/[id]/[type]/page.tsx` |
+| `/report/invoice-report/profit-margin/[id]/[type]` | `src/app/(dashboard)/report/invoice-report/profit-margin/[id]/[type]/page.tsx` |
+| `/report/invoice-report/cost-variance/[id]/[type]` | `src/app/(dashboard)/report/invoice-report/cost-variance/[id]/[type]/page.tsx` |
+| `/report/invoice-report/qty-variance/[id]/[type]` | `src/app/(dashboard)/report/invoice-report/qty-variance/[id]/[type]/page.tsx` |
 | `/report/orders` | `src/app/(dashboard)/report/orders/page.tsx` |
 | `/report` | `src/app/(dashboard)/report/page.tsx` |
 | `/report/shift-report/[id]` | `src/app/(dashboard)/report/shift-report/[id]/page.tsx` |
@@ -254,10 +261,23 @@ src/app/(dashboard)/report/monthly-sales-tax/_components/monthly-sales-tax-entry
 src/app/(dashboard)/report/monthly-sales-tax/_components/retail-monthly-sales-tax-data.ts
 src/app/(dashboard)/report/monthly-sales-tax/_components/retail-monthly-sales-tax-report.tsx
 src/app/(dashboard)/report/monthly-sales-tax/page.tsx
+src/app/(dashboard)/report/invoice-report/_components/invoice-cost-variance-entry.tsx
+src/app/(dashboard)/report/invoice-report/_components/invoice-qty-variance-entry.tsx
 src/app/(dashboard)/report/invoice-report/_components/invoice-report-entry.tsx
+src/app/(dashboard)/report/invoice-report/_components/invoice-profit-margin-entry.tsx
+src/app/(dashboard)/report/invoice-report/_components/invoice-view-entry.tsx
+src/app/(dashboard)/report/invoice-report/_components/retail-invoice-cost-variance.tsx
 src/app/(dashboard)/report/invoice-report/_components/retail-invoice-data.ts
 src/app/(dashboard)/report/invoice-report/_components/retail-invoice-list.tsx
+src/app/(dashboard)/report/invoice-report/_components/retail-invoice-log-dialog.tsx
+src/app/(dashboard)/report/invoice-report/_components/retail-invoice-profit-margin.tsx
+src/app/(dashboard)/report/invoice-report/_components/retail-invoice-qty-variance.tsx
+src/app/(dashboard)/report/invoice-report/_components/retail-invoice-view.tsx
+src/app/(dashboard)/report/invoice-report/cost-variance/[id]/[type]/page.tsx
 src/app/(dashboard)/report/invoice-report/page.tsx
+src/app/(dashboard)/report/invoice-report/profit-margin/[id]/[type]/page.tsx
+src/app/(dashboard)/report/invoice-report/qty-variance/[id]/[type]/page.tsx
+src/app/(dashboard)/report/invoice-report/view/[id]/[type]/page.tsx
 src/app/(dashboard)/report/_components/retail-month-year-filter.tsx
 src/app/(dashboard)/report/orders/order-reporting.tsx
 src/app/(dashboard)/report/orders/page.tsx
@@ -276,6 +296,16 @@ src/app/(dashboard)/report/transaction-detail/[id]/page.tsx
 src/app/(dashboard)/report/transaction-detail/_components/data.ts
 src/app/(dashboard)/report/transaction-detail/_components/transaction-detail.tsx
 src/app/(dashboard)/report/transaction-detail/page.tsx
+src/app/(dashboard)/report/transaction-journal/_components/retail-transaction-journal-data.ts
+src/app/(dashboard)/report/transaction-journal/_components/retail-transaction-journal-print-detail.tsx
+src/app/(dashboard)/report/transaction-journal/_components/retail-transaction-journal-report.tsx
+src/app/(dashboard)/report/transaction-journal/_components/retail-transaction-journal-view.tsx
+src/app/(dashboard)/report/transaction-journal/_components/transaction-journal-entry.tsx
+src/app/(dashboard)/report/transaction-journal/_components/transaction-journal-print-detail-entry.tsx
+src/app/(dashboard)/report/transaction-journal/_components/transaction-journal-view-entry.tsx
+src/app/(dashboard)/report/transaction-journal/page.tsx
+src/app/(dashboard)/report/transaction-journal/print-detail/page.tsx
+src/app/(dashboard)/report/transaction-journal/view/[id]/page.tsx
 src/app/(dashboard)/report/week-end-report/_components/data.ts
 src/app/(dashboard)/report/week-end-report/_components/retail-week-end-data.ts
 src/app/(dashboard)/report/week-end-report/_components/retail-week-end-report.tsx
