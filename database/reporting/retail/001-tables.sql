@@ -209,6 +209,30 @@ CREATE TABLE __SCHEMA__."tbl_shift" (
     "is_sync_mysql" integer DEFAULT 0
 );
 
+CREATE TABLE __SCHEMA__."tbl_shift_end_report" (
+    "id" bigserial PRIMARY KEY NOT NULL,
+    "shiftid" bigint NOT NULL,
+    "stationname" varchar(100) NOT NULL,
+    "batch_number" bigint NOT NULL,
+    "shift" integer NOT NULL,
+    "start_time" timestamptz(6) NOT NULL,
+    "end_time" timestamptz(6),
+    "status" varchar(10) NOT NULL,
+    "employeename" varchar(100),
+    "employeeid" integer,
+    "totaltime" varchar(20),
+    "sale" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "taxes" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "sale_breakdown" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "terminalcashstatus" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "miscellaneous" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "terminalcashtransfer" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "created_at" timestamptz(6) NOT NULL DEFAULT now(),
+    UNIQUE ("shiftid"),
+    CHECK ("status" IN ('Open', 'Close'))
+);
+CREATE INDEX "tbl_shift_end_report_times_idx" ON __SCHEMA__."tbl_shift_end_report" ("start_time", "end_time");
+
 CREATE TABLE __SCHEMA__."tbl_batch" (
     "batchid" bigserial PRIMARY KEY NOT NULL,
     "BatchStart" timestamptz(6) NOT NULL,

@@ -440,7 +440,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"request_id\":\"retail-10-shift-1\",\"shift\":{\"shiftid\":\"2001\",\"batchid\":\"1001\",\"ShiftStart\":\"2026-10-27T08:10:00Z\",\"shiftnumber\":\"1\",\"employeeid\":\"4\",\"isopen\":1,\"stationid\":\"3\",\"stationname\":\"REG1\",\"employeename\":\"Cashier 1\"}}",
+              "raw": "{\"request_id\":\"retail-10-shift-1\",\"shift\":{\"shiftid\":\"2001\",\"stationname\":\"REG1\",\"batch_number\":\"1001\",\"shift\":\"1\",\"start_time\":\"2026-10-27T08:10:00Z\",\"end_time\":null,\"status\":\"Open\",\"employeename\":\"Cashier 1\",\"employeeid\":\"4\",\"sale\":[],\"taxes\":[],\"sale_breakdown\":[],\"terminalcashstatus\":[],\"miscellaneous\":[],\"terminalcashtransfer\":[]}}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -475,7 +475,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"request_id\":\"retail-10-shift-2\",\"shift\":{\"shiftid\":\"2002\",\"batchid\":\"1002\",\"ShiftStart\":\"2026-10-27T09:10:00Z\",\"shiftnumber\":\"2\",\"employeeid\":\"4\",\"isopen\":1,\"stationid\":\"3\",\"stationname\":\"REG2\",\"employeename\":\"Cashier 2\"}}",
+              "raw": "{\"request_id\":\"retail-10-shift-2\",\"shift\":{\"shiftid\":\"2002\",\"stationname\":\"REG2\",\"batch_number\":\"1002\",\"shift\":\"2\",\"start_time\":\"2026-10-27T09:10:00Z\",\"end_time\":null,\"status\":\"Open\",\"employeename\":\"Cashier 2\",\"employeeid\":\"4\",\"sale\":[],\"taxes\":[],\"sale_breakdown\":[],\"terminalcashstatus\":[],\"miscellaneous\":[],\"terminalcashtransfer\":[]}}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -510,7 +510,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"request_id\":\"retail-10-shift-3\",\"shift\":{\"shiftid\":\"2003\",\"batchid\":\"1003\",\"ShiftStart\":\"2026-10-27T10:10:00Z\",\"shiftnumber\":\"3\",\"employeeid\":\"4\",\"isopen\":1,\"stationid\":\"3\",\"stationname\":\"REG3\",\"employeename\":\"Cashier 3\"}}",
+              "raw": "{\"request_id\":\"retail-10-shift-3\",\"shift\":{\"shiftid\":\"2003\",\"stationname\":\"REG3\",\"batch_number\":\"1003\",\"shift\":\"3\",\"start_time\":\"2026-10-27T10:10:00Z\",\"end_time\":null,\"status\":\"Open\",\"employeename\":\"Cashier 3\",\"employeeid\":\"4\",\"sale\":[],\"taxes\":[],\"sale_breakdown\":[],\"terminalcashstatus\":[],\"miscellaneous\":[],\"terminalcashtransfer\":[]}}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -545,7 +545,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"request_id\":\"retail-10-shift-4\",\"shift\":{\"shiftid\":\"2004\",\"batchid\":\"1004\",\"ShiftStart\":\"2026-10-27T11:10:00Z\",\"shiftnumber\":\"4\",\"employeeid\":\"4\",\"isopen\":1,\"stationid\":\"3\",\"stationname\":\"REG4\",\"employeename\":\"Cashier 4\"}}",
+              "raw": "{\"request_id\":\"retail-10-shift-4\",\"shift\":{\"shiftid\":\"2004\",\"stationname\":\"REG4\",\"batch_number\":\"1004\",\"shift\":\"4\",\"start_time\":\"2026-10-27T11:10:00Z\",\"end_time\":null,\"status\":\"Open\",\"employeename\":\"Cashier 4\",\"employeeid\":\"4\",\"sale\":[],\"taxes\":[],\"sale_breakdown\":[],\"terminalcashstatus\":[],\"miscellaneous\":[],\"terminalcashtransfer\":[]}}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -580,7 +580,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"request_id\":\"retail-10-shift-5\",\"shift\":{\"shiftid\":\"2005\",\"batchid\":\"1005\",\"ShiftStart\":\"2026-10-27T12:10:00Z\",\"shiftnumber\":\"5\",\"employeeid\":\"4\",\"isopen\":1,\"stationid\":\"3\",\"stationname\":\"REG5\",\"employeename\":\"Cashier 5\"}}",
+              "raw": "{\"request_id\":\"retail-10-shift-5\",\"shift\":{\"shiftid\":\"2005\",\"stationname\":\"REG5\",\"batch_number\":\"1005\",\"shift\":\"5\",\"start_time\":\"2026-10-27T12:10:00Z\",\"end_time\":null,\"status\":\"Open\",\"employeename\":\"Cashier 5\",\"employeeid\":\"4\",\"sale\":[],\"taxes\":[],\"sale_breakdown\":[],\"terminalcashstatus\":[],\"miscellaneous\":[],\"terminalcashtransfer\":[]}}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -615,7 +615,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"request_id\":\"retail-10-shift-6\",\"shift\":{\"shiftid\":\"2006\",\"batchid\":\"1006\",\"ShiftStart\":\"2026-10-27T13:10:00Z\",\"shiftnumber\":\"6\",\"employeeid\":\"4\",\"isopen\":1,\"stationid\":\"3\",\"stationname\":\"REG6\",\"employeename\":\"Cashier 6\"}}",
+              "raw": "{\"request_id\":\"retail-10-shift-6\",\"shift\":{\"shiftid\":\"2006\",\"stationname\":\"REG6\",\"batch_number\":\"1006\",\"shift\":\"6\",\"start_time\":\"2026-10-27T13:10:00Z\",\"end_time\":null,\"status\":\"Open\",\"employeename\":\"Cashier 6\",\"employeeid\":\"4\",\"sale\":[],\"taxes\":[],\"sale_breakdown\":[],\"terminalcashstatus\":[],\"miscellaneous\":[],\"terminalcashtransfer\":[]}}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -650,7 +650,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"request_id\":\"retail-10-shift-7\",\"shift\":{\"shiftid\":\"2007\",\"batchid\":\"1007\",\"ShiftStart\":\"2026-10-27T14:10:00Z\",\"shiftnumber\":\"7\",\"employeeid\":\"4\",\"isopen\":1,\"stationid\":\"3\",\"stationname\":\"REG7\",\"employeename\":\"Cashier 7\"}}",
+              "raw": "{\"request_id\":\"retail-10-shift-7\",\"shift\":{\"shiftid\":\"2007\",\"stationname\":\"REG7\",\"batch_number\":\"1007\",\"shift\":\"7\",\"start_time\":\"2026-10-27T14:10:00Z\",\"end_time\":null,\"status\":\"Open\",\"employeename\":\"Cashier 7\",\"employeeid\":\"4\",\"sale\":[],\"taxes\":[],\"sale_breakdown\":[],\"terminalcashstatus\":[],\"miscellaneous\":[],\"terminalcashtransfer\":[]}}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -685,7 +685,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"request_id\":\"retail-10-shift-8\",\"shift\":{\"shiftid\":\"2008\",\"batchid\":\"1008\",\"ShiftStart\":\"2026-10-27T15:10:00Z\",\"shiftnumber\":\"8\",\"employeeid\":\"4\",\"isopen\":1,\"stationid\":\"3\",\"stationname\":\"REG8\",\"employeename\":\"Cashier 8\"}}",
+              "raw": "{\"request_id\":\"retail-10-shift-8\",\"shift\":{\"shiftid\":\"2008\",\"stationname\":\"REG8\",\"batch_number\":\"1008\",\"shift\":\"8\",\"start_time\":\"2026-10-27T15:10:00Z\",\"end_time\":null,\"status\":\"Open\",\"employeename\":\"Cashier 8\",\"employeeid\":\"4\",\"sale\":[],\"taxes\":[],\"sale_breakdown\":[],\"terminalcashstatus\":[],\"miscellaneous\":[],\"terminalcashtransfer\":[]}}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -720,7 +720,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"request_id\":\"retail-10-shift-9\",\"shift\":{\"shiftid\":\"2009\",\"batchid\":\"1009\",\"ShiftStart\":\"2026-10-27T16:10:00Z\",\"shiftnumber\":\"9\",\"employeeid\":\"4\",\"isopen\":1,\"stationid\":\"3\",\"stationname\":\"REG9\",\"employeename\":\"Cashier 9\"}}",
+              "raw": "{\"request_id\":\"retail-10-shift-9\",\"shift\":{\"shiftid\":\"2009\",\"stationname\":\"REG9\",\"batch_number\":\"1009\",\"shift\":\"9\",\"start_time\":\"2026-10-27T16:10:00Z\",\"end_time\":null,\"status\":\"Open\",\"employeename\":\"Cashier 9\",\"employeeid\":\"4\",\"sale\":[],\"taxes\":[],\"sale_breakdown\":[],\"terminalcashstatus\":[],\"miscellaneous\":[],\"terminalcashtransfer\":[]}}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -755,7 +755,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"request_id\":\"retail-10-shift-10\",\"shift\":{\"shiftid\":\"2010\",\"batchid\":\"1010\",\"ShiftStart\":\"2026-10-27T17:10:00Z\",\"shiftnumber\":\"10\",\"employeeid\":\"4\",\"isopen\":1,\"stationid\":\"3\",\"stationname\":\"REG10\",\"employeename\":\"Cashier 10\"}}",
+              "raw": "{\"request_id\":\"retail-10-shift-10\",\"shift\":{\"shiftid\":\"2010\",\"stationname\":\"REG10\",\"batch_number\":\"1010\",\"shift\":\"10\",\"start_time\":\"2026-10-27T17:10:00Z\",\"end_time\":\"2026-10-27T23:10:00Z\",\"status\":\"Close\",\"employeename\":\"Cashier 10\",\"employeeid\":\"4\",\"totaltime\":\"06:00:00\",\"sale\":[{\"label\":\"Beer\",\"value\":\"12.00\"}],\"taxes\":[{\"label\":\"Total\",\"value\":\"0.80\"}],\"sale_breakdown\":[{\"label\":\"Cash\",\"value\":\"12.80\"}],\"terminalcashstatus\":[{\"label\":\"Opening Balance\",\"value\":\"20.00\"}],\"miscellaneous\":[{\"label\":\"No Sale Hit Count\",\"value\":\"0\"}],\"terminalcashtransfer\":[]}}",
               "options": {
                 "raw": {
                   "language": "json"

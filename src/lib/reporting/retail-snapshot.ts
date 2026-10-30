@@ -9,7 +9,27 @@ import {
 import { ReportingError } from "./snapshot.ts";
 
 export type RetailBatchSnapshot = { request_id: string; batch: RetailRow };
-export type RetailShiftSnapshot = { request_id: string; shift: RetailRow };
+export type ShiftReportLine = { label: string; value: string };
+export type ShiftReportStatus = "Open" | "Close";
+export type ShiftEndReport = {
+  shiftid: string;
+  stationname: string;
+  batch_number: string;
+  shift: number;
+  start_time: string;
+  end_time: string | null;
+  status: ShiftReportStatus;
+  employeename: string | null;
+  employeeid: number | null;
+  totaltime: string | null;
+  sale: ShiftReportLine[];
+  taxes: ShiftReportLine[];
+  sale_breakdown: ShiftReportLine[];
+  terminalcashstatus: ShiftReportLine[];
+  miscellaneous: ShiftReportLine[];
+  terminalcashtransfer: ShiftReportLine[];
+};
+export type RetailShiftSnapshot = { request_id: string; shift: ShiftEndReport };
 export type RetailOrderSnapshot = {
   request_id: string;
   checkout_transaction: RetailRow;
@@ -166,9 +186,96 @@ export function parseRetailBatch(value: unknown): RetailBatchSnapshot {
   return { request_id: requestId(body), batch: parseRetailRow("tbl_batch", body.batch) };
 }
 
+const shiftReportCards = ["sale", "taxes", "sale_breakdown", "terminalcashstatus", "miscellaneous", "terminalcashtransfer"] as const;
+const shiftReportKeys = new Set<string>([
+  "shiftid",
+  "stationname",
+  "batch_number",
+  "shift",
+  "start_time",
+  "end_time",
+  "status",
+  "employeename",
+  "employeeid",
+  "totaltime",
+  ...shiftReportCards,
+]);
+
+function requiredText(value: unknown, name: string, maxLength: number) {
+  return String(parseRetailValue({ name, kind: "string", required: true, notNull: true, maxLength }, value));
+}
+
+function optionalText(value: unknown, name: string, maxLength: number) {
+  if (value === undefined || value === null) return null;
+  return requiredText(value, name, maxLength);
+}
+
+function positiveInteger(value: unknown, name: string) {
+  const parsed = Number(parseRetailValue({ name, kind: "integer", required: true, notNull: true }, value));
+  if (parsed <= 0) throw new ReportingError(`${name} must be a positive id.`);
+  return parsed;
+}
+
+function optionalPositiveInteger(value: unknown, name: string) {
+  if (value === undefined || value === null) return null;
+  return positiveInteger(value, name);
+}
+
+function positiveBigint(value: unknown, name: string) {
+  const parsed = String(parseRetailValue({ name, kind: "bigint", required: true, notNull: true }, value));
+  if (BigInt(parsed) <= BigInt(0)) throw new ReportingError(`${name} must be a positive id.`);
+  return parsed;
+}
+
+function reportTimestamp(value: unknown, name: string) {
+  return String(parseRetailValue({ name, kind: "timestamp", required: true, notNull: true }, value));
+}
+
+function optionalTimestamp(value: unknown, name: string) {
+  if (value === undefined || value === null) return null;
+  return reportTimestamp(value, name);
+}
+
+function cardLines(value: unknown, name: string): ShiftReportLine[] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value) || value.length > 200) throw new ReportingError(`${name} must be an array with at most 200 lines.`);
+  return value.map((line) => {
+    if (!object(line) || Object.keys(line).some((key) => key !== "label" && key !== "value"))
+      throw new ReportingError(`Invalid ${name} line.`);
+    return {
+      label: requiredText(line.label, `${name} label`, 80),
+      value: requiredText(line.value, `${name} value`, 40),
+    };
+  });
+}
+
 export function parseRetailShift(value: unknown): RetailShiftSnapshot {
   const body = envelope(value, ["request_id", "shift"], "shift", "/api/pos/reporting/retail/shift");
-  return { request_id: requestId(body), shift: parseRetailRow("tbl_shift", body.shift) };
+  if (!object(body.shift)) throw new ReportingError("Invalid shift.");
+  if (Object.keys(body.shift).some((key) => !shiftReportKeys.has(key))) throw new ReportingError("Unknown shift field.");
+  const status = body.shift.status;
+  if (status !== "Open" && status !== "Close") throw new ReportingError("Invalid status.");
+  const end_time = optionalTimestamp(body.shift.end_time, "end_time");
+  if (status === "Close" && !end_time) throw new ReportingError("end_time is required when status is Close.");
+  const shift: ShiftEndReport = {
+    shiftid: positiveBigint(body.shift.shiftid, "shiftid"),
+    stationname: requiredText(body.shift.stationname, "stationname", 100),
+    batch_number: positiveBigint(body.shift.batch_number, "batch_number"),
+    shift: positiveInteger(body.shift.shift, "shift"),
+    start_time: reportTimestamp(body.shift.start_time, "start_time"),
+    end_time,
+    status,
+    employeename: optionalText(body.shift.employeename, "employeename", 100),
+    employeeid: optionalPositiveInteger(body.shift.employeeid, "employeeid"),
+    totaltime: optionalText(body.shift.totaltime, "totaltime", 20),
+    sale: cardLines(body.shift.sale, "sale"),
+    taxes: cardLines(body.shift.taxes, "taxes"),
+    sale_breakdown: cardLines(body.shift.sale_breakdown, "sale_breakdown"),
+    terminalcashstatus: cardLines(body.shift.terminalcashstatus, "terminalcashstatus"),
+    miscellaneous: cardLines(body.shift.miscellaneous, "miscellaneous"),
+    terminalcashtransfer: cardLines(body.shift.terminalcashtransfer, "terminalcashtransfer"),
+  };
+  return { request_id: requestId(body), shift };
 }
 
 export function parseRetailOrder(value: unknown): RetailOrderSnapshot {

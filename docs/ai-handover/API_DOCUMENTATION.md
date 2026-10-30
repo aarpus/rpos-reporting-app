@@ -150,7 +150,7 @@ Sources `src/app/api/pos/reporting/retail/{batch,shift,orders}/route.ts` and `sr
 
 Retail rows use the POS column names in `database/reporting/retail/001-tables.sql`. They do not use `store_code`, `batch_code`, `order_code`, or `source_revision`. Sending those fields, or a restaurant envelope, returns 400. `request_id` is required for the response and is not stored. There is no revision or stale result: the same POS id with the same content returns 200 `{status:"duplicate",request_id,...}`; changed content overwrites that id and returns 201 `{status:"accepted",request_id,...}`. Header Cache-Control=no-store.
 
-Create the batch before the shift, and the shift before the checkout. A missing parent returns 409 `Create the batch before this shift.` or `Create the shift before this transaction.` Each request is one object, not an array. Checkout child arrays are required, may be empty, and are capped at 2,000. Empty `transaction_detail`, `transaction_payment`, or `transaction_gift_card` deletes those children for that `transactionid`. A line, payment, or gift-card id that already belongs to another checkout returns 409.
+Create the checkout only after a `tbl_shift` row exists. A missing shift returns 409 `Create the shift before this transaction.` `POST /api/pos/reporting/retail/shift` upserts `tbl_shift_end_report` by `shiftid` and does not insert `tbl_shift` or require a batch. Each request is one object, not an array. Checkout child arrays are required, may be empty, and are capped at 2,000. Empty `transaction_detail`, `transaction_payment`, or `transaction_gift_card` deletes those children for that `transactionid`. A line, payment, or gift-card id that already belongs to another checkout returns 409.
 
 Every physical column from the retail table is accepted. The POS id is required. Any other column that the table marks `NOT NULL` and that has no default is required. A nullable column that is omitted, or sent as null, is stored blank (`NULL`), including when the column has a SQL default. A `NOT NULL` column with a default is stored as that default when omitted, because the table cannot store blank. `bytea` columns (`logo`, `Coupon_img`) accept Base64. `time` columns accept `HH:MM:SS` with up to six fractional digits.
 
@@ -168,16 +168,26 @@ Checkout money columns are stored as sent. Rows in `tbl_transaction_payment`, in
   "request_id": "example-retail-shift-1",
   "shift": {
     "shiftid": "201",
-    "batchid": "101",
-    "ShiftStart": "2026-10-27T04:05:00Z",
-    "shiftnumber": "1",
-    "employeeid": "4",
-    "stationid": "3",
     "stationname": "REG1",
-    "employeename": "Ada"
+    "batch_number": "5",
+    "shift": "2",
+    "start_time": "2026-10-27T04:05:00Z",
+    "end_time": "2026-10-27T10:12:28Z",
+    "status": "Close",
+    "employeename": "Ada",
+    "employeeid": "4",
+    "totaltime": "06:07:28",
+    "sale": [{ "label": "Beer", "value": "520.00" }],
+    "taxes": [{ "label": "Total", "value": "46.80" }],
+    "sale_breakdown": [{ "label": "Cash", "value": "351.85" }],
+    "terminalcashstatus": [{ "label": "Opening Balance", "value": "23.23" }],
+    "miscellaneous": [{ "label": "No Sale Hit Count", "value": "0" }],
+    "terminalcashtransfer": []
   }
 }
 ```
+
+`shiftid`, `batch_number`, `shift`, and `employeeid` are positive integers, sent as strings or numbers. `end_time` may be null while `status` is `Open`; `Close` requires `end_time`. Each card is an ordered array of `{ "label", "value" }` strings, at most 200 lines. Omitted cards are stored as `[]`. Money stays an exact decimal string. Same content for that `shiftid` returns duplicate; changed content overwrites the row.
 
 ```json
 {
@@ -255,6 +265,12 @@ Source `src/app/api/reporting/transaction-detail/route.ts`, `src/lib/reporting/t
 
 200 `{storeCode,timezone,rows,count,totals,options,detail}`. Rows: `id` order code, `checkNo`, `createdAt`, string amounts `subtotal,tax,discount,gratuity,fees,tips,total`, `paidBy`, `terminal`, placeholder `cashier`, `transType`. Totals: decimal strings `sales,refunds,average,tips,gratuity,fees`. Options: `tenders:string[]`, `departments:{id,label}[]`, `statuses:string[]`, drawn from all store data. Detail is null or a row plus `items:[{id,name,sku,qty,amount}]` and `payments:[{id,method,amount}]`. Count is total matching orders before pagination. Expected errors/cache headers match order reads; missing receipt is 404.
 
+### GET `/api/reporting/retail/shift-end`
+
+Source `src/app/api/reporting/retail/shift-end/route.ts`, `src/lib/reporting/retail-shift-read.ts`. Session and registered store authorization. The store must be `RETAIL`. Required query `store_code`. List mode also requires `from` and `to` (inclusive YYYY-MM-DD, from<=to). Detail mode sends `id`, the report row id, and does not use the dates.
+
+List 200 `{storeCode,timezone,rows}`. Each row is `id`, `shiftid`, `stationname`, `batch_number`, `shift`, `start_time`, `end_time`, `status`. A row matches when its start date in the store timezone is on or before `to`, and its end date is on or after `from`. An open row with a null end stays in range when its start is on or before `to`. Detail 200 `{storeCode,timezone,shift}` adds `employeename`, `employeeid`, `totaltime`, and the card arrays `sale`, `taxes`, `sale_breakdown`, `terminalcashstatus`, `miscellaneous`, `terminalcashtransfer`. Timestamps are ISO. Missing id is 404. Expected 400 filters, 401 session, 403 unavailable/denied schema, 503 unexpected query failure. Cache-Control private,no-store.
+
 These endpoints have different date and monetary semantics: consult [BUSINESS_LOGIC.md](BUSINESS_LOGIC.md) before aligning them.
 
 ## Verified route export inventory
@@ -299,6 +315,7 @@ Generated from route source files, including the Auth.js handler re-export. HEAD
 | `/api/pos/reporting/retail/cashmachine_batch` | POST | `src/app/api/pos/reporting/retail/cashmachine_batch/route.ts` |
 | `/api/push-subscriptions` | POST, DELETE | `src/app/api/push-subscriptions/route.ts` |
 | `/api/reporting/orders` | GET | `src/app/api/reporting/orders/route.ts` |
+| `/api/reporting/retail/shift-end` | GET | `src/app/api/reporting/retail/shift-end/route.ts` |
 | `/api/reporting/transaction-detail` | GET | `src/app/api/reporting/transaction-detail/route.ts` |
 | `/api/store-selection` | POST | `src/app/api/store-selection/route.ts` |
 | `/api/stores` | GET | `src/app/api/stores/route.ts` |

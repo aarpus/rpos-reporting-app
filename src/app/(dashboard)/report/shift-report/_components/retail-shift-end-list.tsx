@@ -7,7 +7,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/tailgrids/core/tooltip";
+import { useStore } from "@/components/store/store-provider";
+import { reportingQueryKey } from "@/lib/reporting/query-key";
 import { cn } from "@/utils/cn";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { LuEye } from "react-icons/lu";
@@ -19,19 +22,34 @@ import {
   RetailReportTable,
   type RetailReportColumn,
 } from "../../_components/retail-report-table";
-import { retailShifts, type RetailShiftRow } from "./retail-shift-data";
+import { formatShiftStamp, type RetailShiftStatus } from "./retail-shift-data";
 
-const noRows: RetailShiftRow[] = [];
+type ShiftListRow = {
+  id: string;
+  stationname: string;
+  batch_number: string;
+  shift: number;
+  start_time: string;
+  end_time: string | null;
+  status: RetailShiftStatus;
+};
 
-function overlaps(
-  row: RetailShiftRow,
-  from: RetailShiftRow["start"],
-  to: RetailShiftRow["start"],
-) {
-  return row.start.compare(to) <= 0 && row.end.compare(from) >= 0;
-}
+type ShiftListResponse = {
+  timezone: string;
+  rows: ShiftListRow[];
+};
 
-function StatusBadge({ status }: { status: RetailShiftRow["status"] }) {
+type DisplayRow = {
+  id: string;
+  startLabel: string;
+  endLabel: string;
+  terminal: string;
+  batch: string;
+  shift: number;
+  status: RetailShiftStatus;
+};
+
+function StatusBadge({ status }: { status: RetailShiftStatus }) {
   return (
     <span
       className={cn(
@@ -46,7 +64,7 @@ function StatusBadge({ status }: { status: RetailShiftRow["status"] }) {
   );
 }
 
-function ViewShiftButton({ row }: { row: RetailShiftRow }) {
+function ViewShiftButton({ row }: { row: DisplayRow }) {
   const router = useRouter();
   return (
     <Tooltip>
@@ -68,7 +86,7 @@ function ViewShiftButton({ row }: { row: RetailShiftRow }) {
   );
 }
 
-const columns: RetailReportColumn<RetailShiftRow>[] = [
+const columns: RetailReportColumn<DisplayRow>[] = [
   {
     id: "start",
     header: "Start Date/Time",
@@ -111,22 +129,60 @@ const columns: RetailReportColumn<RetailShiftRow>[] = [
   },
 ];
 
+function dateRange(applied: RetailAppliedDateFilter) {
+  if (applied.kind === "single") {
+    const day = applied.date.toString();
+    return { from: day, to: day };
+  }
+  const ordered = applied.from.compare(applied.to) <= 0;
+  return {
+    from: (ordered ? applied.from : applied.to).toString(),
+    to: (ordered ? applied.to : applied.from).toString(),
+  };
+}
+
 export default function RetailShiftEndList() {
+  const { selectedStore } = useStore();
   const [applied, setApplied] = useState<RetailAppliedDateFilter | null>(null);
+  const range = useMemo(() => (applied ? dateRange(applied) : null), [applied]);
+  const storeCode = selectedStore?.storeCode ?? "";
+  const report = useQuery({
+    queryKey: reportingQueryKey(storeCode, range),
+    enabled: Boolean(storeCode && range),
+    queryFn: async ({ signal }): Promise<ShiftListResponse> => {
+      const params = new URLSearchParams({
+        store_code: storeCode,
+        from: range?.from ?? "",
+        to: range?.to ?? "",
+      });
+      const response = await fetch(`/api/reporting/retail/shift-end?${params}`, {
+        signal,
+        cache: "no-store",
+      });
+      const body = (await response.json()) as ShiftListResponse & { error?: string };
+      if (!response.ok) throw new Error(body.error ?? "Unable to load shifts.");
+      return body;
+    },
+  });
 
   const rows = useMemo(() => {
-    if (!applied) return noRows;
-    if (applied.kind === "single") {
-      return retailShifts.filter((row) =>
-        overlaps(row, applied.date, applied.date),
-      );
-    }
-    const from =
-      applied.from.compare(applied.to) <= 0 ? applied.from : applied.to;
-    const to =
-      applied.from.compare(applied.to) <= 0 ? applied.to : applied.from;
-    return retailShifts.filter((row) => overlaps(row, from, to));
-  }, [applied]);
+    const timezone = report.data?.timezone ?? selectedStore?.timezone ?? "UTC";
+    return (report.data?.rows ?? []).map((row) => ({
+      id: row.id,
+      startLabel: formatShiftStamp(row.start_time, timezone),
+      endLabel: formatShiftStamp(row.end_time, timezone),
+      terminal: row.stationname,
+      batch: row.batch_number,
+      shift: row.shift,
+      status: row.status,
+    }));
+  }, [report.data, selectedStore?.timezone]);
+
+  const emptyMessage = !applied
+    ? "Search a date to see shifts."
+    : report.isFetching
+      ? "Loading shifts."
+      : "No shifts found for the selected date.";
 
   return (
     <div className="min-h-full pb-6">
@@ -148,12 +204,20 @@ export default function RetailShiftEndList() {
           onSearch={setApplied}
           onReset={() => setApplied(null)}
         />
+        {applied && report.error ? (
+          <div role="alert" className="text-sm text-error-500">
+            {report.error.message}{" "}
+            <Button size="xs" appearance="outline" onPress={() => void report.refetch()}>
+              Retry
+            </Button>
+          </div>
+        ) : null}
         <RetailReportTable
           columns={columns}
-          rows={rows}
+          rows={applied ? rows : []}
           rowKey={(row) => row.id}
           recordLabel="shifts"
-          emptyMessage="No shifts found for the selected date. Preview shifts run from Jul 14, 2025 through Jul 16, 2025."
+          emptyMessage={emptyMessage}
         />
       </div>
     </div>

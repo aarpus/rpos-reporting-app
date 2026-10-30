@@ -7,12 +7,13 @@ import { ArrowLeft } from "@tailgrids/icons";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LuUpload } from "react-icons/lu";
+import { useQuery } from "@tanstack/react-query";
+import { notFound } from "next/navigation";
 import {
-  retailShiftDetail,
-  shiftDurationLabel,
-  shiftTitleDate,
+  decorateShiftLines,
+  formatShiftStamp,
+  formatShiftTitle,
   type RetailShiftLine,
-  type RetailShiftRow,
 } from "./retail-shift-data";
 
 const printStyles = `
@@ -119,15 +120,50 @@ function Section({ title, rows }: { title: string; rows: RetailShiftLine[] }) {
   );
 }
 
-export default function RetailShiftEndDetail({
-  shift,
-}: {
-  shift: RetailShiftRow;
-}) {
+type ShiftDetail = {
+  id: string;
+  stationname: string;
+  shift: number;
+  start_time: string;
+  end_time: string | null;
+  employeename: string | null;
+  employeeid: number | null;
+  totaltime: string | null;
+  sale: { label: string; value: string }[];
+  taxes: { label: string; value: string }[];
+  sale_breakdown: { label: string; value: string }[];
+  terminalcashstatus: { label: string; value: string }[];
+  miscellaneous: { label: string; value: string }[];
+  terminalcashtransfer: { label: string; value: string }[];
+};
+
+type ShiftDetailResponse = {
+  timezone: string;
+  shift: ShiftDetail | null;
+};
+
+export default function RetailShiftEndDetail({ id }: { id: string }) {
   const router = useRouter();
   const { selectedStore } = useStore();
-  const detail = retailShiftDetail(shift.id);
-  const titleDate = shiftTitleDate(shift.end);
+  const storeCode = selectedStore?.storeCode ?? "";
+  const report = useQuery({
+    queryKey: ["retail-shift-end", storeCode, id],
+    enabled: Boolean(storeCode),
+    queryFn: async ({ signal }): Promise<ShiftDetailResponse> => {
+      const params = new URLSearchParams({ store_code: storeCode, id });
+      const response = await fetch(`/api/reporting/retail/shift-end?${params}`, {
+        signal,
+        cache: "no-store",
+      });
+      if (response.status === 404) return { timezone: selectedStore?.timezone ?? "UTC", shift: null };
+      const body = (await response.json()) as ShiftDetailResponse & { error?: string };
+      if (!response.ok) throw new Error(body.error ?? "Unable to load this shift.");
+      return body;
+    },
+  });
+  const shift = report.data?.shift;
+  const timezone = report.data?.timezone ?? selectedStore?.timezone ?? "UTC";
+  const titleDate = shift ? formatShiftTitle(shift.end_time ?? shift.start_time, timezone) : "";
   const [printedAt, setPrintedAt] = useState("");
 
   useEffect(() => {
@@ -145,7 +181,14 @@ export default function RetailShiftEndDetail({
     window.print();
   }
 
-  if (!detail) return null;
+  if (report.isSuccess && !shift) notFound();
+  if (!shift) {
+    return (
+      <div className="px-4 py-4 text-sm text-text-secondary sm:px-6">
+        {report.error ? report.error.message : "Loading shift."}
+      </div>
+    );
+  }
 
   return (
     <div id="retail-shift-print" className="min-h-full px-4 py-4 sm:px-6">
@@ -183,30 +226,28 @@ export default function RetailShiftEndDetail({
       </div>
       <div className="mt-4 grid gap-6 border-y border-card-border py-4 sm:grid-cols-2">
         <dl>
-          <MetaRow label="Station :" value={shift.terminal} />
+          <MetaRow label="Station :" value={shift.stationname} />
           <MetaRow label="Shift :" value={String(shift.shift)} />
-          <MetaRow label="Start Time :" value={shift.startLabel} />
-          <MetaRow label="End Time :" value={shift.endLabel} />
+          <MetaRow label="Start Time :" value={formatShiftStamp(shift.start_time, timezone)} />
+          <MetaRow label="End Time :" value={formatShiftStamp(shift.end_time, timezone)} />
         </dl>
         <dl>
-          <MetaRow label="Employee Name :" value={detail.employeeName} />
-          <MetaRow label="Employee ID :" value={detail.employeeId} />
-          <MetaRow
-            label="Total Time :"
-            value={shiftDurationLabel(shift.startLabel, shift.endLabel)}
-          />
+          <MetaRow label="Employee Name :" value={shift.employeename ?? ""} />
+          <MetaRow label="Employee ID :" value={shift.employeeid === null ? "" : String(shift.employeeid)} />
+          <MetaRow label="Total Time :" value={shift.totaltime ?? ""} />
         </dl>
       </div>
 
       <div className="mt-4 grid items-start gap-4 lg:grid-cols-2">
         <div className="space-y-4">
-          <Section title="Sales" rows={detail.sales} />
-          <Section title="Miscellaneous" rows={detail.miscellaneous} />
+          <Section title="Sales" rows={decorateShiftLines(shift.sale)} />
+          <Section title="Miscellaneous" rows={decorateShiftLines(shift.miscellaneous)} />
         </div>
         <div className="space-y-4">
-          <Section title="Taxes" rows={detail.taxes} />
-          <Section title="Sales Breakdown" rows={detail.payments} />
-          <Section title="Terminal Cash Status" rows={detail.cashStatus} />
+          <Section title="Taxes" rows={decorateShiftLines(shift.taxes)} />
+          <Section title="Sales Breakdown" rows={decorateShiftLines(shift.sale_breakdown)} />
+          <Section title="Terminal Cash Status" rows={decorateShiftLines(shift.terminalcashstatus)} />
+          <Section title="Terminal Cash Transfer" rows={decorateShiftLines(shift.terminalcashtransfer)} />
         </div>
       </div>
     </div>

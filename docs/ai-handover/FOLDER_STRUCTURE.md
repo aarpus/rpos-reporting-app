@@ -367,6 +367,7 @@ src/app/api/pos/reporting/retail/cashmachine_master/route.ts
 src/app/api/pos/reporting/retail/cashmachine_batch/route.ts
 src/app/api/push-subscriptions/route.ts
 src/app/api/reporting/orders/route.ts
+src/app/api/reporting/retail/shift-end/route.ts
 src/app/api/reporting/transaction-detail/route.ts
 src/app/api/store-selection/route.ts
 src/app/api/stores/route.ts
@@ -631,6 +632,7 @@ This index was extracted by reading every authored TS/TSX/MJS source file. Expor
 | `src/app/api/pos/reporting/restaurant/orders/route.ts` | 22 | `runtime`, `POST` |
 | `src/app/api/push-subscriptions/route.ts` | 46 | `POST`, `DELETE` |
 | `src/app/api/reporting/orders/route.ts` | 49 | `runtime`, `GET` |
+| `src/app/api/reporting/retail/shift-end/route.ts` | 50 | `runtime`, `GET` |
 | `src/app/api/reporting/transaction-detail/route.ts` | 46 | `runtime`, `GET` |
 | `src/app/api/store-selection/route.ts` | 18 | `POST` |
 | `src/app/api/stores/route.ts` | 7 | `GET` |

@@ -43,6 +43,6 @@ test("retail postman files contain 10 insertable records for every retail route"
   const shifts = JSON.parse(await readFile(new URL("shift.json", directory), "utf8"));
   orders.forEach((order, index) => {
     assert.equal(order.checkout_transaction.shiftid, shifts[index].shift.shiftid);
-    assert.equal(order.transaction_payment[0].batchid, shifts[index].shift.batchid);
+    assert.equal(order.transaction_payment[0].batchid, shifts[index].shift.batch_number);
   });
 });

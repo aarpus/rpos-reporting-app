@@ -35,7 +35,7 @@ Never trust a client-provided schema or selected-store cookie for access. Rechec
 
 ## Current progress and blockers
 
-Live order/transaction reports, store/user administration, POS ingestion, inbox/preferences and PWA push code exist. Home, summary reports and employee clock reports are sample/empty implementations. Existing tests passed 33/33; consult status for lint/type-check details and limitations.
+Live order/transaction reports, store/user administration, POS ingestion, inbox/preferences and PWA push code exist. Retail Shift End reads `tbl_shift_end_report` after a date search. Home, the other summary reports, and employee clock reports are sample/empty implementations. Existing tests passed 33/33; consult status for lint/type-check details and limitations.
 
 Most critical: current Prisma metadata IDs are integers, but tracked migrations still create UUID IDs without defaults. Do not recommend fresh production migration deployment as working until reconciled. Example environment files contain populated secret-like material; generate fresh secrets rather than copying those values. There is no source proxy despite stale README references. No durable push retry job or deployed environment verification exists.
 
