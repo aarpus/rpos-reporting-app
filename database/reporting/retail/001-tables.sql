@@ -233,6 +233,31 @@ CREATE TABLE __SCHEMA__."tbl_shift_end_report" (
 );
 CREATE INDEX "tbl_shift_end_report_times_idx" ON __SCHEMA__."tbl_shift_end_report" ("start_time", "end_time");
 
+CREATE TABLE __SCHEMA__."tbl_day_end_report" (
+    "id" bigserial PRIMARY KEY NOT NULL,
+    "batchid" bigint NOT NULL,
+    "batch_number" integer NOT NULL,
+    "start_date_time" timestamptz(6) NOT NULL,
+    "end_date_time" timestamptz(6),
+    "status" varchar(10) NOT NULL,
+    "employeename" varchar(100),
+    "department_sales" jsonb NOT NULL DEFAULT '{"rows":[],"total":null}'::jsonb,
+    "sales_summary" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "cash_status" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "sales_breakdown" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "paid_out" jsonb NOT NULL DEFAULT '{"rows":[],"total":""}'::jsonb,
+    "paid_in" jsonb NOT NULL DEFAULT '{"rows":[],"total":""}'::jsonb,
+    "tax_detail" jsonb NOT NULL DEFAULT '{"rows":[],"total":null}'::jsonb,
+    "cash_acceptor" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "employee_status" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "miscellaneous" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "promotion_summary" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "created_at" timestamptz(6) NOT NULL DEFAULT now(),
+    UNIQUE ("batchid"),
+    CHECK ("status" IN ('Open', 'Close'))
+);
+CREATE INDEX "tbl_day_end_report_times_idx" ON __SCHEMA__."tbl_day_end_report" ("start_date_time", "end_date_time");
+
 CREATE TABLE __SCHEMA__."tbl_batch" (
     "batchid" bigserial PRIMARY KEY NOT NULL,
     "BatchStart" timestamptz(6) NOT NULL,

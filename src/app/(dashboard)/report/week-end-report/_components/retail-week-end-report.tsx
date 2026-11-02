@@ -11,15 +11,15 @@ import {
   SelectValue,
 } from "@/components/tailgrids/core/select";
 import { useStore } from "@/components/store/store-provider";
+import { reportingQueryKey } from "@/lib/reporting/query-key";
 import { cn } from "@/utils/cn";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
 import { LuRotateCcw, LuUpload } from "react-icons/lu";
 import {
-  retailWeekEndDetailForWeek,
-  type RetailWeekEndDepartment,
-  type RetailWeekEndLine,
-  type RetailWeekEndTax,
-} from "./retail-week-end-data";
+  RetailPeriodSummary,
+  type DayEndBatch,
+} from "../../day-end-report/_components/retail-day-end-detail";
 
 const MONTH_LABELS = [
   "January",
@@ -185,158 +185,6 @@ function formatPrintedAt(date: Date) {
   return `${month}-${day}-${date.getFullYear()} ${hours}:${minutes}:${seconds} ${meridiem}`;
 }
 
-function Panel({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="overflow-hidden rounded-lg border border-card-border bg-card-surface-area">
-      <h2 className="border-b border-card-border px-4 py-2 text-xs font-semibold tracking-wide text-text-primary uppercase">
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
-}
-
-function Lines({ rows }: { rows: RetailWeekEndLine[] }) {
-  return (
-    <dl>
-      {rows.map((row, index) => (
-        <div
-          key={`${row.label}-${index}`}
-          className={cn(
-            "flex items-baseline justify-between gap-4 px-4 py-1.5 text-sm",
-            row.emphasize && "font-semibold text-text-primary",
-            row.divider && "border-t border-card-border",
-          )}
-        >
-          <dt className={row.emphasize ? "text-text-primary" : "text-text-secondary"}>
-            {row.label}
-          </dt>
-          <dd className="tabular-nums text-text-primary">{row.value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
-
-const headCell =
-  "px-3 py-2 text-left text-xs font-semibold whitespace-nowrap text-text-secondary";
-const bodyCell = "px-3 py-2 text-sm whitespace-nowrap text-text-secondary tabular-nums";
-
-function DepartmentTable({
-  rows,
-  total,
-}: {
-  rows: RetailWeekEndDepartment[];
-  total: RetailWeekEndDepartment;
-}) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[52rem]">
-        <thead className="bg-background-gray-secondary_alt_2">
-          <tr>
-            {[
-              "Trans#",
-              "Department Name",
-              "Quantity",
-              "Disc(AMT)($)",
-              "Disc(%)",
-              "Sub Total($)",
-              "Tax($)",
-              "Total Amount($)",
-              "Dept Sales(%)",
-            ].map((label) => (
-              <th
-                key={label}
-                className={cn(
-                  headCell,
-                  label !== "Department Name" && label !== "Trans#" && "text-right",
-                )}
-              >
-                {label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={`${row.trans}-${row.name}`} className="border-t border-card-border">
-              <td className={bodyCell}>{row.trans}</td>
-              <td className={cn(bodyCell, "text-text-primary")}>{row.name}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.quantity}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.discountAmount}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.discountPercent}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.subTotal}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.tax}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.total}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.share}</td>
-            </tr>
-          ))}
-          <tr className="border-t border-card-border font-semibold text-text-primary">
-            <td className={bodyCell} />
-            <td className={cn(bodyCell, "text-text-primary")}>{total.name}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.quantity}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>
-              {total.discountAmount}
-            </td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>
-              {total.discountPercent}
-            </td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.subTotal}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.tax}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.total}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.share}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function TaxTable({ rows, total }: { rows: RetailWeekEndTax[]; total: RetailWeekEndTax }) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[40rem]">
-        <thead className="bg-background-gray-secondary_alt_2">
-          <tr>
-            {[
-              "TaxName",
-              "Qty",
-              "TaxRate",
-              "Taxable Amount($)",
-              "Tax Amount($)",
-              "Tax Sales(%)",
-            ].map((label) => (
-              <th key={label} className={cn(headCell, label !== "TaxName" && "text-right")}>
-                {label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.name} className="border-t border-card-border">
-              <td className={cn(bodyCell, "text-text-primary")}>{row.name}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.quantity}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.rate}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.taxable}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.tax}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.share}</td>
-            </tr>
-          ))}
-          <tr className="border-t border-card-border font-semibold text-text-primary">
-            <td className={cn(bodyCell, "text-text-primary")}>{total.name}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.quantity}</td>
-            <td className={bodyCell} />
-            <td className={bodyCell} />
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.tax}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.share}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 function FilterSelect({
   label,
   value,
@@ -379,8 +227,24 @@ export default function RetailWeekEndReport() {
   const monthOptions = useMemo(() => buildMonthOptions(now), [now]);
   const [draftMonth, setDraftMonth] = useState(monthOptions[0]?.id ?? "");
   const [draftWeek, setDraftWeek] = useState("");
-  const [appliedWeekId, setAppliedWeekId] = useState<string | null>(null);
+  const [applied, setApplied] = useState<{ from: string; to: string; title: string } | null>(null);
   const [printedAt, setPrintedAt] = useState("");
+  const storeCode = selectedStore?.storeCode ?? "";
+  const report = useQuery({
+    queryKey: reportingQueryKey(storeCode, { report: "week-end", applied }),
+    enabled: Boolean(storeCode && applied),
+    queryFn: async ({ signal }): Promise<{ timezone: string; rows: DayEndBatch[] }> => {
+      const params = new URLSearchParams({
+        store_code: storeCode,
+        from: applied?.from ?? "",
+        to: applied?.to ?? "",
+      });
+      const response = await fetch(`/api/reporting/retail/day-end?${params}`, { signal, cache: "no-store" });
+      const body = (await response.json()) as { timezone: string; rows: DayEndBatch[]; error?: string };
+      if (!response.ok) throw new Error(body.error ?? "Unable to load this week.");
+      return body;
+    },
+  });
 
   const selectedMonth =
     monthOptions.find((month) => month.id === draftMonth) ?? monthOptions[0];
@@ -406,9 +270,9 @@ export default function RetailWeekEndReport() {
 
   useEffect(() => {
     setPrintedAt(formatPrintedAt(new Date()));
-  }, [appliedWeekId]);
+  }, [applied]);
 
-  const detail = appliedWeekId ? retailWeekEndDetailForWeek(appliedWeekId) : null;
+  const rows = report.data?.rows ?? [];
 
   function changeMonth(monthIdValue: string) {
     setDraftMonth(monthIdValue);
@@ -425,13 +289,23 @@ export default function RetailWeekEndReport() {
       ? weeksForMonth(firstMonth.year, firstMonth.monthIndex)
       : [];
     setDraftWeek(defaultWeekId(weeks, now));
-    setAppliedWeekId(null);
+    setApplied(null);
+  }
+
+  function searchWeek() {
+    const week = availableWeeks.find((entry) => entry.id === draftWeek);
+    if (!week) return;
+    setApplied({
+      from: dateId(week.start),
+      to: dateId(week.end),
+      title: `${formatWeekDate(week.start)} To ${formatWeekDate(week.end)}`,
+    });
   }
 
   function exportPdf() {
-    if (!detail) return;
+    if (!applied || !rows.length) return;
     const previous = document.title;
-    document.title = `WEEK END REPORT ${detail.titleRange}`;
+    document.title = `WEEK END REPORT ${applied.title}`;
     const restore = () => {
       document.title = previous;
       window.removeEventListener("afterprint", restore);
@@ -479,7 +353,7 @@ export default function RetailWeekEndReport() {
               appearance="outline"
               className="h-9 px-4"
               disabled={!draftWeek}
-              onPress={() => setAppliedWeekId(draftWeek)}
+              onPress={searchWeek}
             >
               Search Report
             </Button>
@@ -494,72 +368,45 @@ export default function RetailWeekEndReport() {
           </div>
         </section>
 
-        {appliedWeekId === null ? (
+        {applied === null ? (
           <div className="rounded-lg border border-dashed border-card-border bg-card-surface-area px-5 py-10 text-center">
             <p className="text-sm font-medium text-text-secondary">
               Select a month and week, then search the report.
             </p>
-            <p className="mt-1 text-[11px] text-text-tertiary">
-              Preview data is available for July Week-2 (07-Jul-2025 To 13-Jul-2025).
-            </p>
           </div>
-        ) : !detail ? (
+        ) : report.isFetching ? (
+            <p className="text-sm text-text-secondary">Loading the report.</p>
+        ) : report.error ? (
+          <div role="alert" className="text-sm text-error-500">
+            {report.error.message}{" "}
+            <Button size="xs" appearance="outline" onPress={() => void report.refetch()}>
+              Retry
+            </Button>
+          </div>
+        ) : rows.length === 0 ? (
           <div className="rounded-lg border border-dashed border-card-border bg-card-surface-area px-5 py-10 text-center">
             <p className="text-sm font-medium text-text-secondary">
-              No week-end data found for the selected week.
-            </p>
-            <p className="mt-1 text-[11px] text-text-tertiary">
-              Preview data is available for July Week-2 (07-Jul-2025 To 13-Jul-2025).
+              No day-end data found for the selected week.
             </p>
           </div>
         ) : (
           <div id="retail-week-end-print" className="space-y-4">
             <div className="retail-report-no-print flex justify-end">
-              <Button
-                appearance="outline"
-                size="sm"
-                className="w-fit gap-1.5"
-                onPress={exportPdf}
-              >
+              <Button appearance="outline" size="sm" className="w-fit gap-1.5" onPress={exportPdf}>
                 <LuUpload />
                 Export
               </Button>
             </div>
-
             <div className="rounded-lg border border-card-border px-2 py-4">
               <p className="text-center text-sm font-semibold tracking-wide text-text-primary uppercase">
                 {selectedStore?.storeCode}
               </p>
               <div className="shift-title-bar mt-3 bg-text-primary px-4 py-2 text-center text-sm font-semibold tracking-wide text-card-surface-area">
-                WEEK END REPORT {detail.titleRange}
+                WEEK END REPORT {applied.title}
               </div>
-              <div className="mt-3 flex flex-col gap-1 text-sm text-text-secondary sm:flex-row sm:items-center sm:justify-between">
-                <p>Date & Time: {printedAt}</p>
-                <p>
-                  Employee Name:{" "}
-                  <span className="font-medium text-text-primary">
-                    {detail.employeeName}
-                  </span>
-                </p>
-              </div>
+              <p className="mt-3 text-sm text-text-secondary">Date & Time: {printedAt}</p>
             </div>
-
-            <Panel title="Department Sales Detail">
-              <DepartmentTable rows={detail.departments} total={detail.departmentTotal} />
-            </Panel>
-
-            <div className="grid items-start gap-4 lg:grid-cols-2">
-              <section className="overflow-hidden rounded-lg border border-card-border bg-card-surface-area">
-                <Lines rows={detail.summary} />
-              </section>
-              <Panel title="Sales Breakdown">
-                <Lines rows={detail.salesBreakdown} />
-              </Panel>
-            </div>
-
-            <Panel title="Tax Detail">
-              <TaxTable rows={detail.taxes} total={detail.taxTotal} />
-            </Panel>
+            <RetailPeriodSummary rows={rows} />
           </div>
         )}
       </div>

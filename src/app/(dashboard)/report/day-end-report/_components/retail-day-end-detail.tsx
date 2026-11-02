@@ -2,17 +2,20 @@
 
 import { Button } from "@/components/tailgrids/core/button";
 import { useStore } from "@/components/store/store-provider";
+import { reportingQueryKey } from "@/lib/reporting/query-key";
 import { cn } from "@/utils/cn";
 import { ArrowLeft } from "@tailgrids/icons";
-import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { notFound, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { LuUpload } from "react-icons/lu";
 import {
-  retailDayEndDetail,
   type RetailDayEndDepartment,
   type RetailDayEndLine,
   type RetailDayEndTax,
 } from "./retail-day-end-data";
+import { formatShiftStamp, formatShiftTitle } from "../../shift-report/_components/retail-shift-data";
+import { sumDayEndPeriod } from "./sum-day-end-period";
 
 const printStyles = `
 @media print {
@@ -95,9 +98,9 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
 function Lines({ rows }: { rows: RetailDayEndLine[] }) {
   return (
     <dl>
-      {rows.map((row) => (
+      {rows.map((row, index) => (
         <div
-          key={row.label}
+          key={`${row.label}-${index}`}
           className={cn(
             "flex items-baseline justify-between gap-4 px-4 py-1.5 text-sm",
             row.emphasize && "font-semibold text-text-primary",
@@ -118,7 +121,7 @@ function Lines({ rows }: { rows: RetailDayEndLine[] }) {
   );
 }
 
-function AmountTable({ total }: { total: string }) {
+function AmountTable({ rows, total }: { rows: RetailDayEndLine[]; total: string }) {
   return (
     <table className="w-full text-sm">
       <thead className="bg-background-gray-secondary_alt_2 text-xs text-text-secondary">
@@ -128,6 +131,12 @@ function AmountTable({ total }: { total: string }) {
         </tr>
       </thead>
       <tbody>
+        {rows.map((row, index) => (
+          <tr key={`${row.label}-${index}`} className="border-t border-card-border">
+            <td className="px-4 py-2 text-text-secondary">{row.label}</td>
+            <td className="px-4 py-2 text-right tabular-nums text-text-primary">{row.value}</td>
+          </tr>
+        ))}
         <tr className="border-t border-card-border font-semibold">
           <td className="px-4 py-2">Total</td>
           <td className="px-4 py-2 text-right tabular-nums">{total}</td>
@@ -147,7 +156,7 @@ function DepartmentTable({
   total,
 }: {
   rows: RetailDayEndDepartment[];
-  total: RetailDayEndDepartment;
+  total: RetailDayEndDepartment | null;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -200,6 +209,7 @@ function DepartmentTable({
               <td className={cn(bodyCell, "text-right")}>{row.share}</td>
             </tr>
           ))}
+          {total ? (
           <tr className="border-t border-card-border font-semibold text-text-primary">
             <td className={bodyCell} />
             <td className={cn(bodyCell, "text-text-primary")}>{total.name}</td>
@@ -225,6 +235,7 @@ function DepartmentTable({
               {total.share}
             </td>
           </tr>
+          ) : null}
         </tbody>
       </table>
     </div>
@@ -236,7 +247,7 @@ function TaxTable({
   total,
 }: {
   rows: RetailDayEndTax[];
-  total: RetailDayEndTax;
+  total: RetailDayEndTax | null;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -271,6 +282,7 @@ function TaxTable({
               <td className={cn(bodyCell, "text-right")}>{row.share}</td>
             </tr>
           ))}
+          {total ? (
           <tr className="border-t border-card-border font-semibold text-text-primary">
             <td className={cn(bodyCell, "text-text-primary")}>{total.name}</td>
             <td className={cn(bodyCell, "text-right text-text-primary")}>
@@ -285,74 +297,108 @@ function TaxTable({
               {total.share}
             </td>
           </tr>
+          ) : null}
         </tbody>
       </table>
     </div>
   );
 }
 
-export default function RetailDayEndDetail() {
-  const router = useRouter();
-  const { selectedStore } = useStore();
-  const detail = retailDayEndDetail;
-  const [printedAt, setPrintedAt] = useState("");
+export type DayEndBatch = {
+  id: string;
+  batch_number: number;
+  start_date_time: string;
+  end_date_time: string | null;
+  status: "Open" | "Close";
+  employeename: string | null;
+  department_sales: { rows: RetailDayEndDepartment[]; total: RetailDayEndDepartment | null };
+  sales_summary: RetailDayEndLine[];
+  cash_status: RetailDayEndLine[];
+  sales_breakdown: RetailDayEndLine[];
+  paid_out: { rows: RetailDayEndLine[]; total: string };
+  paid_in: { rows: RetailDayEndLine[]; total: string };
+  tax_detail: { rows: RetailDayEndTax[]; total: RetailDayEndTax | null };
+  cash_acceptor: Array<{
+    name: string;
+    openingRecycler: string;
+    closingRecycler: string;
+    openingCashbox: string;
+    closingCashbox: string;
+  }>;
+  employee_status: Array<{ name: string; clockIn: string; clockOut: string; total: string }>;
+  miscellaneous: Array<{
+    terminal: string;
+    noSale: string;
+    voidCount: string;
+    voidAmount: string;
+    returnCount: string;
+    returnDeposit: string;
+    returnTax: string;
+    returnAmount: string;
+  }>;
+  promotion_summary: Array<{
+    name: string;
+    count: string;
+    quantity: string;
+    beforeSale: string;
+    discount: string;
+    afterSale: string;
+  }>;
+};
 
-  useEffect(() => {
-    setPrintedAt(formatPrintedAt(new Date()));
-  }, []);
+export type DayEndPanelDetail = {
+  employeeName: string;
+  departments: RetailDayEndDepartment[];
+  departmentTotal: RetailDayEndDepartment | null;
+  summary: RetailDayEndLine[];
+  cashStatus: RetailDayEndLine[];
+  salesBreakdown: RetailDayEndLine[];
+  paidOutRows: RetailDayEndLine[];
+  paidOutTotal: string;
+  paidInRows: RetailDayEndLine[];
+  paidInTotal: string;
+  taxes: RetailDayEndTax[];
+  taxTotal: RetailDayEndTax | null;
+  cashAcceptors: DayEndBatch["cash_acceptor"];
+  employees: DayEndBatch["employee_status"];
+  miscellaneous: DayEndBatch["miscellaneous"];
+  promotions: DayEndBatch["promotion_summary"];
+};
 
-  function exportPdf() {
-    const previous = document.title;
-    document.title = "DAY END REPORT";
-    const restore = () => {
-      document.title = previous;
-      window.removeEventListener("afterprint", restore);
-    };
-    window.addEventListener("afterprint", restore);
-    window.print();
-  }
+const boldLine = /^(net sales|tax paid|gross sales|no of transaction|total|available balance|sales total)\b/i;
 
+function decorate(rows: RetailDayEndLine[]): RetailDayEndLine[] {
+  return rows.map((row) => ({
+    ...row,
+    emphasize: boldLine.test(row.label),
+    divider: /^(total|available balance|sales total)\b/i.test(row.label),
+  }));
+}
+
+export function viewFromDayEnd(batch: DayEndBatch): DayEndPanelDetail {
+  return {
+    employeeName: batch.employeename ?? "",
+    departments: batch.department_sales.rows,
+    departmentTotal: batch.department_sales.total,
+    summary: decorate(batch.sales_summary),
+    cashStatus: decorate(batch.cash_status),
+    salesBreakdown: decorate(batch.sales_breakdown),
+    paidOutRows: batch.paid_out.rows,
+    paidOutTotal: batch.paid_out.total,
+    paidInRows: batch.paid_in.rows,
+    paidInTotal: batch.paid_in.total,
+    taxes: batch.tax_detail.rows,
+    taxTotal: batch.tax_detail.total,
+    cashAcceptors: batch.cash_acceptor,
+    employees: batch.employee_status,
+    miscellaneous: batch.miscellaneous,
+    promotions: batch.promotion_summary,
+  };
+}
+
+export function RetailDayEndPanels({ detail }: { detail: DayEndPanelDetail }) {
   return (
-    <div id="retail-day-end-print" className="min-h-full px-4 py-4 sm:px-6">
-      <style>{printStyles}</style>
-      <div className="retail-report-no-print mb-4 flex items-center justify-between gap-3">
-        <Button
-          appearance="outline"
-          size="sm"
-          className="w-fit gap-1.5"
-          onPress={() => router.push("/report/day-end-report")}
-        >
-          <ArrowLeft />
-          Back
-        </Button>
-        <Button
-          appearance="outline"
-          size="sm"
-          className="w-fit gap-1.5"
-          onPress={exportPdf}
-        >
-          <LuUpload />
-          Export
-        </Button>
-      </div>
-
-      <div className="border border-card-border rounded-lg py-4 px-2">
-        <p className="text-center text-sm font-semibold tracking-wide text-text-primary uppercase">
-          {selectedStore?.storeCode}
-        </p>
-        <div className="shift-title-bar mt-3 bg-text-primary px-4 py-2 text-center text-sm font-semibold tracking-wide text-card-surface-area">
-          DAY END REPORT
-        </div>
-        <div className="mt-3 flex flex-col gap-1 text-sm text-text-secondary sm:flex-row sm:items-center sm:justify-between">
-          <p>Date & Time: {printedAt}</p>
-          <p>
-            Employee Name:{" "}
-            <span className="font-medium text-text-primary">
-              {detail.employeeName}
-            </span>
-          </p>
-        </div>
-      </div>
+    <>
       <div className="mt-4">
         <Panel title="Department Sales Detail">
           <DepartmentTable
@@ -377,10 +423,10 @@ export default function RetailDayEndDetail() {
         </Panel>
         <div className="space-y-4">
           <Panel title="Paid Out Detail">
-            <AmountTable total={detail.paidOutTotal} />
+            <AmountTable rows={detail.paidOutRows} total={detail.paidOutTotal} />
           </Panel>
           <Panel title="Paid In Detail">
-            <AmountTable total={detail.paidInTotal} />
+            <AmountTable rows={detail.paidInRows} total={detail.paidInTotal} />
           </Panel>
         </div>
       </div>
@@ -589,6 +635,110 @@ export default function RetailDayEndDetail() {
           </div>
         </Panel>
       </div>
+    </>
+  );
+}
+
+type DayEndDetailResponse = { timezone: string; batch: DayEndBatch | null };
+
+export default function RetailDayEndDetail({ id }: { id: string }) {
+  const router = useRouter();
+  const { selectedStore } = useStore();
+  const storeCode = selectedStore?.storeCode ?? "";
+  const report = useQuery({
+    queryKey: reportingQueryKey(storeCode, { report: "day-end", id }),
+    enabled: Boolean(storeCode),
+    queryFn: async ({ signal }): Promise<DayEndDetailResponse> => {
+      const params = new URLSearchParams({ store_code: storeCode, id });
+      const response = await fetch(`/api/reporting/retail/day-end?${params}`, { signal, cache: "no-store" });
+      if (response.status === 404) return { timezone: selectedStore?.timezone ?? "UTC", batch: null };
+      const body = (await response.json()) as DayEndDetailResponse & { error?: string };
+      if (!response.ok) throw new Error(body.error ?? "Unable to load this batch.");
+      return body;
+    },
+  });
+  const batch = report.data?.batch;
+  const timezone = report.data?.timezone ?? selectedStore?.timezone ?? "UTC";
+  const detail = batch ? viewFromDayEnd(batch) : null;
+  const titleDate = batch ? formatShiftTitle(batch.end_date_time ?? batch.start_date_time, timezone) : "";
+  const [printedAt, setPrintedAt] = useState("");
+
+  useEffect(() => {
+    setPrintedAt(formatPrintedAt(new Date()));
+  }, [id]);
+
+  function exportPdf() {
+    const previous = document.title;
+    document.title = `DAY END REPORT ${titleDate}`;
+    const restore = () => {
+      document.title = previous;
+      window.removeEventListener("afterprint", restore);
+    };
+    window.addEventListener("afterprint", restore);
+    window.print();
+  }
+
+  if (report.isSuccess && !batch) notFound();
+  if (!batch || !detail) {
+    return (
+      <div className="px-4 py-4 text-sm text-text-secondary sm:px-6">
+        {report.error ? report.error.message : "Loading batch."}
+      </div>
+    );
+  }
+
+  return (
+    <div id="retail-day-end-print" className="min-h-full px-4 py-4 sm:px-6">
+      <style>{printStyles}</style>
+      <div className="retail-report-no-print mb-4 flex items-center justify-between gap-3">
+        <Button appearance="outline" size="sm" className="w-fit gap-1.5" onPress={() => router.push("/report/day-end-report")}>
+          <ArrowLeft />
+          Back
+        </Button>
+        <Button appearance="outline" size="sm" className="w-fit gap-1.5" onPress={exportPdf}>
+          <LuUpload />
+          Export
+        </Button>
+      </div>
+      <div className="border border-card-border rounded-lg py-4 px-2">
+        <p className="text-center text-sm font-semibold tracking-wide text-text-primary uppercase">{selectedStore?.storeCode}</p>
+        <div className="shift-title-bar mt-3 bg-text-primary px-4 py-2 text-center text-sm font-semibold tracking-wide text-card-surface-area">
+          DAY END REPORT {titleDate}
+        </div>
+        <div className="mt-3 flex flex-col gap-1 text-sm text-text-secondary sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            Batch #{batch.batch_number} · {formatShiftStamp(batch.start_date_time, timezone)}
+            {batch.end_date_time ? ` to ${formatShiftStamp(batch.end_date_time, timezone)}` : ""} · {batch.status}
+          </p>
+          <p>
+            Employee Name: <span className="font-medium text-text-primary">{detail.employeeName}</span>
+          </p>
+        </div>
+        <p className="mt-1 text-sm text-text-secondary">Printed: {printedAt}</p>
+      </div>
+      <RetailDayEndPanels detail={detail} />
+    </div>
+  );
+}
+
+export function RetailPeriodSummary({ rows }: { rows: DayEndBatch[] }) {
+  const summary = sumDayEndPeriod(rows);
+  return (
+    <div className="space-y-4">
+      <Panel title="Department Sales Detail">
+        <DepartmentTable rows={summary.departments} total={summary.departmentTotal} />
+      </Panel>
+      <div className="grid items-start gap-4 lg:grid-cols-2">
+        <section className="overflow-hidden rounded-lg border border-card-border bg-card-surface-area">
+          <Lines rows={decorate(summary.summary)} />
+        </section>
+        <Panel title="Sales Breakdown">
+          <Lines rows={decorate(summary.salesBreakdown)} />
+        </Panel>
+      </div>
+      <Panel title="Tax Detail">
+        <TaxTable rows={summary.taxes} total={summary.taxTotal} />
+      </Panel>
     </div>
   );
 }

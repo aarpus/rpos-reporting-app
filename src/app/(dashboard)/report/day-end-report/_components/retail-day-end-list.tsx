@@ -7,7 +7,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/tailgrids/core/tooltip";
+import { useStore } from "@/components/store/store-provider";
+import { reportingQueryKey } from "@/lib/reporting/query-key";
 import { cn } from "@/utils/cn";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { LuEye } from "react-icons/lu";
@@ -19,15 +22,32 @@ import {
   RetailReportTable,
   type RetailReportColumn,
 } from "../../_components/retail-report-table";
-import { retailDayEndBatches, type RetailDayEndRow } from "./retail-day-end-data";
+import { formatShiftStamp } from "../../shift-report/_components/retail-shift-data";
 
-const noRows: RetailDayEndRow[] = [];
+type DayEndStatus = "Close" | "Open";
 
-function overlaps(row: RetailDayEndRow, from: RetailDayEndRow["start"], to: RetailDayEndRow["start"]) {
-  return row.start.compare(to) <= 0 && row.end.compare(from) >= 0;
-}
+type DayEndListRow = {
+  id: string;
+  batch_number: number;
+  start_date_time: string;
+  end_date_time: string | null;
+  status: DayEndStatus;
+};
 
-function StatusBadge({ status }: { status: RetailDayEndRow["status"] }) {
+type DayEndListResponse = {
+  timezone: string;
+  rows: DayEndListRow[];
+};
+
+type DisplayRow = {
+  id: string;
+  batch: number;
+  startLabel: string;
+  endLabel: string;
+  status: DayEndStatus;
+};
+
+function StatusBadge({ status }: { status: DayEndStatus }) {
   return (
     <span
       className={cn(
@@ -42,7 +62,7 @@ function StatusBadge({ status }: { status: RetailDayEndRow["status"] }) {
   );
 }
 
-function ViewBatchButton({ row }: { row: RetailDayEndRow }) {
+function ViewBatchButton({ row }: { row: DisplayRow }) {
   const router = useRouter();
   return (
     <Tooltip>
@@ -64,49 +84,63 @@ function ViewBatchButton({ row }: { row: RetailDayEndRow }) {
   );
 }
 
-const columns: RetailReportColumn<RetailDayEndRow>[] = [
-  {
-    id: "batch",
-    header: "#",
-    cell: (row) => row.batch,
-    cellClassName: "tabular-nums",
-  },
-  {
-    id: "start",
-    header: "Batch Start Date/Time",
-    cell: (row) => row.startLabel,
-    cellClassName: "whitespace-nowrap",
-  },
-  {
-    id: "end",
-    header: "Batch End Date/Time",
-    cell: (row) => row.endLabel,
-    cellClassName: "whitespace-nowrap",
-  },
-  {
-    id: "status",
-    header: "Status",
-    cell: (row) => <StatusBadge status={row.status} />,
-  },
-  {
-    id: "view",
-    header: "View",
-    cell: (row) => <ViewBatchButton row={row} />,
-  },
+const columns: RetailReportColumn<DisplayRow>[] = [
+  { id: "batch", header: "#", cell: (row) => row.batch, cellClassName: "tabular-nums" },
+  { id: "start", header: "Batch Start Date/Time", cell: (row) => row.startLabel, cellClassName: "whitespace-nowrap" },
+  { id: "end", header: "Batch End Date/Time", cell: (row) => row.endLabel, cellClassName: "whitespace-nowrap" },
+  { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} /> },
+  { id: "view", header: "View", cell: (row) => <ViewBatchButton row={row} /> },
 ];
 
+function dateRange(applied: RetailAppliedDateFilter) {
+  if (applied.kind === "single") {
+    const day = applied.date.toString();
+    return { from: day, to: day };
+  }
+  const ordered = applied.from.compare(applied.to) <= 0;
+  return {
+    from: (ordered ? applied.from : applied.to).toString(),
+    to: (ordered ? applied.to : applied.from).toString(),
+  };
+}
+
 export default function RetailDayEndList() {
+  const { selectedStore } = useStore();
   const [applied, setApplied] = useState<RetailAppliedDateFilter | null>(null);
+  const range = useMemo(() => (applied ? dateRange(applied) : null), [applied]);
+  const storeCode = selectedStore?.storeCode ?? "";
+  const report = useQuery({
+    queryKey: reportingQueryKey(storeCode, { report: "day-end", range }),
+    enabled: Boolean(storeCode && range),
+    queryFn: async ({ signal }): Promise<DayEndListResponse> => {
+      const params = new URLSearchParams({
+        store_code: storeCode,
+        from: range?.from ?? "",
+        to: range?.to ?? "",
+      });
+      const response = await fetch(`/api/reporting/retail/day-end?${params}`, { signal, cache: "no-store" });
+      const body = (await response.json()) as DayEndListResponse & { error?: string };
+      if (!response.ok) throw new Error(body.error ?? "Unable to load batches.");
+      return body;
+    },
+  });
 
   const rows = useMemo(() => {
-    if (!applied) return noRows;
-    if (applied.kind === "single") {
-      return retailDayEndBatches.filter((row) => overlaps(row, applied.date, applied.date));
-    }
-    const from = applied.from.compare(applied.to) <= 0 ? applied.from : applied.to;
-    const to = applied.from.compare(applied.to) <= 0 ? applied.to : applied.from;
-    return retailDayEndBatches.filter((row) => overlaps(row, from, to));
-  }, [applied]);
+    const timezone = report.data?.timezone ?? selectedStore?.timezone ?? "UTC";
+    return (report.data?.rows ?? []).map((row) => ({
+      id: row.id,
+      batch: row.batch_number,
+      startLabel: formatShiftStamp(row.start_date_time, timezone),
+      endLabel: formatShiftStamp(row.end_date_time, timezone),
+      status: row.status,
+    }));
+  }, [report.data, selectedStore?.timezone]);
+
+  const emptyMessage = !applied
+    ? "Search a date to see batches."
+    : report.isFetching
+      ? "Loading batches."
+      : "No batches found for the selected date.";
 
   return (
     <div className="min-h-full pb-6">
@@ -120,16 +154,23 @@ export default function RetailDayEndList() {
           ]}
         />
       </div>
-
       <div className="space-y-4 px-3 sm:px-5">
         <RetailReportDateFilter onSearch={setApplied} onReset={() => setApplied(null)} />
+        {applied && report.error ? (
+          <div role="alert" className="text-sm text-error-500">
+            {report.error.message}{" "}
+            <Button size="xs" appearance="outline" onPress={() => void report.refetch()}>
+              Retry
+            </Button>
+          </div>
+        ) : null}
         <RetailReportTable
           columns={columns}
-          rows={rows}
+          rows={applied ? rows : []}
           rowKey={(row) => row.id}
           recordLabel="batches"
           minWidthClassName="min-w-[44rem]"
-          emptyMessage="No batches found for the selected date. Preview batches run from Jul 14, 2025 through Jul 16, 2025."
+          emptyMessage={emptyMessage}
         />
       </div>
     </div>

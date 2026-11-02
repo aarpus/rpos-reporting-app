@@ -241,6 +241,9 @@ src/app/(dashboard)/report/day-end-report/_components/day-end-report.tsx
 src/app/(dashboard)/report/day-end-report/_components/retail-day-end-data.ts
 src/app/(dashboard)/report/day-end-report/_components/retail-day-end-detail.tsx
 src/app/(dashboard)/report/day-end-report/_components/retail-day-end-list.tsx
+src/lib/reporting/retail-day-end.ts
+src/app/api/pos/reporting/retail/day-end-report/route.ts
+src/app/api/reporting/retail/day-end/route.ts
 src/app/(dashboard)/report/day-end-report/page.tsx
 src/app/(dashboard)/report/employee-clock-in-out/_components/data.ts
 src/app/(dashboard)/report/employee-clock-in-out/_components/employee-clock-report.tsx

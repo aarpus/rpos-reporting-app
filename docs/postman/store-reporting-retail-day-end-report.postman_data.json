@@ -1,0 +1,451 @@
+[
+  {
+    "request_id": "example-retail-day-end-5",
+    "day_end": {
+      "batchid": "5",
+      "batch_number": "5",
+      "start_date_time": "2026-10-27T04:00:00Z",
+      "end_date_time": "2026-10-27T23:05:00Z",
+      "status": "Close",
+      "employeename": "Ada",
+      "department_sales": {
+        "rows": [
+          {
+            "trans": "12",
+            "name": "Beer",
+            "quantity": "18",
+            "discountAmount": "4.00",
+            "discountPercent": "0.76",
+            "subTotal": "520.00",
+            "tax": "46.80",
+            "total": "566.80",
+            "share": "61.20"
+          }
+        ],
+        "total": {
+          "trans": "",
+          "name": "Total",
+          "quantity": "18",
+          "discountAmount": "4.00",
+          "discountPercent": "0.76",
+          "subTotal": "520.00",
+          "tax": "46.80",
+          "total": "566.80",
+          "share": "100.00"
+        }
+      },
+      "sales_summary": [
+        { "label": "Net Sales Amount", "value": "520.00" },
+        { "label": "Tax Paid", "value": "46.80" },
+        { "label": "Gross Sales Amount", "value": "566.80" },
+        { "label": "No of Transaction", "value": "12" }
+      ],
+      "cash_status": [
+        { "label": "Opening Balance", "value": "200.00" },
+        { "label": "Cash Sales", "value": "351.85" },
+        { "label": "Available Balance", "value": "551.85" }
+      ],
+      "sales_breakdown": [
+        { "label": "Cash", "value": "351.85" },
+        { "label": "Credit Card", "value": "214.95" },
+        { "label": "Sales Total", "value": "566.80" }
+      ],
+      "paid_out": { "rows": [{ "label": "Vendor", "value": "15.00" }], "total": "15.00" },
+      "paid_in": { "rows": [], "total": "0.00" },
+      "tax_detail": {
+        "rows": [
+          {
+            "name": "State",
+            "quantity": "18",
+            "rate": "9.00",
+            "taxable": "520.00",
+            "tax": "46.80",
+            "share": "100.00"
+          }
+        ],
+        "total": {
+          "name": "Total",
+          "quantity": "18",
+          "rate": "",
+          "taxable": "520.00",
+          "tax": "46.80",
+          "share": "100.00"
+        }
+      },
+      "cash_acceptor": [
+        {
+          "name": "REG1",
+          "openingRecycler": "80.00",
+          "closingRecycler": "120.00",
+          "openingCashbox": "120.00",
+          "closingCashbox": "431.85"
+        }
+      ],
+      "employee_status": [
+        {
+          "name": "Ada",
+          "clockIn": "2026-10-27 04:00:00",
+          "clockOut": "2026-10-27 23:05:00",
+          "total": "19:05:00"
+        }
+      ],
+      "miscellaneous": [
+        {
+          "terminal": "REG1",
+          "noSale": "1",
+          "voidCount": "0",
+          "voidAmount": "0.00",
+          "returnCount": "0",
+          "returnDeposit": "0.00",
+          "returnTax": "0.00",
+          "returnAmount": "0.00"
+        }
+      ],
+      "promotion_summary": [
+        {
+          "name": "Happy Hour",
+          "count": "2",
+          "quantity": "2",
+          "beforeSale": "24.00",
+          "discount": "4.00",
+          "afterSale": "20.00"
+        }
+      ]
+    }
+  },
+  {
+    "request_id": "example-retail-day-end-6",
+    "day_end": {
+      "batchid": "6",
+      "batch_number": "6",
+      "start_date_time": "2026-10-28T04:00:00Z",
+      "end_date_time": null,
+      "status": "Open",
+      "employeename": "Noah",
+      "department_sales": { "rows": [], "total": null },
+      "sales_summary": [],
+      "cash_status": [],
+      "sales_breakdown": [],
+      "paid_out": { "rows": [], "total": "" },
+      "paid_in": { "rows": [], "total": "" },
+      "tax_detail": { "rows": [], "total": null },
+      "cash_acceptor": [],
+      "employee_status": [],
+      "miscellaneous": [],
+      "promotion_summary": []
+    }
+  },
+  
+{
+  "request_id": "example-retail-day-end-7",
+  "day_end": {
+    "batchid": "7",
+    "batch_number": "7",
+    "start_date_time": "2026-10-29T04:30:00Z",
+    "end_date_time": "2026-10-29T23:00:00Z",
+    "status": "Close",
+    "employeename": "Emma",
+    "department_sales": {
+      "rows": [
+        {
+          "trans": "12",
+          "name": "Battery",
+          "quantity": "15",
+          "discountAmount": "10.00",
+          "discountPercent": "2.44",
+          "subTotal": "400.00",
+          "tax": "24.00",
+          "total": "424.00",
+          "share": "40.00"
+        },
+        {
+          "trans": "8",
+          "name": "Cleaner",
+          "quantity": "12",
+          "discountAmount": "5.00",
+          "discountPercent": "1.64",
+          "subTotal": "300.00",
+          "tax": "18.00",
+          "total": "318.00",
+          "share": "30.00"
+        },
+        {
+          "trans": "5",
+          "name": "Coils-Pods",
+          "quantity": "10",
+          "discountAmount": "0.00",
+          "discountPercent": "0.00",
+          "subTotal": "300.00",
+          "tax": "18.00",
+          "total": "318.00",
+          "share": "30.00"
+        }
+      ],
+      "total": {
+        "trans": "25",
+        "name": "Total",
+        "quantity": "37",
+        "discountAmount": "15.00",
+        "discountPercent": "1.48",
+        "subTotal": "1000.00",
+        "tax": "60.00",
+        "total": "1060.00",
+        "share": "100.00"
+      }
+    },
+    "sales_summary": [
+      {"label": "Net Sales Amount", "value": "1000.00"},
+      {"label": "Tax Paid", "value": "60.00"},
+      {"label": "Gross Sales Amount", "value": "1060.00"},
+      {"label": "No of Transaction", "value": "25"}
+    ],
+    "cash_status": [
+      {"label": "Opening Balance", "value": "200.00"},
+      {"label": "Cash Sales", "value": "600.00"},
+      {"label": "Available Balance", "value": "800.00"}
+    ],
+    "sales_breakdown": [
+      {"label": "Cash", "value": "600.00"},
+      {"label": "Credit Card", "value": "300.00"},
+      {"label": "Debit Card", "value": "160.00"},
+      {"label": "Sales Total", "value": "1060.00"}
+    ],
+    "paid_out": {
+      "rows": [
+        {"label": "Vendor", "value": "30.00"},
+        {"label": "Maintenance", "value": "20.00"}
+      ],
+      "total": "50.00"
+    },
+    "paid_in": {
+      "rows": [],
+      "total": "0.00"
+    },
+    "tax_detail": {
+      "rows": [
+        {
+          "name": "State",
+          "quantity": "37",
+          "rate": "6.00",
+          "taxable": "1000.00",
+          "tax": "60.00",
+          "share": "100.00"
+        }
+      ],
+      "total": {
+        "name": "Total",
+        "quantity": "37",
+        "rate": "",
+        "taxable": "1000.00",
+        "tax": "60.00",
+        "share": "100.00"
+      }
+    },
+    "cash_acceptor": [
+      {
+        "name": "W22",
+        "openingRecycler": "100.00",
+        "closingRecycler": "150.00",
+        "openingCashbox": "100.00",
+        "closingCashbox": "600.00"
+      }
+    ],
+    "employee_status": [
+      {
+        "name": "Emma",
+        "clockIn": "2026-10-29 04:30:00",
+        "clockOut": "2026-10-29 23:00:00",
+        "total": "18:30:00"
+      }
+    ],
+    "miscellaneous": [
+      {
+        "terminal": "W22",
+        "noSale": "3",
+        "voidCount": "2",
+        "voidAmount": "35.00",
+        "returnCount": "1",
+        "returnDeposit": "0.00",
+        "returnTax": "3.00",
+        "returnAmount": "53.00"
+      }
+    ],
+    "promotion_summary": [
+      {
+        "name": "Battery Discount",
+        "count": "2",
+        "quantity": "2",
+        "beforeSale": "100.00",
+        "discount": "10.00",
+        "afterSale": "90.00"
+      },
+      {
+        "name": "Cleaner Offer",
+        "count": "1",
+        "quantity": "1",
+        "beforeSale": "50.00",
+        "discount": "5.00",
+        "afterSale": "45.00"
+      }
+    ]
+  }
+},
+
+{
+  "request_id": "example-retail-day-end-8",
+  "day_end": {
+    "batchid": "8",
+    "batch_number": "8",
+    "start_date_time": "2026-10-30T04:00:00Z",
+    "end_date_time": "2026-10-30T23:30:00Z",
+    "status": "Close",
+    "employeename": "Michael",
+    "department_sales": {
+      "rows": [
+        {
+          "trans": "15",
+          "name": "Beer",
+          "quantity": "25",
+          "discountAmount": "20.00",
+          "discountPercent": "2.44",
+          "subTotal": "800.00",
+          "tax": "48.00",
+          "total": "848.00",
+          "share": "50.00"
+        },
+        {
+          "trans": "10",
+          "name": "Wine",
+          "quantity": "15",
+          "discountAmount": "10.00",
+          "discountPercent": "1.96",
+          "subTotal": "500.00",
+          "tax": "30.00",
+          "total": "530.00",
+          "share": "31.25"
+        },
+        {
+          "trans": "5",
+          "name": "Spirits",
+          "quantity": "8",
+          "discountAmount": "0.00",
+          "discountPercent": "0.00",
+          "subTotal": "300.00",
+          "tax": "18.00",
+          "total": "318.00",
+          "share": "18.75"
+        }
+      ],
+      "total": {
+        "trans": "30",
+        "name": "Total",
+        "quantity": "48",
+        "discountAmount": "30.00",
+        "discountPercent": "1.84",
+        "subTotal": "1600.00",
+        "tax": "96.00",
+        "total": "1696.00",
+        "share": "100.00"
+      }
+    },
+    "sales_summary": [
+      {"label": "Net Sales Amount", "value": "1600.00"},
+      {"label": "Tax Paid", "value": "96.00"},
+      {"label": "Gross Sales Amount", "value": "1696.00"},
+      {"label": "No of Transaction", "value": "30"}
+    ],
+    "cash_status": [
+      {"label": "Opening Balance", "value": "250.00"},
+      {"label": "Cash Sales", "value": "700.00"},
+      {"label": "Available Balance", "value": "950.00"}
+    ],
+    "sales_breakdown": [
+      {"label": "Cash", "value": "700.00"},
+      {"label": "Credit Card", "value": "650.00"},
+      {"label": "Debit Card", "value": "346.00"},
+      {"label": "Sales Total", "value": "1696.00"}
+    ],
+    "paid_out": {
+      "rows": [
+        {"label": "Vendor", "value": "40.00"},
+        {"label": "Store Supplies", "value": "20.00"}
+      ],
+      "total": "60.00"
+    },
+    "paid_in": {
+      "rows": [
+        {"label": "Cash Adjustment", "value": "15.00"}
+      ],
+      "total": "15.00"
+    },
+    "tax_detail": {
+      "rows": [
+        {
+          "name": "State",
+          "quantity": "48",
+          "rate": "6.00",
+          "taxable": "1600.00",
+          "tax": "96.00",
+          "share": "100.00"
+        }
+      ],
+      "total": {
+        "name": "Total",
+        "quantity": "48",
+        "rate": "",
+        "taxable": "1600.00",
+        "tax": "96.00",
+        "share": "100.00"
+      }
+    },
+    "cash_acceptor": [
+      {
+        "name": "REG2",
+        "openingRecycler": "100.00",
+        "closingRecycler": "200.00",
+        "openingCashbox": "150.00",
+        "closingCashbox": "750.00"
+      }
+    ],
+    "employee_status": [
+      {
+        "name": "Michael",
+        "clockIn": "2026-10-30 04:00:00",
+        "clockOut": "2026-10-30 23:30:00",
+        "total": "19:30:00"
+      }
+    ],
+    "miscellaneous": [
+      {
+        "terminal": "REG2",
+        "noSale": "4",
+        "voidCount": "2",
+        "voidAmount": "50.00",
+        "returnCount": "1",
+        "returnDeposit": "0.00",
+        "returnTax": "6.00",
+        "returnAmount": "106.00"
+      }
+    ],
+    "promotion_summary": [
+      {
+        "name": "Happy Hour",
+        "count": "4",
+        "quantity": "5",
+        "beforeSale": "120.00",
+        "discount": "20.00",
+        "afterSale": "100.00"
+      },
+      {
+        "name": "Wine Special",
+        "count": "2",
+        "quantity": "2",
+        "beforeSale": "100.00",
+        "discount": "10.00",
+        "afterSale": "90.00"
+      }
+    ]
+  }
+}
+
+]

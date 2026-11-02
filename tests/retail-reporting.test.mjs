@@ -7,6 +7,7 @@ import { retailTable } from "../src/lib/reporting/retail-columns.ts";
 import { parseRetailBatch, parseRetailEntity, parseRetailOrder, parseRetailShift } from "../src/lib/reporting/retail-snapshot.ts";
 import { syncRetailBatch, syncRetailEntity, syncRetailOrder, syncRetailShift } from "../src/lib/reporting/retail-sync.ts";
 import { readShiftEndDetail, readShiftEndList } from "../src/lib/reporting/retail-shift-read.ts";
+import { parseRetailDayEnd, readDayEndDetail, readDayEndList, syncRetailDayEnd } from "../src/lib/reporting/retail-day-end.ts";
 
 const retailDdlUrl = new URL("../database/reporting/retail/001-tables.sql", import.meta.url);
 
@@ -267,5 +268,62 @@ test("retail batch, shift, and checkout upserts stay inside the retail schema", 
     syncRetailBatch(db, scope, parseRetailBatch({ ...batch, request_id: "retail-batch-3" })),
     (error) => error instanceof ReportingError && error.status === 403,
   );
+  await engine.close();
+});
+
+const dayEnd = {
+  request_id: "retail-day-end-5",
+  day_end: {
+    batchid: "5",
+    batch_number: "5",
+    start_date_time: "2026-10-27T04:00:00Z",
+    end_date_time: "2026-10-27T23:05:00Z",
+    status: "Close",
+    employeename: "Ada",
+    department_sales: {
+      rows: [{ trans: "12", name: "Beer", quantity: "18", discountAmount: "4.00", discountPercent: "0.76", subTotal: "520.00", tax: "46.80", total: "566.80", share: "61.20" }],
+      total: { trans: "", name: "Total", quantity: "18", discountAmount: "4.00", discountPercent: "0.76", subTotal: "520.00", tax: "46.80", total: "566.80", share: "100.00" },
+    },
+    sales_summary: [{ label: "Net Sales Amount", value: "520.00" }],
+    paid_out: { rows: [], total: "15.00" },
+    paid_in: { rows: [], total: "" },
+  },
+};
+
+test("day-end batches upsert once and stay visible for the day, week, and month", async () => {
+  const { engine, db, scope } = await retailDb();
+  const reportScope = { ...scope, timezone: "America/New_York" };
+  assert.throws(() => parseRetailDayEnd({ ...dayEnd, day_end: { ...dayEnd.day_end, end_date_time: null } }), ReportingError);
+  const parsed = parseRetailDayEnd(dayEnd);
+  assert.equal((await syncRetailDayEnd(db, scope, parsed)).status, "accepted");
+  assert.equal((await syncRetailDayEnd(db, scope, parsed)).status, "duplicate");
+  const open = parseRetailDayEnd({
+    request_id: "retail-day-end-6",
+    day_end: {
+      batchid: "6",
+      batch_number: "6",
+      start_date_time: "2026-10-28T04:00:00Z",
+      status: "Open",
+    },
+  });
+  assert.equal((await syncRetailDayEnd(db, scope, open)).status, "accepted");
+  const day = await readDayEndList(db, reportScope, { from: "2026-10-27", to: "2026-10-27" });
+  assert.deepEqual(day.map((row) => row.batchid), ["5"]);
+  const week = await readDayEndList(db, reportScope, { from: "2026-10-26", to: "2026-11-01" });
+  assert.deepEqual(week.map((row) => row.batchid), ["5", "6"]);
+  const month = await readDayEndList(db, reportScope, { from: "2026-10-01", to: "2026-10-31" });
+  assert.deepEqual(month.map((row) => row.batchid), ["5", "6"]);
+  const detail = await readDayEndDetail(db, reportScope, day[0].id);
+  assert.equal(detail?.department_sales.rows[0].name, "Beer");
+  assert.equal(detail?.department_sales.total?.name, "Total");
+  assert.equal(detail?.paid_out.total, "15.00");
+  assert.equal(detail?.sales_summary.length, 1);
+  const changed = parseRetailDayEnd({
+    ...dayEnd,
+    request_id: "retail-day-end-5b",
+    day_end: { ...dayEnd.day_end, sales_summary: [{ label: "Net Sales Amount", value: "530.00" }] },
+  });
+  assert.equal((await syncRetailDayEnd(db, scope, changed)).status, "accepted");
+  assert.equal((await readDayEndDetail(db, reportScope, day[0].id))?.sales_summary[0].value, "530.00");
   await engine.close();
 });

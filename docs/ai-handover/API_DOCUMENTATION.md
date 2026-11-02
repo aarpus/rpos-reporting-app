@@ -189,6 +189,37 @@ Checkout money columns are stored as sent. Rows in `tbl_transaction_payment`, in
 
 `shiftid`, `batch_number`, `shift`, and `employeeid` are positive integers, sent as strings or numbers. `end_time` may be null while `status` is `Open`; `Close` requires `end_time`. Each card is an ordered array of `{ "label", "value" }` strings, at most 200 lines. Omitted cards are stored as `[]`. Money stays an exact decimal string. Same content for that `shiftid` returns duplicate; changed content overwrites the row.
 
+### POST `/api/pos/reporting/retail/day-end-report`
+
+Source `src/app/api/pos/reporting/retail/day-end-report/route.ts`, `src/lib/reporting/retail-day-end.ts`. Same HMAC auth and `201 accepted` / `200 duplicate` result as the shift route. The body is `{ request_id, day_end }`. Upsert is by `batchid`. This route does not write `tbl_batch`. `Close` requires `end_date_time`. `Open` may leave `end_date_time` null. Sample rows: `docs/postman/store-reporting-retail-day-end-report.postman_data.json`.
+
+```json
+{
+  "request_id": "example-retail-day-end-5",
+  "day_end": {
+    "batchid": "5",
+    "batch_number": "5",
+    "start_date_time": "2026-10-27T04:00:00Z",
+    "end_date_time": "2026-10-27T23:05:00Z",
+    "status": "Close",
+    "employeename": "Ada",
+    "department_sales": { "rows": [], "total": null },
+    "sales_summary": [{ "label": "Net Sales Amount", "value": "520.00" }],
+    "cash_status": [],
+    "sales_breakdown": [],
+    "paid_out": { "rows": [], "total": "15.00" },
+    "paid_in": { "rows": [], "total": "" },
+    "tax_detail": { "rows": [], "total": null },
+    "cash_acceptor": [],
+    "employee_status": [],
+    "miscellaneous": [],
+    "promotion_summary": []
+  }
+}
+```
+
+Card sections are ordered `{ "label", "value" }` arrays. `department_sales` and `tax_detail` are `{ "rows", "total" }`. `paid_out` and `paid_in` are `{ "rows", "total" }` where `total` is the amount string. Omitted sections use the table defaults. There is no separate week or month body.
+
 ```json
 {
   "request_id": "example-retail-order-1",
@@ -271,6 +302,12 @@ Source `src/app/api/reporting/retail/shift-end/route.ts`, `src/lib/reporting/ret
 
 List 200 `{storeCode,timezone,rows}`. Each row is `id`, `shiftid`, `stationname`, `batch_number`, `shift`, `start_time`, `end_time`, `status`. A row matches when its start date in the store timezone is on or before `to`, and its end date is on or after `from`. An open row with a null end stays in range when its start is on or before `to`. Detail 200 `{storeCode,timezone,shift}` adds `employeename`, `employeeid`, `totaltime`, and the card arrays `sale`, `taxes`, `sale_breakdown`, `terminalcashstatus`, `miscellaneous`, `terminalcashtransfer`. Timestamps are ISO. Missing id is 404. Expected 400 filters, 401 session, 403 unavailable/denied schema, 503 unexpected query failure. Cache-Control private,no-store.
 
+### GET `/api/reporting/retail/day-end`
+
+Source `src/app/api/reporting/retail/day-end/route.ts`, `src/lib/reporting/retail-day-end.ts`. Same session, retail store, and date-overlap rules as Shift End. List mode requires `store_code`, `from`, and `to`. Detail mode sends `id`.
+
+List 200 `{storeCode,timezone,rows}`. Each row is one stored day-end batch, including every section. Rows are ordered by `start_date_time`. Detail 200 `{storeCode,timezone,batch}`. Week End and Month End call this list with the selected week's first and last day, or the selected month's first and last day. The screen adds those batches into Department Sales, the sales-total card, Sales Breakdown, and Tax Detail. Missing id is 404. A missing `tbl_day_end_report` on an already provisioned schema returns 503.
+
 These endpoints have different date and monetary semantics: consult [BUSINESS_LOGIC.md](BUSINESS_LOGIC.md) before aligning them.
 
 ## Verified route export inventory
@@ -298,6 +335,7 @@ Generated from route source files, including the Auth.js handler re-export. HEAD
 | `/api/pos/reporting/retail/batch` | POST | `src/app/api/pos/reporting/retail/batch/route.ts` |
 | `/api/pos/reporting/retail/orders` | POST | `src/app/api/pos/reporting/retail/orders/route.ts` |
 | `/api/pos/reporting/retail/shift` | POST | `src/app/api/pos/reporting/retail/shift/route.ts` |
+| `/api/pos/reporting/retail/day-end-report` | POST | `src/app/api/pos/reporting/retail/day-end-report/route.ts` |
 | `/api/pos/reporting/retail/station_transaction` | POST | `src/app/api/pos/reporting/retail/station_transaction/route.ts` |
 | `/api/pos/reporting/retail/store_account_transaction` | POST | `src/app/api/pos/reporting/retail/store_account_transaction/route.ts` |
 | `/api/pos/reporting/retail/station_cash_transfer` | POST | `src/app/api/pos/reporting/retail/station_cash_transfer/route.ts` |
@@ -316,6 +354,7 @@ Generated from route source files, including the Auth.js handler re-export. HEAD
 | `/api/push-subscriptions` | POST, DELETE | `src/app/api/push-subscriptions/route.ts` |
 | `/api/reporting/orders` | GET | `src/app/api/reporting/orders/route.ts` |
 | `/api/reporting/retail/shift-end` | GET | `src/app/api/reporting/retail/shift-end/route.ts` |
+| `/api/reporting/retail/day-end` | GET | `src/app/api/reporting/retail/day-end/route.ts` |
 | `/api/reporting/transaction-detail` | GET | `src/app/api/reporting/transaction-detail/route.ts` |
 | `/api/store-selection` | POST | `src/app/api/store-selection/route.ts` |
 | `/api/stores` | GET | `src/app/api/stores/route.ts` |

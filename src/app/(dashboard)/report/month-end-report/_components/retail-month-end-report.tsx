@@ -3,16 +3,15 @@
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
 import { Button } from "@/components/tailgrids/core/button";
 import { useStore } from "@/components/store/store-provider";
-import { cn } from "@/utils/cn";
-import { useEffect, useState, type ReactNode } from "react";
+import { reportingQueryKey } from "@/lib/reporting/query-key";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { LuUpload } from "react-icons/lu";
 import { RetailMonthYearFilter } from "../../_components/retail-month-year-filter";
 import {
-  retailMonthEndDetailForMonth,
-  type RetailMonthEndDepartment,
-  type RetailMonthEndLine,
-  type RetailMonthEndTax,
-} from "./retail-month-end-data";
+  RetailPeriodSummary,
+  type DayEndBatch,
+} from "../../day-end-report/_components/retail-day-end-detail";
 
 const SHORT_MONTHS = [
   "Jan",
@@ -82,185 +81,53 @@ function formatPrintedAt(date: Date) {
   return `${month}-${day}-${date.getFullYear()} ${hours}:${minutes}:${seconds} ${meridiem}`;
 }
 
-function Panel({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="overflow-hidden rounded-lg border border-card-border bg-card-surface-area">
-      <h2 className="border-b border-card-border px-4 py-2 text-xs font-semibold tracking-wide text-text-primary uppercase">
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
-}
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-function Lines({ rows }: { rows: RetailMonthEndLine[] }) {
-  return (
-    <dl>
-      {rows.map((row, index) => (
-        <div
-          key={`${row.label}-${index}`}
-          className={cn(
-            "flex items-baseline justify-between gap-4 px-4 py-1.5 text-sm",
-            row.emphasize && "font-semibold text-text-primary",
-            row.divider && "border-t border-card-border",
-          )}
-        >
-          <dt className={row.emphasize ? "text-text-primary" : "text-text-secondary"}>
-            {row.label}
-          </dt>
-          <dd className="tabular-nums text-text-primary">{row.value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
-
-const headCell =
-  "px-3 py-2 text-left text-xs font-semibold whitespace-nowrap text-text-secondary";
-const bodyCell =
-  "px-3 py-2 text-sm whitespace-nowrap text-text-secondary tabular-nums";
-
-function DepartmentTable({
-  rows,
-  total,
-}: {
-  rows: RetailMonthEndDepartment[];
-  total: RetailMonthEndDepartment;
-}) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[52rem]">
-        <thead className="bg-background-gray-secondary_alt_2">
-          <tr>
-            {[
-              "Trans#",
-              "Department Name",
-              "Quantity",
-              "Disc(AMT)($)",
-              "Disc(%)",
-              "Sub Total($)",
-              "Tax($)",
-              "Total Amount($)",
-              "Dept Sales(%)",
-            ].map((label) => (
-              <th
-                key={label}
-                className={cn(
-                  headCell,
-                  label !== "Department Name" && label !== "Trans#" && "text-right",
-                )}
-              >
-                {label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={`${row.trans}-${row.name}`} className="border-t border-card-border">
-              <td className={bodyCell}>{row.trans}</td>
-              <td className={cn(bodyCell, "text-text-primary")}>{row.name}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.quantity}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.discountAmount}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.discountPercent}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.subTotal}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.tax}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.total}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.share}</td>
-            </tr>
-          ))}
-          <tr className="border-t border-card-border font-semibold text-text-primary">
-            <td className={bodyCell} />
-            <td className={cn(bodyCell, "text-text-primary")}>{total.name}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.quantity}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>
-              {total.discountAmount}
-            </td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>
-              {total.discountPercent}
-            </td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.subTotal}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.tax}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.total}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.share}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function TaxTable({
-  rows,
-  total,
-}: {
-  rows: RetailMonthEndTax[];
-  total: RetailMonthEndTax;
-}) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[40rem]">
-        <thead className="bg-background-gray-secondary_alt_2">
-          <tr>
-            {[
-              "TaxName",
-              "Qty",
-              "TaxRate",
-              "Taxable Amount($)",
-              "Tax Amount($)",
-              "Tax Sales(%)",
-            ].map((label) => (
-              <th
-                key={label}
-                className={cn(headCell, label !== "TaxName" && "text-right")}
-              >
-                {label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.name} className="border-t border-card-border">
-              <td className={cn(bodyCell, "text-text-primary")}>{row.name}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.quantity}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.rate}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.taxable}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.tax}</td>
-              <td className={cn(bodyCell, "text-right")}>{row.share}</td>
-            </tr>
-          ))}
-          <tr className="border-t border-card-border font-semibold text-text-primary">
-            <td className={cn(bodyCell, "text-text-primary")}>{total.name}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.quantity}</td>
-            <td className={bodyCell} />
-            <td className={bodyCell} />
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.tax}</td>
-            <td className={cn(bodyCell, "text-right text-text-primary")}>{total.share}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
+function monthRange(monthId: string) {
+  const [yearText, monthText] = monthId.split("-");
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const last = new Date(year, month, 0).getDate();
+  const stamp = `${yearText}-${monthText}`;
+  return {
+    from: `${stamp}-01`,
+    to: `${stamp}-${String(last).padStart(2, "0")}`,
+    title: `${MONTH_NAMES[month - 1] ?? monthId} ${yearText}`,
+  };
 }
 
 export default function RetailMonthEndReport() {
   const { selectedStore } = useStore();
   const [appliedMonthId, setAppliedMonthId] = useState<string | null>(null);
   const [printedAt, setPrintedAt] = useState("");
+  const applied = appliedMonthId ? monthRange(appliedMonthId) : null;
+  const storeCode = selectedStore?.storeCode ?? "";
+  const report = useQuery({
+    queryKey: reportingQueryKey(storeCode, { report: "month-end", applied }),
+    enabled: Boolean(storeCode && applied),
+    queryFn: async ({ signal }): Promise<{ timezone: string; rows: DayEndBatch[] }> => {
+      const params = new URLSearchParams({
+        store_code: storeCode,
+        from: applied?.from ?? "",
+        to: applied?.to ?? "",
+      });
+      const response = await fetch(`/api/reporting/retail/day-end?${params}`, { signal, cache: "no-store" });
+      const body = (await response.json()) as { timezone: string; rows: DayEndBatch[]; error?: string };
+      if (!response.ok) throw new Error(body.error ?? "Unable to load this month.");
+      return body;
+    },
+  });
 
   useEffect(() => {
     setPrintedAt(formatPrintedAt(new Date()));
   }, [appliedMonthId]);
 
-  const detail = appliedMonthId
-    ? retailMonthEndDetailForMonth(appliedMonthId)
-    : null;
+  const rows = report.data?.rows ?? [];
 
   function exportPdf() {
-    if (!detail) return;
+    if (!applied || !rows.length) return;
     const previous = document.title;
-    document.title = `MONTH END REPORT ${detail.titleRange}`;
+    document.title = `MONTH END REPORT ${applied.title}`;
     const restore = () => {
       document.title = previous;
       window.removeEventListener("afterprint", restore);
@@ -296,70 +163,40 @@ export default function RetailMonthEndReport() {
             <p className="text-sm font-medium text-text-secondary">
               Select a year and month, then search the report.
             </p>
-            <p className="mt-1 text-[11px] text-text-tertiary">
-              Preview data is available for July 2025.
-            </p>
           </div>
-        ) : !detail ? (
+        ) : report.isFetching ? (
+          <p className="text-sm text-text-secondary">Loading the report.</p>
+        ) : report.error ? (
+          <div role="alert" className="text-sm text-error-500">
+            {report.error.message}{" "}
+            <Button size="xs" appearance="outline" onPress={() => void report.refetch()}>
+              Retry
+            </Button>
+          </div>
+        ) : rows.length === 0 ? (
           <div className="rounded-lg border border-dashed border-card-border bg-card-surface-area px-5 py-10 text-center">
             <p className="text-sm font-medium text-text-secondary">
-              No month-end data found for the selected month.
-            </p>
-            <p className="mt-1 text-[11px] text-text-tertiary">
-              Preview data is available for July 2025.
+              No day-end data found for the selected month.
             </p>
           </div>
         ) : (
           <div id="retail-month-end-print" className="space-y-4">
             <div className="retail-report-no-print flex justify-end">
-              <Button
-                appearance="outline"
-                size="sm"
-                className="w-fit gap-1.5"
-                onPress={exportPdf}
-              >
+              <Button appearance="outline" size="sm" className="w-fit gap-1.5" onPress={exportPdf}>
                 <LuUpload />
                 Export
               </Button>
             </div>
-
             <div className="rounded-lg border border-card-border px-2 py-4">
               <p className="text-center text-sm font-semibold tracking-wide text-text-primary uppercase">
                 {selectedStore?.storeCode}
               </p>
               <div className="shift-title-bar mt-3 bg-text-primary px-4 py-2 text-center text-sm font-semibold tracking-wide text-card-surface-area">
-                MONTH END REPORT {detail.titleRange}
+                MONTH END REPORT {applied?.title}
               </div>
-              <div className="mt-3 flex flex-col gap-1 text-sm text-text-secondary sm:flex-row sm:items-center sm:justify-between">
-                <p>Date & Time: {printedAt}</p>
-                <p>
-                  Employee Name:{" "}
-                  <span className="font-medium text-text-primary">
-                    {detail.employeeName}
-                  </span>
-                </p>
-              </div>
+              <p className="mt-3 text-sm text-text-secondary">Date & Time: {printedAt}</p>
             </div>
-
-            <Panel title="Department Sales Detail">
-              <DepartmentTable
-                rows={detail.departments}
-                total={detail.departmentTotal}
-              />
-            </Panel>
-
-            <div className="grid items-start gap-4 lg:grid-cols-2">
-              <section className="overflow-hidden rounded-lg border border-card-border bg-card-surface-area">
-                <Lines rows={detail.summary} />
-              </section>
-              <Panel title="Sales Breakdown">
-                <Lines rows={detail.salesBreakdown} />
-              </Panel>
-            </div>
-
-            <Panel title="Tax Detail">
-              <TaxTable rows={detail.taxes} total={detail.taxTotal} />
-            </Panel>
+            <RetailPeriodSummary rows={rows} />
           </div>
         )}
       </div>
