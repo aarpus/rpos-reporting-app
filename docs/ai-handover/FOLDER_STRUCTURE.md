@@ -66,6 +66,7 @@ The tree below lists every discovered non-generated project file in the reviewed
 | `/report/transaction-journal/view/[id]` | `src/app/(dashboard)/report/transaction-journal/view/[id]/page.tsx` |
 | `/report/transaction-journal/print-detail` | `src/app/(dashboard)/report/transaction-journal/print-detail/page.tsx` |
 | `/report/invoice-report` | `src/app/(dashboard)/report/invoice-report/page.tsx` |
+| `/report/no-upc-detail` | `src/app/(dashboard)/report/no-upc-detail/page.tsx` |
 | `/report/invoice-report/view/[id]/[type]` | `src/app/(dashboard)/report/invoice-report/view/[id]/[type]/page.tsx` |
 | `/report/invoice-report/profit-margin/[id]/[type]` | `src/app/(dashboard)/report/invoice-report/profit-margin/[id]/[type]/page.tsx` |
 | `/report/invoice-report/cost-variance/[id]/[type]` | `src/app/(dashboard)/report/invoice-report/cost-variance/[id]/[type]/page.tsx` |
@@ -242,8 +243,23 @@ src/app/(dashboard)/report/day-end-report/_components/retail-day-end-data.ts
 src/app/(dashboard)/report/day-end-report/_components/retail-day-end-detail.tsx
 src/app/(dashboard)/report/day-end-report/_components/retail-day-end-list.tsx
 src/lib/reporting/retail-day-end.ts
+src/lib/reporting/retail-transaction-journal.ts
+src/lib/reporting/retail-credit-card.ts
+src/lib/reporting/retail-monthly-sales-tax.ts
+src/lib/reporting/retail-invoice.ts
+src/lib/reporting/retail-noupc.ts
 src/app/api/pos/reporting/retail/day-end-report/route.ts
+src/app/api/pos/reporting/retail/transaction-journal/route.ts
+src/app/api/pos/reporting/retail/credit-card-transaction/route.ts
+src/app/api/pos/reporting/retail/monthly-sales-tax/route.ts
+src/app/api/pos/reporting/retail/invoice/route.ts
+src/app/api/pos/reporting/retail/no-upc-detail/route.ts
 src/app/api/reporting/retail/day-end/route.ts
+src/app/api/reporting/retail/transaction-journal/route.ts
+src/app/api/reporting/retail/credit-card-transaction/route.ts
+src/app/api/reporting/retail/monthly-sales-tax/route.ts
+src/app/api/reporting/retail/invoice/route.ts
+src/app/api/reporting/retail/no-upc-detail/route.ts
 src/app/(dashboard)/report/day-end-report/page.tsx
 src/app/(dashboard)/report/employee-clock-in-out/_components/data.ts
 src/app/(dashboard)/report/employee-clock-in-out/_components/employee-clock-report.tsx
@@ -272,6 +288,7 @@ src/app/(dashboard)/report/invoice-report/_components/invoice-view-entry.tsx
 src/app/(dashboard)/report/invoice-report/_components/retail-invoice-cost-variance.tsx
 src/app/(dashboard)/report/invoice-report/_components/retail-invoice-data.ts
 src/app/(dashboard)/report/invoice-report/_components/retail-invoice-list.tsx
+src/app/(dashboard)/report/invoice-report/_components/retail-invoice-query.ts
 src/app/(dashboard)/report/invoice-report/_components/retail-invoice-log-dialog.tsx
 src/app/(dashboard)/report/invoice-report/_components/retail-invoice-profit-margin.tsx
 src/app/(dashboard)/report/invoice-report/_components/retail-invoice-qty-variance.tsx
@@ -281,6 +298,9 @@ src/app/(dashboard)/report/invoice-report/page.tsx
 src/app/(dashboard)/report/invoice-report/profit-margin/[id]/[type]/page.tsx
 src/app/(dashboard)/report/invoice-report/qty-variance/[id]/[type]/page.tsx
 src/app/(dashboard)/report/invoice-report/view/[id]/[type]/page.tsx
+src/app/(dashboard)/report/no-upc-detail/_components/no-upc-detail-entry.tsx
+src/app/(dashboard)/report/no-upc-detail/_components/retail-no-upc-detail-report.tsx
+src/app/(dashboard)/report/no-upc-detail/page.tsx
 src/app/(dashboard)/report/_components/retail-month-year-filter.tsx
 src/app/(dashboard)/report/orders/order-reporting.tsx
 src/app/(dashboard)/report/orders/page.tsx
@@ -350,27 +370,20 @@ src/app/api/pos/notification-events/route.ts
 src/app/api/pos/reporting/restaurant/batch/route.ts
 src/app/api/pos/reporting/restaurant/orders/route.ts
 src/app/api/pos/reporting/restaurant/shift/route.ts
-src/app/api/pos/reporting/retail/batch/route.ts
-src/app/api/pos/reporting/retail/orders/route.ts
 src/app/api/pos/reporting/retail/shift/route.ts
-src/app/api/pos/reporting/retail/station_transaction/route.ts
-src/app/api/pos/reporting/retail/store_account_transaction/route.ts
-src/app/api/pos/reporting/retail/station_cash_transfer/route.ts
+src/app/api/pos/reporting/retail/day-end-report/route.ts
+src/app/api/pos/reporting/retail/transaction-journal/route.ts
+src/app/api/pos/reporting/retail/credit-card-transaction/route.ts
+src/app/api/pos/reporting/retail/monthly-sales-tax/route.ts
 src/app/api/pos/reporting/retail/invoice/route.ts
-src/app/api/pos/reporting/retail/invoice_payment/route.ts
-src/app/api/pos/reporting/retail/clockin/route.ts
-src/app/api/pos/reporting/retail/nosale/route.ts
-src/app/api/pos/reporting/retail/account_payment/route.ts
-src/app/api/pos/reporting/retail/group_detail/route.ts
-src/app/api/pos/reporting/retail/store/route.ts
-src/app/api/pos/reporting/retail/Coupon/route.ts
-src/app/api/pos/reporting/retail/Online_Platform_Master/route.ts
-src/app/api/pos/reporting/retail/cashmachine_transaction/route.ts
-src/app/api/pos/reporting/retail/cashmachine_master/route.ts
-src/app/api/pos/reporting/retail/cashmachine_batch/route.ts
+src/app/api/pos/reporting/retail/no-upc-detail/route.ts
 src/app/api/push-subscriptions/route.ts
 src/app/api/reporting/orders/route.ts
 src/app/api/reporting/retail/shift-end/route.ts
+src/app/api/reporting/retail/credit-card-transaction/route.ts
+src/app/api/reporting/retail/monthly-sales-tax/route.ts
+src/app/api/reporting/retail/invoice/route.ts
+src/app/api/reporting/retail/no-upc-detail/route.ts
 src/app/api/reporting/transaction-detail/route.ts
 src/app/api/store-selection/route.ts
 src/app/api/stores/route.ts

@@ -23,44 +23,48 @@ export type PeriodSummary = {
 };
 
 const summaryLabels = ["Net Sales Amount", "Tax Paid", "Gross Sales Amount", "No of Transaction"] as const;
+const zero = BigInt(0);
+const two = BigInt(2);
+const ten = BigInt(10);
+const tenThousand = BigInt(10000);
 
 function parseAmount(raw: string): Amount {
   const cleaned = raw.trim().replace(/[$,]/g, "").replace(/%$/, "");
   const match = /^(-?)(\d+)(?:\.(\d+))?$/.exec(cleaned);
-  if (!match) return { signed: 0n, scale: 0 };
+  if (!match) return { signed: zero, scale: 0 };
   const fraction = match[3] ?? "";
   const digits = BigInt(`${match[2]}${fraction}`);
   return { signed: match[1] === "-" ? -digits : digits, scale: fraction.length };
 }
 
 function formatAmount(signed: bigint, scale: number) {
-  const negative = signed < 0n;
+  const negative = signed < zero;
   const digits = (negative ? -signed : signed).toString().padStart(scale + 1, "0");
   if (scale === 0) return `${negative && digits !== "0" ? "-" : ""}${digits}`;
   const whole = digits.slice(0, -scale);
   const fraction = digits.slice(-scale);
-  const zero = whole === "0" && /^0+$/.test(fraction);
-  return `${negative && !zero ? "-" : ""}${whole}.${fraction}`;
+  const zeroAmount = whole === "0" && /^0+$/.test(fraction);
+  return `${negative && !zeroAmount ? "-" : ""}${whole}.${fraction}`;
 }
 
-function addAmounts(values: string[]) {
+export function addAmounts(values: string[]) {
   const parts = values.map(parseAmount);
   const scale = parts.reduce((max, part) => Math.max(max, part.scale), 0);
-  let total = 0n;
-  for (const part of parts) total += part.signed * 10n ** BigInt(scale - part.scale);
+  let total = zero;
+  for (const part of parts) total += part.signed * ten ** BigInt(scale - part.scale);
   return formatAmount(total, scale);
 }
 
 function scaleTo(amount: Amount, scale: number) {
-  return amount.signed * 10n ** BigInt(scale - amount.scale);
+  return amount.signed * ten ** BigInt(scale - amount.scale);
 }
 
 function divideRound(numerator: bigint, denominator: bigint) {
-  if (denominator === 0n) return 0n;
-  const negative = (numerator < 0n) !== (denominator < 0n);
-  const n = numerator < 0n ? -numerator : numerator;
-  const d = denominator < 0n ? -denominator : denominator;
-  const quotient = (n + d / 2n) / d;
+  if (denominator === zero) return zero;
+  const negative = (numerator < zero) !== (denominator < zero);
+  const n = numerator < zero ? -numerator : numerator;
+  const d = denominator < zero ? -denominator : denominator;
+  const quotient = (n + d / two) / d;
   return negative ? -quotient : quotient;
 }
 
@@ -69,8 +73,8 @@ function percent(part: string, whole: string) {
   const right = parseAmount(whole);
   const scale = Math.max(left.scale, right.scale);
   const wholeScaled = scaleTo(right, scale);
-  if (wholeScaled === 0n) return formatAmount(0n, 2);
-  return formatAmount(divideRound(scaleTo(left, scale) * 10000n, wholeScaled), 2);
+  if (wholeScaled === zero) return formatAmount(zero, 2);
+  return formatAmount(divideRound(scaleTo(left, scale) * tenThousand, wholeScaled), 2);
 }
 
 function labelKey(label: string) {

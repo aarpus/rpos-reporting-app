@@ -1,0 +1,53 @@
+[
+  {
+    "request_id": "example-retail-noupc-1",
+    "no_upc_detail": {
+      "department": "Coils-Pods",
+      "transaction_no": "ACFG76570",
+      "product_name": "Coils-Pods-NU @ $ 03.22",
+      "sold_qty": "1",
+      "retail_price": "3.22",
+      "discount": "0.00",
+      "subtotal": "3.22",
+      "tax": "0.19",
+      "total_amount": "3.41",
+      "station_name": "W22",
+      "transaction_datetime": "2025-07-07T05:07:04Z",
+      "employee_user": "111"
+    }
+  },
+  {
+    "request_id": "example-retail-noupc-2",
+    "no_upc_detail": {
+      "department": "Cleaner",
+      "transaction_no": "ACFG76571",
+      "product_name": "Cleaner-NU @ $ 21.11",
+      "sold_qty": "1",
+      "retail_price": "21.11",
+      "discount": "0.00",
+      "subtotal": "21.11",
+      "tax": "1.27",
+      "total_amount": "22.38",
+      "station_name": "W22",
+      "transaction_datetime": "2025-07-07T04:10:00Z",
+      "employee_user": "111"
+    }
+  },
+  {
+    "request_id": "example-retail-noupc-3",
+    "no_upc_detail": {
+      "department": "Charcoal",
+      "transaction_no": "ACFG70001",
+      "product_name": "Charcoal-NU @ $ 01.00",
+      "sold_qty": "-1",
+      "retail_price": "1.00",
+      "discount": "0.00",
+      "subtotal": "-1.00",
+      "tax": "0.00",
+      "total_amount": "-1.00",
+      "station_name": "Tobbaco",
+      "transaction_datetime": "2025-04-28T13:26:41Z",
+      "employee_user": "23"
+    }
+  }
+]

@@ -3,14 +3,13 @@
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
 import { Button } from "@/components/tailgrids/core/button";
 import { useStore } from "@/components/store/store-provider";
+import { reportingQueryKey } from "@/lib/reporting/query-key";
+import { sumMonthlySalesTaxRows, type MonthlySalesTaxRow } from "@/lib/reporting/retail-monthly-sales-tax";
 import { cn } from "@/utils/cn";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
 import { LuUpload } from "react-icons/lu";
 import { RetailMonthYearFilter } from "../../_components/retail-month-year-filter";
-import {
-  retailMonthlySalesTaxForMonth,
-  type RetailMonthlySalesTaxRow,
-} from "./retail-monthly-sales-tax-data";
 
 const printStyles = `
 @media print {
@@ -69,28 +68,12 @@ const SHORT_MONTHS = [
   "Dec",
 ] as const;
 
-const TABLE_HEADERS = [
-  "Date",
-  "Total Sales",
-  "Net Sales",
-  "Total Tax",
-  "Deposit Amount",
-  "Cash",
-  "Cheque",
-  "Card",
-  "Account",
-  "StoreCredit",
-  "Giftcard",
-  "Sales Tax TaxableAmt",
-  "Sales Tax TaxAmt",
-  "Lequer Tax TaxableAmt",
-  "Lequer Tax TaxAmt",
-  "Cgst TaxableAmt",
-  "Cgst TaxAmt",
-  "No Tax TaxableAmt",
-  "Norfolk TaxableAmt",
-  "Norfolk TaxAmt",
-] as const;
+type MonthlySalesTaxResponse = {
+  employeeName: string;
+  columns: string[];
+  rows: MonthlySalesTaxRow[];
+  error?: string;
+};
 
 function formatPrintedAt(date: Date) {
   const month = SHORT_MONTHS[date.getMonth()];
@@ -103,46 +86,46 @@ function formatPrintedAt(date: Date) {
   return `${month}-${day}-${date.getFullYear()} ${hours}:${minutes}:${seconds} ${meridiem}`;
 }
 
-function rowValues(row: RetailMonthlySalesTaxRow) {
-  return [
-    row.date,
-    row.totalSales,
-    row.netSales,
-    row.totalTax,
-    row.depositAmount,
-    row.cash,
-    row.cheque,
-    row.card,
-    row.account,
-    row.storeCredit,
-    row.giftcard,
-    row.salesTaxTaxable,
-    row.salesTaxAmt,
-    row.lequerTaxTaxable,
-    row.lequerTaxAmt,
-    row.cgstTaxable,
-    row.cgstTaxAmt,
-    row.noTaxTaxable,
-    row.norfolkTaxable,
-    row.norfolkTaxAmt,
-  ];
-}
-
 export default function RetailMonthlySalesTaxReport() {
   const { selectedStore } = useStore();
   const [appliedMonthId, setAppliedMonthId] = useState<string | null>(null);
   const [printedAt, setPrintedAt] = useState("");
+  const storeCode = selectedStore?.storeCode ?? "";
+  const report = useQuery({
+    queryKey: reportingQueryKey(storeCode, { report: "monthly-sales-tax", month: appliedMonthId }),
+    enabled: Boolean(storeCode && appliedMonthId),
+    queryFn: async ({ signal }): Promise<MonthlySalesTaxResponse> => {
+      const params = new URLSearchParams({
+        store_code: storeCode,
+        month: appliedMonthId ?? "",
+      });
+      const response = await fetch(`/api/reporting/retail/monthly-sales-tax?${params}`, { signal, cache: "no-store" });
+      const body = (await response.json()) as MonthlySalesTaxResponse;
+      if (!response.ok) throw new Error(body.error ?? "Unable to load monthly sales and tax.");
+      return body;
+    },
+  });
 
   useEffect(() => {
     setPrintedAt(formatPrintedAt(new Date()));
   }, [appliedMonthId]);
 
-  const detail = appliedMonthId
-    ? retailMonthlySalesTaxForMonth(appliedMonthId)
-    : null;
+  const grid = useMemo(() => {
+    const columns = report.data?.columns ?? [];
+    const rows = report.data?.rows ?? [];
+    if (columns.length === 0) return null;
+    return {
+      employeeName: report.data?.employeeName ?? "",
+      columns,
+      rows: [
+        ...rows,
+        { cells: ["Total", ...sumMonthlySalesTaxRows(rows)], emphasize: true },
+      ],
+    };
+  }, [report.data]);
 
   function exportPdf() {
-    if (!detail) return;
+    if (!grid) return;
     const previous = document.title;
     document.title = "MONTHLY SALES AND TAX REPORT";
     const restore = () => {
@@ -183,17 +166,22 @@ export default function RetailMonthlySalesTaxReport() {
             <p className="text-sm font-medium text-text-secondary">
               Select a year and month, then search the report.
             </p>
-            <p className="mt-1 text-[11px] text-text-tertiary">
-              Preview data is available for July 2025.
-            </p>
           </div>
-        ) : !detail ? (
+        ) : report.error ? (
+          <div role="alert" className="rounded-lg border border-dashed border-card-border bg-card-surface-area px-5 py-10 text-center">
+            <p className="text-sm font-medium text-error-500">{report.error.message}</p>
+            <Button size="xs" appearance="outline" className="mt-3" onPress={() => void report.refetch()}>
+              Retry
+            </Button>
+          </div>
+        ) : report.isFetching && !grid ? (
+          <div className="rounded-lg border border-dashed border-card-border bg-card-surface-area px-5 py-10 text-center">
+            <p className="text-sm font-medium text-text-secondary">Loading monthly sales and tax.</p>
+          </div>
+        ) : !grid ? (
           <div className="rounded-lg border border-dashed border-card-border bg-card-surface-area px-5 py-10 text-center">
             <p className="text-sm font-medium text-text-secondary">
               No monthly sales and tax data found for the selected month.
-            </p>
-            <p className="mt-1 text-[11px] text-text-tertiary">
-              Preview data is available for July 2025.
             </p>
           </div>
         ) : (
@@ -223,22 +211,22 @@ export default function RetailMonthlySalesTaxReport() {
                   <p>
                     Employee Name:{" "}
                     <span className="font-medium text-text-primary">
-                      {detail.employeeName}
+                      {grid.employeeName}
                     </span>
                   </p>
                 </div>
               </div>
 
               <div className="overflow-x-auto border-t border-card-border">
-                <table className="w-full min-w-[96rem] text-left text-sm">
+                <table className="w-max min-w-full text-left text-sm">
                   <thead className="bg-background-gray-secondary_alt_2">
                     <tr>
-                      {TABLE_HEADERS.map((label) => (
+                      {grid.columns.map((label, index) => (
                         <th
-                          key={label}
+                          key={`${label}-${index}`}
                           className={cn(
                             "px-3 py-2 text-xs font-semibold whitespace-nowrap text-text-secondary",
-                            label !== "Date" && "text-right",
+                            index > 0 && "text-right",
                           )}
                         >
                           {label}
@@ -247,33 +235,30 @@ export default function RetailMonthlySalesTaxReport() {
                     </tr>
                   </thead>
                   <tbody>
-                    {detail.rows.map((row) => {
-                      const values = rowValues(row);
-                      return (
-                        <tr
-                          key={row.date}
-                          className={cn(
-                            "border-t border-card-border",
-                            row.emphasize &&
-                              "bg-background-gray-secondary_alt_2 font-semibold text-text-primary",
-                          )}
-                        >
-                          {values.map((value, index) => (
-                            <td
-                              key={`${row.date}-${TABLE_HEADERS[index]}`}
-                              className={cn(
-                                "px-3 py-2 whitespace-nowrap tabular-nums text-text-secondary",
-                                index === 0 && "text-left text-text-primary",
-                                index > 0 && "text-right",
-                                row.emphasize && "text-text-primary",
-                              )}
-                            >
-                              {value}
-                            </td>
-                          ))}
-                        </tr>
-                      );
-                    })}
+                    {grid.rows.map((row, rowIndex) => (
+                      <tr
+                        key={`${row.cells[0]}-${rowIndex}`}
+                        className={cn(
+                          "border-t border-card-border",
+                          row.emphasize &&
+                            "bg-background-gray-secondary_alt_2 font-semibold text-text-primary",
+                        )}
+                      >
+                        {row.cells.map((value, index) => (
+                          <td
+                            key={`${rowIndex}-${index}`}
+                            className={cn(
+                              "px-3 py-2 whitespace-nowrap tabular-nums text-text-secondary",
+                              index === 0 && "text-left text-text-primary",
+                              index > 0 && "text-right",
+                              row.emphasize && "text-text-primary",
+                            )}
+                          >
+                            {value}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>

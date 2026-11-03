@@ -1,48 +1,40 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { parseRetailBatch, parseRetailEntity, parseRetailOrder, parseRetailShift } from "../src/lib/reporting/retail-snapshot.ts";
+import { parseRetailShift } from "../src/lib/reporting/retail-snapshot.ts";
+import { parseRetailDayEnd } from "../src/lib/reporting/retail-day-end.ts";
+import { parseRetailTransactionJournal } from "../src/lib/reporting/retail-transaction-journal.ts";
+import { parseRetailCreditCard } from "../src/lib/reporting/retail-credit-card.ts";
+import { parseRetailMonthlySalesTax } from "../src/lib/reporting/retail-monthly-sales-tax.ts";
+import { parseRetailInvoice } from "../src/lib/reporting/retail-invoice.ts";
+import { parseRetailNoUpc } from "../src/lib/reporting/retail-noupc.ts";
 
-const directory = new URL("../docs/postman/retail-10/", import.meta.url);
-const files = {
-  batch: parseRetailBatch,
-  shift: parseRetailShift,
-  orders: parseRetailOrder,
-  station_transaction: (body) => parseRetailEntity(body, "station_transaction", "tbl_station_transaction"),
-  store_account_transaction: (body) => parseRetailEntity(body, "store_account_transaction", "tbl_store_account_transaction"),
-  station_cash_transfer: (body) => parseRetailEntity(body, "station_cash_transfer", "tbl_station_cash_transfer"),
-  invoice: (body) => parseRetailEntity(body, "invoice", "tbl_invoice"),
-  invoice_payment: (body) => parseRetailEntity(body, "invoice_payment", "tbl_invoice_payment"),
-  clockin: (body) => parseRetailEntity(body, "clockin", "tbl_clockin"),
-  nosale: (body) => parseRetailEntity(body, "nosale", "tbl_nosale"),
-  account_payment: (body) => parseRetailEntity(body, "account_payment", "tbl_account_payment"),
-  group_detail: (body) => parseRetailEntity(body, "group_detail", "tbl_group_detail"),
-  store: (body) => parseRetailEntity(body, "store", "tbl_store"),
-  Coupon: (body) => parseRetailEntity(body, "Coupon", "tbl_Coupon"),
-  Online_Platform_Master: (body) => parseRetailEntity(body, "Online_Platform_Master", "tbl_Online_Platform_Master"),
-  cashmachine_transaction: (body) => parseRetailEntity(body, "cashmachine_transaction", "tbl_cashmachine_transaction"),
-  cashmachine_master: (body) => parseRetailEntity(body, "cashmachine_master", "tbl_cashmachine_master"),
-  cashmachine_batch: (body) => parseRetailEntity(body, "cashmachine_batch", "tbl_cashmachine_batch"),
-};
+async function bodies(name) {
+  return JSON.parse(await readFile(new URL(`../docs/postman/${name}`, import.meta.url), "utf8"));
+}
 
-test("retail postman files contain 10 insertable records for every retail route", async () => {
-  const collection = JSON.parse(await readFile(new URL("../docs/postman/store-reporting-retail-10.postman_collection.json", import.meta.url), "utf8"));
-  assert.equal(collection.item.length, Object.keys(files).length);
-  for (const [name, parse] of Object.entries(files)) {
-    const bodies = JSON.parse(await readFile(new URL(`${name}.json`, directory), "utf8"));
-    assert.equal(bodies.length, 10, name);
-    const folder = collection.item.find((entry) => entry.name === name);
-    assert.equal(folder.item.length, 10, name);
-    bodies.forEach((body, index) => {
-      parse(body);
-      assert.equal(folder.item[index].request.url.raw, `{{baseUrl}}/api/pos/reporting/retail/${name}`);
-      assert.deepEqual(JSON.parse(folder.item[index].request.body.raw), body);
-    });
-  }
-  const orders = JSON.parse(await readFile(new URL("orders.json", directory), "utf8"));
-  const shifts = JSON.parse(await readFile(new URL("shift.json", directory), "utf8"));
-  orders.forEach((order, index) => {
-    assert.equal(order.checkout_transaction.shiftid, shifts[index].shift.shiftid);
-    assert.equal(order.transaction_payment[0].batchid, shifts[index].shift.batch_number);
-  });
+test("retail report postman samples match the remaining push routes", async () => {
+  const shifts = await bodies("store-reporting-retail-shift.postman_data.json");
+  const days = await bodies("store-reporting-retail-day-end-report.postman_data.json");
+  const journals = await bodies("store-reporting-retail-transaction-journal.postman_data.json");
+  const cards = await bodies("store-reporting-retail-credit-card.postman_data.json");
+  const months = await bodies("store-reporting-retail-monthly-sales-tax.postman_data.json");
+  const invoices = await bodies("store-reporting-retail-invoice.postman_data.json");
+  const noUpc = await bodies("store-reporting-retail-no-upc-detail.postman_data.json");
+  assert.ok(shifts.length >= 1);
+  assert.ok(days.length >= 1);
+  assert.equal(journals.length, 2);
+  assert.equal(cards.length, 3);
+  assert.equal(months.length, 1);
+  assert.equal(invoices.length, 2);
+  assert.equal(noUpc.length, 3);
+  shifts.forEach((body) => parseRetailShift(body));
+  days.forEach((body) => parseRetailDayEnd(body));
+  journals.forEach((body) => parseRetailTransactionJournal(body));
+  cards.forEach((body) => parseRetailCreditCard(body));
+  months.forEach((body) => parseRetailMonthlySalesTax(body));
+  invoices.forEach((body) => parseRetailInvoice(body));
+  noUpc.forEach((body) => parseRetailNoUpc(body));
+  assert.equal(journals[0].transaction_journal.transaction_number, "ACFG866202");
+  assert.equal(journals[1].transaction_journal.paid_by, "Cash");
 });

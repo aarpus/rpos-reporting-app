@@ -144,24 +144,11 @@ Sample bodies: `docs/postman/store-reporting-batch.postman_data.json` and `docs/
 
 These three routes accept a store only when `public.stores.store_type` is `RESTAURANT`. A retail store receives 403 `Restaurant reporting is not available for this store.` The caller does not send a store type. The signed `X-Store-Code` selects the registered store, and the server reads its type.
 
-### POST `/api/pos/reporting/retail/batch`, `/shift`, and `/orders`
+### POST `/api/pos/reporting/retail/shift`
 
-Sources `src/app/api/pos/reporting/retail/{batch,shift,orders}/route.ts` and `src/lib/reporting/{pos-auth.ts,retail-columns.ts,retail-snapshot.ts,retail-sync.ts}`. Same HMAC headers, 1 MB UTF-8 limit, and active credential checks as the restaurant routes. The store must be `RETAIL`; a restaurant store receives 403 `Retail reporting is not available for this store.` Registered reporting version must be 1.
+Source `src/app/api/pos/reporting/retail/shift/route.ts`, `src/lib/reporting/retail-snapshot.ts`, `retail-sync.ts`. Same HMAC headers, 1 MB UTF-8 limit, and active credential checks as the restaurant routes. The store must be `RETAIL`; a restaurant store receives 403 `Retail reporting is not available for this store.` Registered reporting version must be 1.
 
-Retail rows use the POS column names in `database/reporting/retail/001-tables.sql`. They do not use `store_code`, `batch_code`, `order_code`, or `source_revision`. Sending those fields, or a restaurant envelope, returns 400. `request_id` is required for the response and is not stored. There is no revision or stale result: the same POS id with the same content returns 200 `{status:"duplicate",request_id,...}`; changed content overwrites that id and returns 201 `{status:"accepted",request_id,...}`. Header Cache-Control=no-store.
-
-Create the checkout only after a `tbl_shift` row exists. A missing shift returns 409 `Create the shift before this transaction.` `POST /api/pos/reporting/retail/shift` upserts `tbl_shift_end_report` by `shiftid` and does not insert `tbl_shift` or require a batch. Each request is one object, not an array. Checkout child arrays are required, may be empty, and are capped at 2,000. Empty `transaction_detail`, `transaction_payment`, or `transaction_gift_card` deletes those children for that `transactionid`. A line, payment, or gift-card id that already belongs to another checkout returns 409.
-
-Every physical column from the retail table is accepted. The POS id is required. Any other column that the table marks `NOT NULL` and that has no default is required. A nullable column that is omitted, or sent as null, is stored blank (`NULL`), including when the column has a SQL default. A `NOT NULL` column with a default is stored as that default when omitted, because the table cannot store blank. `bytea` columns (`logo`, `Coupon_img`) accept Base64. `time` columns accept `HH:MM:SS` with up to six fractional digits.
-
-Checkout money columns are stored as sent. Rows in `tbl_transaction_payment`, including card attempts, are not added into `transactioncreditcardamount` or the other checkout totals. Omitted child `transactionid`, `shiftid`, and `chkout_id` are copied from the checkout; a supplied value that differs is rejected.
-
-```json
-{
-  "request_id": "example-retail-batch-1",
-  "batch": { "batchid": "101", "BatchStart": "2026-10-27T04:00:00Z", "storeid": "7" }
-}
-```
+The body is one object, `{ request_id, shift }`. It does not use `store_code`, `batch_code`, `order_code`, or `source_revision`. `request_id` is required for the response and is not stored. The same `shiftid` with the same content returns 200 `{status:"duplicate",request_id,shiftid}`; changed content overwrites that id and returns 201 `{status:"accepted",request_id,shiftid}`. Header Cache-Control=no-store. The route writes `tbl_shift_end_report` only.
 
 ```json
 {
@@ -220,22 +207,48 @@ Source `src/app/api/pos/reporting/retail/day-end-report/route.ts`, `src/lib/repo
 
 Card sections are ordered `{ "label", "value" }` arrays. `department_sales` and `tax_detail` are `{ "rows", "total" }`. `paid_out` and `paid_in` are `{ "rows", "total" }` where `total` is the amount string. Omitted sections use the table defaults. There is no separate week or month body.
 
+### POST `/api/pos/reporting/retail/transaction-journal`
+
+Source `src/app/api/pos/reporting/retail/transaction-journal/route.ts`, `src/lib/reporting/retail-transaction-journal.ts`. Same HMAC auth and `201 accepted` / `200 duplicate` result as the shift route. The body is `{ request_id, transaction_journal }`. Upsert is by `transactionid`. `transaction_number` is the displayed transaction code and is not the upsert key. Amount columns are exact strings. `lines` is `{ "rows", "total" }`. `credit_card` and `paid_by_amounts` are ordered `{ "label", "value" }` arrays. Sample rows: `docs/postman/store-reporting-retail-transaction-journal.postman_data.json`. Each file is an array; Postman must send one object per request.
+
 ```json
 {
-  "request_id": "example-retail-order-1",
-  "checkout_transaction": {
+  "request_id": "example-retail-journal-301",
+  "transaction_journal": {
     "transactionid": "301",
-    "transactiondate": "2026-10-27T04:10:00Z",
-    "transactionemployeeid": "4",
-    "shiftid": "201"
-  },
-  "transaction_detail": [],
-  "transaction_payment": [],
-  "transaction_gift_card": []
+    "transaction_date_time": "2026-10-27T10:20:00Z",
+    "stationname": "W22",
+    "transaction_number": "ACFG866202",
+    "qty": "1.00",
+    "discount": "0.00",
+    "sub_total": "19.99",
+    "tax": "1.20",
+    "deposit": "0.00",
+    "total": "21.19",
+    "paid_by": "Card",
+    "cashier": "111",
+    "lines": { "rows": [], "total": null },
+    "credit_card": [{ "label": "Auth Code", "value": "123456" }],
+    "paid_by_amounts": [{ "label": "Card", "value": "21.19" }]
+  }
 }
 ```
 
-POS ids are required positive integers, sent as strings except integer serial ids, which may be numbers. Payment `batchid` must equal the shift's batch. `tbl_checkout_transaction` and `tbl_transaction_detail` have no primary-key constraint in the retail SQL, so uniqueness is enforced by the API lock and a duplicate-id check, not by a new database constraint. Examples: `docs/postman/store-reporting-retail-batch.postman_data.json`, `store-reporting-retail-shift.postman_data.json`, and `store-reporting-retail-order.postman_data.json`. Ten insert bodies for every retail route are in `docs/postman/retail-10/`. Import `docs/postman/store-reporting-retail-10.postman_collection.json` and run the folders from top to bottom. Each file is an array; Postman must send one object per request.
+### POST `/api/pos/reporting/retail/credit-card-transaction`
+
+Source `src/app/api/pos/reporting/retail/credit-card-transaction/route.ts`, `src/lib/reporting/retail-credit-card.ts`. Same HMAC auth and `201 accepted` / `200 duplicate` result as the shift route. The body is `{ request_id, credit_card }`. Upsert is by `transactionid` into `tbl_creditcard_detail`. `tender` is `credit`, `debit`, or `external`. `transaction_type` is required only when `tender` is `external`. Amount is a two-decimal number and may be negative. Sample rows: `docs/postman/store-reporting-retail-credit-card.postman_data.json`. Postman must send one object per request.
+
+### POST `/api/pos/reporting/retail/monthly-sales-tax`
+
+Source `src/app/api/pos/reporting/retail/monthly-sales-tax/route.ts`, `src/lib/reporting/retail-monthly-sales-tax.ts`. Same HMAC auth and `201 accepted` / `200 duplicate` result as the shift route. The body is `{ request_id, monthly_sales_tax }`. Upsert is by `report_month` (`YYYY-MM`) into `tbl_monthly_sales_tax`. `columns` is the ordered header list and the first header is `Date`. `rows` is `{ "cells", "emphasize" }`, and each `cells` list matches the header count. Money cells are two-decimal strings. A row whose first cell is `Total` is rejected. Sample rows: `docs/postman/store-reporting-retail-monthly-sales-tax.postman_data.json`. Postman must send one object per request.
+
+### POST `/api/pos/reporting/retail/invoice`
+
+Source `src/app/api/pos/reporting/retail/invoice/route.ts`, `src/lib/reporting/retail-invoice.ts`. Same HMAC auth and `201 accepted` / `200 duplicate` result as the shift route. The body is `{ request_id, invoice }`. Upsert is by `invoiceid` and `invoice_type` into `tbl_invoice_report`. Header amounts are two-decimal numbers and may be negative. `lines`, `profit_lines`, `cost_lines`, `qty_lines`, and `log` are arrays of at most 200 rows. Line money stays an exact string. `profit_totals` is printed as sent. Sample rows: `docs/postman/store-reporting-retail-invoice.postman_data.json`. Postman must send one object per request.
+
+### POST `/api/pos/reporting/retail/no-upc-detail`
+
+Source `src/app/api/pos/reporting/retail/no-upc-detail/route.ts`, `src/lib/reporting/retail-noupc.ts`. Same HMAC auth and `201 accepted` / `200 duplicate` result as the shift route. The body is `{ request_id, no_upc_detail }`. Upsert is by `transaction_no`, `product_name`, and `transaction_datetime` into `tbl_noupc_detail`. `sold_qty` is an exact number string and may be negative. Money is a two-decimal number and may be negative. Sample rows: `docs/postman/store-reporting-retail-no-upc-detail.postman_data.json`. Postman must send one object per request.
 
 These additional retail routes use the same authentication, one-object envelope, column rules, and `201 accepted` / `200 duplicate` result. The envelope key matches the path. The response includes `request_id` and that table's POS id.
 
@@ -308,6 +321,36 @@ Source `src/app/api/reporting/retail/day-end/route.ts`, `src/lib/reporting/retai
 
 List 200 `{storeCode,timezone,rows}`. Each row is one stored day-end batch, including every section. Rows are ordered by `start_date_time`. Detail 200 `{storeCode,timezone,batch}`. Week End and Month End call this list with the selected week's first and last day, or the selected month's first and last day. The screen adds those batches into Department Sales, the sales-total card, Sales Breakdown, and Tax Detail. Missing id is 404. A missing `tbl_day_end_report` on an already provisioned schema returns 503.
 
+### GET `/api/reporting/retail/transaction-journal`
+
+Source `src/app/api/reporting/retail/transaction-journal/route.ts`, `src/lib/reporting/retail-transaction-journal.ts`. Same session and retail-store rules as Shift End. List mode requires `store_code`, `from`, and `to`. Optional `transaction_number` is a case-insensitive substring of the displayed transaction code, maximum 50 characters. Detail mode sends `id`, the report row id.
+
+List 200 `{storeCode,timezone,rows}`. A row matches when the store-local date of `transaction_date_time` is between `from` and `to`. Detail 200 `{storeCode,timezone,transaction}`. Each record includes the amount strings, `lines`, `credit_card`, and `paid_by_amounts`. Missing id is 404. A missing `tbl_transaction_journal_report` on an already provisioned schema returns 503.
+
+### GET `/api/reporting/retail/credit-card-transaction`
+
+Source `src/app/api/reporting/retail/credit-card-transaction/route.ts`, `src/lib/reporting/retail-credit-card.ts`. Same session and retail-store rules as Shift End. Requires `store_code`, `from`, and `to`.
+
+200 `{storeCode,timezone,rows}`. A row matches when the store-local date of `card_datetime` is between `from` and `to`. Amounts are decimal strings. The list uses rows whose `tender` is `credit` or `debit`. View Details uses `external` rows for External Pay. A missing `tbl_creditcard_detail` on an already provisioned schema returns 503.
+
+### GET `/api/reporting/retail/monthly-sales-tax`
+
+Source `src/app/api/reporting/retail/monthly-sales-tax/route.ts`, `src/lib/reporting/retail-monthly-sales-tax.ts`. Same session and retail-store rules as Shift End. Requires `store_code` and `month` (`YYYY-MM`).
+
+200 `{storeCode,timezone,reportMonth,employeeName,columns,rows}`. A missing month returns an empty `columns` and `rows` list. The screen adds the Total row. A missing `tbl_monthly_sales_tax` on an already provisioned schema returns 503.
+
+### GET `/api/reporting/retail/invoice`
+
+Source `src/app/api/reporting/retail/invoice/route.ts`, `src/lib/reporting/retail-invoice.ts`. Same session and retail-store rules as Shift End. List mode requires `store_code`, `from`, and `to`. Optional `amount_from`, `amount_to`, `invoice_type` (`RC` or `OP`), exact `supplier_name`, and a case-insensitive `supplier_invoice_no` substring narrow the list. Detail mode sends `id` and `type`.
+
+List 200 `{storeCode,timezone,suppliers,rows}`. A row matches when the store-local date of `invoice_datetime` is between `from` and `to`. `suppliers` is the distinct supplier names in that date match, before the supplier filter. List rows do not include the line arrays. Detail 200 `{storeCode,timezone,invoice}`. Missing id is 404. A missing `tbl_invoice_report` on an already provisioned schema returns 503.
+
+### GET `/api/reporting/retail/no-upc-detail`
+
+Source `src/app/api/reporting/retail/no-upc-detail/route.ts`, `src/lib/reporting/retail-noupc.ts`. Same session and retail-store rules as Shift End. Requires `store_code`, `from`, and `to`.
+
+200 `{storeCode,timezone,rows}`. A row matches when the store-local date of `transaction_datetime` is between `from` and `to`. Amounts are decimal strings. The screen groups the rows by department and adds a Sub Total. A missing `tbl_noupc_detail` on an already provisioned schema returns 503.
+
 These endpoints have different date and monetary semantics: consult [BUSINESS_LOGIC.md](BUSINESS_LOGIC.md) before aligning them.
 
 ## Verified route export inventory
@@ -332,29 +375,22 @@ Generated from route source files, including the Auth.js handler re-export. HEAD
 | `/api/pos/reporting/restaurant/batch` | POST | `src/app/api/pos/reporting/restaurant/batch/route.ts` |
 | `/api/pos/reporting/restaurant/orders` | POST | `src/app/api/pos/reporting/restaurant/orders/route.ts` |
 | `/api/pos/reporting/restaurant/shift` | POST | `src/app/api/pos/reporting/restaurant/shift/route.ts` |
-| `/api/pos/reporting/retail/batch` | POST | `src/app/api/pos/reporting/retail/batch/route.ts` |
-| `/api/pos/reporting/retail/orders` | POST | `src/app/api/pos/reporting/retail/orders/route.ts` |
 | `/api/pos/reporting/retail/shift` | POST | `src/app/api/pos/reporting/retail/shift/route.ts` |
 | `/api/pos/reporting/retail/day-end-report` | POST | `src/app/api/pos/reporting/retail/day-end-report/route.ts` |
-| `/api/pos/reporting/retail/station_transaction` | POST | `src/app/api/pos/reporting/retail/station_transaction/route.ts` |
-| `/api/pos/reporting/retail/store_account_transaction` | POST | `src/app/api/pos/reporting/retail/store_account_transaction/route.ts` |
-| `/api/pos/reporting/retail/station_cash_transfer` | POST | `src/app/api/pos/reporting/retail/station_cash_transfer/route.ts` |
+| `/api/pos/reporting/retail/transaction-journal` | POST | `src/app/api/pos/reporting/retail/transaction-journal/route.ts` |
+| `/api/pos/reporting/retail/credit-card-transaction` | POST | `src/app/api/pos/reporting/retail/credit-card-transaction/route.ts` |
+| `/api/pos/reporting/retail/monthly-sales-tax` | POST | `src/app/api/pos/reporting/retail/monthly-sales-tax/route.ts` |
 | `/api/pos/reporting/retail/invoice` | POST | `src/app/api/pos/reporting/retail/invoice/route.ts` |
-| `/api/pos/reporting/retail/invoice_payment` | POST | `src/app/api/pos/reporting/retail/invoice_payment/route.ts` |
-| `/api/pos/reporting/retail/clockin` | POST | `src/app/api/pos/reporting/retail/clockin/route.ts` |
-| `/api/pos/reporting/retail/nosale` | POST | `src/app/api/pos/reporting/retail/nosale/route.ts` |
-| `/api/pos/reporting/retail/account_payment` | POST | `src/app/api/pos/reporting/retail/account_payment/route.ts` |
-| `/api/pos/reporting/retail/group_detail` | POST | `src/app/api/pos/reporting/retail/group_detail/route.ts` |
-| `/api/pos/reporting/retail/store` | POST | `src/app/api/pos/reporting/retail/store/route.ts` |
-| `/api/pos/reporting/retail/Coupon` | POST | `src/app/api/pos/reporting/retail/Coupon/route.ts` |
-| `/api/pos/reporting/retail/Online_Platform_Master` | POST | `src/app/api/pos/reporting/retail/Online_Platform_Master/route.ts` |
-| `/api/pos/reporting/retail/cashmachine_transaction` | POST | `src/app/api/pos/reporting/retail/cashmachine_transaction/route.ts` |
-| `/api/pos/reporting/retail/cashmachine_master` | POST | `src/app/api/pos/reporting/retail/cashmachine_master/route.ts` |
-| `/api/pos/reporting/retail/cashmachine_batch` | POST | `src/app/api/pos/reporting/retail/cashmachine_batch/route.ts` |
+| `/api/pos/reporting/retail/no-upc-detail` | POST | `src/app/api/pos/reporting/retail/no-upc-detail/route.ts` |
 | `/api/push-subscriptions` | POST, DELETE | `src/app/api/push-subscriptions/route.ts` |
 | `/api/reporting/orders` | GET | `src/app/api/reporting/orders/route.ts` |
 | `/api/reporting/retail/shift-end` | GET | `src/app/api/reporting/retail/shift-end/route.ts` |
 | `/api/reporting/retail/day-end` | GET | `src/app/api/reporting/retail/day-end/route.ts` |
+| `/api/reporting/retail/transaction-journal` | GET | `src/app/api/reporting/retail/transaction-journal/route.ts` |
+| `/api/reporting/retail/credit-card-transaction` | GET | `src/app/api/reporting/retail/credit-card-transaction/route.ts` |
+| `/api/reporting/retail/monthly-sales-tax` | GET | `src/app/api/reporting/retail/monthly-sales-tax/route.ts` |
+| `/api/reporting/retail/invoice` | GET | `src/app/api/reporting/retail/invoice/route.ts` |
+| `/api/reporting/retail/no-upc-detail` | GET | `src/app/api/reporting/retail/no-upc-detail/route.ts` |
 | `/api/reporting/transaction-detail` | GET | `src/app/api/reporting/transaction-detail/route.ts` |
 | `/api/store-selection` | POST | `src/app/api/store-selection/route.ts` |
 | `/api/stores` | GET | `src/app/api/stores/route.ts` |

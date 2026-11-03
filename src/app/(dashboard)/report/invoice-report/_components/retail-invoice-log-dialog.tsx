@@ -7,7 +7,8 @@ import {
   DialogTitle,
 } from "@/components/tailgrids/core/dialog";
 import { cn } from "@/utils/cn";
-import { getRetailInvoiceLogEntries, type RetailInvoiceRow } from "./retail-invoice-data";
+import { type RetailInvoiceRow } from "./retail-invoice-data";
+import { useInvoiceDetail } from "./retail-invoice-query";
 
 export default function RetailInvoiceLogDialog({
   invoice,
@@ -16,10 +17,8 @@ export default function RetailInvoiceLogDialog({
   invoice: RetailInvoiceRow | null;
   onOpenChange: (isOpen: boolean) => void;
 }) {
-  const entries =
-    invoice != null
-      ? getRetailInvoiceLogEntries(invoice.id, invoice.type)
-      : null;
+  const report = useInvoiceDetail(invoice?.id, invoice?.type);
+  const entries = report.data?.invoice.log ?? null;
 
   return (
     <>
@@ -55,9 +54,9 @@ export default function RetailInvoiceLogDialog({
                     </tr>
                   </thead>
                   <tbody>
-                    {(entries ?? []).map((entry) => (
+                    {(entries ?? []).map((entry, index) => (
                       <tr
-                        key={`${entry.date}-${entry.log.slice(0, 24)}`}
+                        key={`${entry.date}-${index}`}
                         className="border-t border-card-border"
                       >
                         <td
@@ -78,7 +77,11 @@ export default function RetailInvoiceLogDialog({
                           colSpan={2}
                           className="px-3 py-8 text-center text-sm text-text-tertiary"
                         >
-                          No invoice log entries found.
+                          {report.isFetching
+                            ? "Loading invoice log."
+                            : report.error
+                              ? report.error.message
+                              : "No invoice log entries found."}
                         </td>
                       </tr>
                     )}

@@ -1,0 +1,108 @@
+[
+  {
+    "request_id": "example-retail-journal-301",
+    "transaction_journal": {
+      "transactionid": "301",
+      "transaction_date_time": "2026-10-27T10:20:00Z",
+      "stationname": "W22",
+      "transaction_number": "ACFG866202",
+      "qty": "1.00",
+      "discount": "0.00",
+      "sub_total": "19.99",
+      "tax": "1.20",
+      "deposit": "0.00",
+      "total": "21.19",
+      "paid_by": "Card",
+      "cashier": "111",
+      "lines": {
+        "rows": [
+          {
+            "quantity": "1",
+            "itemNo": "7726",
+            "productName": "Adalya Hookah Tobacco | 250 Gram Angel Lips 1 EA @ $19.99",
+            "retail": "19.99",
+            "discount": "0.00",
+            "amount": "19.99",
+            "tax": "1.20",
+            "deposit": "0.00",
+            "total": "21.19"
+          }
+        ],
+        "total": {
+          "retail": "19.99",
+          "discount": "0.00",
+          "amount": "19.99",
+          "tax": "1.20",
+          "deposit": "0.00",
+          "total": "21.19"
+        }
+      },
+      "credit_card": [
+        { "label": "Auth Code", "value": "" },
+        { "label": "Card", "value": "CreditCard -" },
+        { "label": "Reference", "value": "" },
+        { "label": "Date Time", "value": "10/27/2026 06:19:34 AM" },
+        { "label": "Amount", "value": "5.00" },
+        { "label": "Transaction Type", "value": "Ext-Pay" }
+      ],
+      "paid_by_amounts": [
+        { "label": "Cash", "value": "0.00" },
+        { "label": "Check", "value": "16.19" },
+        { "label": "Card", "value": "5.00" },
+        { "label": "GiftCard", "value": "0.00" },
+        { "label": "StoreCreditCard", "value": "0.00" },
+        { "label": "FoodStamp", "value": "0.00" },
+        { "label": "EBT", "value": "0.00" },
+        { "label": "Voucher", "value": "0.00" },
+        { "label": "Account", "value": "0.00" },
+        { "label": "Papodw2", "value": "0.00" }
+      ]
+    }
+  },
+  {
+    "request_id": "example-retail-journal-302",
+    "transaction_journal": {
+      "transactionid": "302",
+      "transaction_date_time": "2026-10-28T11:23:00Z",
+      "stationname": "TOBBACO",
+      "transaction_number": "ACFG866203",
+      "qty": "1.00",
+      "discount": "0.00",
+      "sub_total": "3.22",
+      "tax": "0.19",
+      "deposit": "0.00",
+      "total": "3.41",
+      "paid_by": "Cash",
+      "cashier": "23",
+      "lines": {
+        "rows": [
+          {
+            "quantity": "1",
+            "itemNo": "5947",
+            "productName": "3CHI Delta 8 Cartridges Watermelon Kush 1G",
+            "retail": "3.22",
+            "discount": "0.00",
+            "amount": "3.22",
+            "tax": "0.19",
+            "deposit": "0.00",
+            "total": "3.41"
+          }
+        ],
+        "total": {
+          "retail": "3.22",
+          "discount": "0.00",
+          "amount": "3.22",
+          "tax": "0.19",
+          "deposit": "0.00",
+          "total": "3.41"
+        }
+      },
+      "credit_card": [],
+      "paid_by_amounts": [
+        { "label": "Cash", "value": "3.41" },
+        { "label": "Check", "value": "0.00" },
+        { "label": "Card", "value": "0.00" }
+      ]
+    }
+  }
+]

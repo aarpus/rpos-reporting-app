@@ -1000,6 +1000,7 @@ const quickReports: Array<{
   {
     title: "NoUPC Details Report",
     description: "Review items sold without a UPC.",
+    href: "/report/no-upc-detail",
     icon: LuBarcode,
     iconClassName: "bg-badge-primary-background text-badge-primary-icon-color",
   },

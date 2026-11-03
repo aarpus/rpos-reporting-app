@@ -239,20 +239,37 @@ export const retailExternalPayTransactions: RetailExternalPayTransaction[] = [
   },
 ];
 
-function money(value: number) {
-  const formatted = Math.abs(value).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  return value < 0 ? `-${formatted}` : formatted;
+const zero = BigInt(0);
+const hundred = BigInt(100);
+
+function toCents(value: string) {
+  const match = /^(-?)(\d+)(?:\.(\d{1,2}))?$/.exec(value);
+  if (!match) return zero;
+  const cents = BigInt(match[2]) * hundred + BigInt((match[3] ?? "").padEnd(2, "0"));
+  return match[1] === "-" ? -cents : cents;
 }
 
-function moneySigned(value: number) {
-  const formatted = Math.abs(value).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  return value < 0 ? `-$${formatted}` : `$${formatted}`;
+function fromCents(cents: bigint) {
+  const negative = cents < zero;
+  const abs = negative ? -cents : cents;
+  return `${negative ? "-" : ""}${abs / hundred}.${(abs % hundred).toString().padStart(2, "0")}`;
+}
+
+export function formatCardStamp(iso: string, timeZone: string) {
+  const date = new Date(iso);
+  if (!Number.isFinite(date.getTime())) return "";
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((item) => item.type === type)?.value ?? "";
+  return `${part("year")}-${part("month")}-${part("day")} ${part("hour")}:${part("minute")}:${part("second")}`;
 }
 
 export function filterCardTransactions(
@@ -280,23 +297,23 @@ export function cardTypeSummary(
 ): RetailCardSummaryRow[] {
   const credit = rows.filter((row) => row.kind === "credit");
   const debit = rows.filter((row) => row.kind === "debit");
-  const creditAmount = credit.reduce((sum, row) => sum + row.amountValue, 0);
-  const debitAmount = debit.reduce((sum, row) => sum + row.amountValue, 0);
+  const creditAmount = credit.reduce((sum, row) => sum + toCents(row.amount), zero);
+  const debitAmount = debit.reduce((sum, row) => sum + toCents(row.amount), zero);
   return [
     {
       label: "CreditCard",
       count: String(credit.length),
-      amount: money(creditAmount),
+      amount: fromCents(creditAmount),
     },
     {
       label: "DebitCard",
       count: String(debit.length),
-      amount: money(debitAmount),
+      amount: fromCents(debitAmount),
     },
     {
       label: "Total",
       count: String(rows.length),
-      amount: money(creditAmount + debitAmount),
+      amount: fromCents(creditAmount + debitAmount),
     },
   ];
 }
@@ -304,23 +321,23 @@ export function cardTypeSummary(
 export function cardTerminalSummary(
   rows: RetailCardTransaction[],
 ): RetailCardSummaryRow[] {
-  const stations = new Map<string, { count: number; amount: number }>();
+  const stations = new Map<string, { count: number; amount: bigint }>();
   for (const row of rows) {
-    const current = stations.get(row.stationName) ?? { count: 0, amount: 0 };
+    const current = stations.get(row.stationName) ?? { count: 0, amount: zero };
     current.count += 1;
-    current.amount += row.amountValue;
+    current.amount += toCents(row.amount);
     stations.set(row.stationName, current);
   }
   const list = [...stations.entries()].map(([label, value]) => ({
     label,
     count: String(value.count),
-    amount: money(value.amount),
+    amount: fromCents(value.amount),
   }));
-  const totalAmount = rows.reduce((sum, row) => sum + row.amountValue, 0);
+  const totalAmount = rows.reduce((sum, row) => sum + toCents(row.amount), zero);
   list.push({
     label: "Total",
     count: String(rows.length),
-    amount: money(totalAmount),
+    amount: fromCents(totalAmount),
   });
   return list;
 }
@@ -330,12 +347,12 @@ export function cardBrandSummary(
 ): RetailCardBrandRow[] {
   function groupRows(kind: "credit" | "debit", groupLabel: string) {
     const subset = rows.filter((row) => row.kind === kind);
-    const brands = new Map<string, { count: number; amount: number }>();
+    const brands = new Map<string, { count: number; amount: bigint }>();
     for (const row of subset) {
       const name = row.cardName.trim() || "OTHER";
-      const current = brands.get(name) ?? { count: 0, amount: 0 };
+      const current = brands.get(name) ?? { count: 0, amount: zero };
       current.count += 1;
-      current.amount += row.amountValue;
+      current.amount += toCents(row.amount);
       brands.set(name, current);
     }
     const result: RetailCardBrandRow[] = [...brands.entries()].map(
@@ -343,15 +360,15 @@ export function cardBrandSummary(
         group: groupLabel,
         name,
         count: String(value.count),
-        amount: money(value.amount),
+        amount: fromCents(value.amount),
       }),
     );
-    const subtotal = subset.reduce((sum, row) => sum + row.amountValue, 0);
+    const subtotal = subset.reduce((sum, row) => sum + toCents(row.amount), zero);
     result.push({
       group: groupLabel,
       name: "SubTotal",
       count: String(subset.length),
-      amount: money(subtotal),
+      amount: fromCents(subtotal),
       isSubtotal: true,
     });
     return result;
@@ -359,7 +376,7 @@ export function cardBrandSummary(
 
   const credit = groupRows("credit", "Credit Card");
   const debit = groupRows("debit", "Debit Card");
-  const totalAmount = rows.reduce((sum, row) => sum + row.amountValue, 0);
+  const totalAmount = rows.reduce((sum, row) => sum + toCents(row.amount), zero);
   return [
     ...credit,
     ...debit,
@@ -367,7 +384,7 @@ export function cardBrandSummary(
       group: "",
       name: "Total",
       count: String(rows.length),
-      amount: money(totalAmount),
+      amount: fromCents(totalAmount),
       isTotal: true,
     },
   ];
@@ -376,17 +393,17 @@ export function cardBrandSummary(
 export function externalPayTypeSummary(
   rows: RetailExternalPayTransaction[],
 ): RetailCardSummaryRow[] {
-  const amount = rows.reduce((sum, row) => sum + row.amountValue, 0);
+  const amount = rows.reduce((sum, row) => sum + toCents(row.amount), zero);
   return [
     {
       label: "ExternalPay",
       count: String(rows.length),
-      amount: money(amount),
+      amount: fromCents(amount),
     },
     {
       label: "Total",
       count: String(rows.length),
-      amount: money(amount),
+      amount: fromCents(amount),
     },
   ];
 }
@@ -394,27 +411,28 @@ export function externalPayTypeSummary(
 export function externalPayTerminalSummary(
   rows: RetailExternalPayTransaction[],
 ): RetailCardSummaryRow[] {
-  const stations = new Map<string, { count: number; amount: number }>();
+  const stations = new Map<string, { count: number; amount: bigint }>();
   for (const row of rows) {
-    const current = stations.get(row.stationName) ?? { count: 0, amount: 0 };
+    const current = stations.get(row.stationName) ?? { count: 0, amount: zero };
     current.count += 1;
-    current.amount += row.amountValue;
+    current.amount += toCents(row.amount);
     stations.set(row.stationName, current);
   }
   const list = [...stations.entries()].map(([label, value]) => ({
     label,
     count: String(value.count),
-    amount: money(value.amount),
+    amount: fromCents(value.amount),
   }));
-  const totalAmount = rows.reduce((sum, row) => sum + row.amountValue, 0);
+  const totalAmount = rows.reduce((sum, row) => sum + toCents(row.amount), zero);
   list.push({
     label: "Total",
     count: String(rows.length),
-    amount: money(totalAmount),
+    amount: fromCents(totalAmount),
   });
   return list;
 }
 
 export function externalPayTotalAmount(rows: RetailExternalPayTransaction[]) {
-  return moneySigned(rows.reduce((sum, row) => sum + row.amountValue, 0));
+  const text = fromCents(rows.reduce((sum, row) => sum + toCents(row.amount), zero));
+  return text.startsWith("-") ? `-$${text.slice(1)}` : `$${text}`;
 }

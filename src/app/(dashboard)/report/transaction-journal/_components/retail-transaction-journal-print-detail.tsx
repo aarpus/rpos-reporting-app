@@ -11,17 +11,20 @@ import {
   SelectValue,
 } from "@/components/tailgrids/core/select";
 import { useStore } from "@/components/store/store-provider";
+import { reportingQueryKey } from "@/lib/reporting/query-key";
 import { cn } from "@/utils/cn";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "@tailgrids/icons";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { LuChevronLeft, LuChevronRight, LuPrinter } from "react-icons/lu";
+import { formatShiftStamp } from "../../shift-report/_components/retail-shift-data";
 import {
   formatJournalPrintedAt,
   formatJournalPrintRangeLabel,
-  getRetailJournalPrintGroups,
   parseRetailJournalFilter,
   transactionJournalListHref,
+  type RetailJournalLine,
   type RetailJournalPrintGroup,
 } from "./retail-transaction-journal-data";
 
@@ -219,10 +222,73 @@ export default function RetailTransactionJournalPrintDetail() {
     [listQuery],
   );
 
-  const groups = useMemo(
-    () => (filter ? getRetailJournalPrintGroups(filter) : []),
-    [filter],
-  );
+  const storeCode = selectedStore?.storeCode ?? "";
+  const range = useMemo(() => {
+    if (!filter) return null;
+    if (filter.date.kind === "single") {
+      const day = filter.date.date.toString();
+      return { from: day, to: day };
+    }
+    const ordered = filter.date.from.compare(filter.date.to) <= 0;
+    return {
+      from: (ordered ? filter.date.from : filter.date.to).toString(),
+      to: (ordered ? filter.date.to : filter.date.from).toString(),
+    };
+  }, [filter]);
+  const report = useQuery({
+    queryKey: reportingQueryKey(storeCode, {
+      report: "transaction-journal-print",
+      range,
+      transactionNo: filter?.transactionNo ?? "",
+    }),
+    enabled: Boolean(storeCode && filter && range),
+    queryFn: async ({ signal }) => {
+      const params = new URLSearchParams({
+        store_code: storeCode,
+        from: range?.from ?? "",
+        to: range?.to ?? "",
+      });
+      if (filter?.transactionNo.trim()) params.set("transaction_number", filter.transactionNo.trim());
+      const response = await fetch(`/api/reporting/retail/transaction-journal?${params}`, { signal, cache: "no-store" });
+      const body = (await response.json()) as {
+        timezone: string;
+        rows: Array<{
+          id: string;
+          transaction_date_time: string;
+          stationname: string;
+          transaction_number: string;
+          total: string;
+          cashier: string | null;
+          lines: { rows: RetailJournalLine[]; total: RetailJournalPrintGroup["subtotal"] | null };
+        }>;
+        error?: string;
+      };
+      if (!response.ok) throw new Error(body.error ?? "Unable to load transactions.");
+      return body;
+    },
+  });
+  const groups = useMemo(() => {
+    const timezone = report.data?.timezone ?? selectedStore?.timezone ?? "UTC";
+    return (report.data?.rows ?? []).map((row) => ({
+      transaction: {
+        id: row.id,
+        dateTimeLabel: formatShiftStamp(row.transaction_date_time, timezone),
+        stationId: row.stationname,
+        transactionNo: row.transaction_number,
+        total: row.total,
+        cashier: row.cashier ?? "",
+      },
+      lines: row.lines.rows,
+      subtotal: row.lines.total ?? {
+        retail: "",
+        discount: "",
+        amount: "",
+        tax: "",
+        deposit: "",
+        total: "",
+      },
+    }));
+  }, [report.data, selectedStore?.timezone]);
 
   useEffect(() => {
     setPrintedAt(formatJournalPrintedAt(new Date()));
@@ -392,7 +458,11 @@ export default function RetailTransactionJournalPrintDetail() {
                     colSpan={9}
                     className="px-6 py-10 text-center text-sm text-text-tertiary"
                   >
-                    No transaction detail found for the selected filters.
+                    {report.error
+                      ? report.error.message
+                      : report.isFetching
+                        ? "Loading transactions."
+                        : "No transaction detail found for the selected filters."}
                   </td>
                 </tr>
               ) : (

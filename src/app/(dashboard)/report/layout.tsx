@@ -20,6 +20,7 @@ function isRetailReportPage(pathname: string) {
     pathname === "/report/transaction-journal/print-detail" ||
     /^\/report\/transaction-journal\/view\/[^/]+$/.test(pathname) ||
     pathname === "/report/invoice-report" ||
+    pathname === "/report/no-upc-detail" ||
     /^\/report\/invoice-report\/view\/[^/]+\/[^/]+$/.test(pathname) ||
     /^\/report\/invoice-report\/profit-margin\/[^/]+\/[^/]+$/.test(pathname) ||
     /^\/report\/invoice-report\/cost-variance\/[^/]+\/[^/]+$/.test(pathname) ||

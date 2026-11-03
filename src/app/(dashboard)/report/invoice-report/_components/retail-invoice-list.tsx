@@ -15,7 +15,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/tailgrids/core/tooltip";
+import { useStore } from "@/components/store/store-provider";
+import { reportingQueryKey } from "@/lib/reporting/query-key";
+import { formatInvoiceStamp, type InvoiceListRow } from "@/lib/reporting/retail-invoice";
 import { cn } from "@/utils/cn";
+import { CalendarDate } from "@internationalized/date";
+import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 import {
@@ -34,10 +39,7 @@ import {
   type RetailReportColumn,
 } from "../../_components/retail-report-table";
 import {
-  filterRetailInvoices,
   parseRetailInvoiceFilter,
-  RETAIL_INVOICE_SUPPLIERS,
-  retailInvoices,
   serializeRetailInvoiceFilter,
   type RetailInvoiceAppliedFilter,
   type RetailInvoiceRow,
@@ -265,10 +267,12 @@ function buildColumns(
 
 function InvoiceFilterBar({
   applied,
+  suppliers,
   onApply,
   onClear,
 }: {
   applied: RetailInvoiceAppliedFilter | null;
+  suppliers: string[];
   onApply: (filter: RetailInvoiceAppliedFilter) => void;
   onClear: () => void;
 }) {
@@ -388,7 +392,7 @@ function InvoiceFilterBar({
                 <SelectItem id="All" textValue="All">
                   All
                 </SelectItem>
-                {RETAIL_INVOICE_SUPPLIERS.map((name) => (
+                {suppliers.map((name) => (
                   <SelectItem key={name} id={name} textValue={name}>
                     {name}
                   </SelectItem>
@@ -414,10 +418,35 @@ function InvoiceFilterBar({
   );
 }
 
+function filterBounds(applied: RetailInvoiceAppliedFilter) {
+  if (applied.date.kind === "single") return { from: applied.date.date, to: applied.date.date };
+  const from = applied.date.from.compare(applied.date.to) <= 0 ? applied.date.from : applied.date.to;
+  const to = applied.date.from.compare(applied.date.to) <= 0 ? applied.date.to : applied.date.from;
+  return { from, to };
+}
+
+function listRow(row: InvoiceListRow, timeZone: string): RetailInvoiceRow {
+  return {
+    id: row.id,
+    dateLabel: formatInvoiceStamp(row.invoice_datetime, timeZone),
+    date: new CalendarDate(2000, 1, 1),
+    supplierName: row.supplier_name,
+    supplierInvoiceNo: row.supplier_invoice_no,
+    type: row.invoice_type,
+    status: row.status,
+    discount: row.discount,
+    shipping: row.shipping,
+    tax: row.tax,
+    total: row.total,
+    totalValue: 0,
+  };
+}
+
 export default function RetailInvoiceList() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { selectedStore } = useStore();
   const listQuery = searchParams.toString();
 
   const urlApplied = useMemo(
@@ -434,11 +463,42 @@ export default function RetailInvoiceList() {
   }
 
   const filterQuery = applied ? serializeRetailInvoiceFilter(applied) : "";
+  const storeCode = selectedStore?.storeCode ?? "";
+  const report = useQuery({
+    queryKey: reportingQueryKey(storeCode, { report: "invoice-list", applied }),
+    enabled: Boolean(storeCode && applied),
+    queryFn: async ({ signal }): Promise<{ timezone: string; suppliers: string[]; rows: InvoiceListRow[] }> => {
+      const bounds = applied ? filterBounds(applied) : null;
+      const params = new URLSearchParams({
+        store_code: storeCode,
+        from: bounds?.from.toString() ?? "",
+        to: bounds?.to.toString() ?? "",
+      });
+      if (applied?.amountFrom.trim()) params.set("amount_from", applied.amountFrom.trim());
+      if (applied?.amountTo.trim()) params.set("amount_to", applied.amountTo.trim());
+      if (applied && applied.invoiceType !== "All") params.set("invoice_type", applied.invoiceType);
+      if (applied && applied.supplierName !== "All") params.set("supplier_name", applied.supplierName);
+      if (applied?.supplierInvoiceNo.trim()) params.set("supplier_invoice_no", applied.supplierInvoiceNo.trim());
+      const response = await fetch(`/api/reporting/retail/invoice?${params}`, { signal, cache: "no-store" });
+      const body = (await response.json()) as { timezone: string; suppliers: string[]; rows: InvoiceListRow[]; error?: string };
+      if (!response.ok) throw new Error(body.error ?? "Unable to load invoices.");
+      return body;
+    },
+  });
 
   const rows = useMemo(() => {
     if (!applied) return noRows;
-    return filterRetailInvoices(retailInvoices, applied);
-  }, [applied]);
+    const timezone = report.data?.timezone ?? selectedStore?.timezone ?? "UTC";
+    return (report.data?.rows ?? []).map((row) => listRow(row, timezone));
+  }, [applied, report.data, selectedStore?.timezone]);
+
+  const suppliers = useMemo(() => {
+    const names = report.data?.suppliers ?? [];
+    if (applied && applied.supplierName !== "All" && !names.includes(applied.supplierName)) {
+      return [applied.supplierName, ...names];
+    }
+    return names;
+  }, [applied, report.data]);
 
   const columns = useMemo(
     () => buildColumns(filterQuery, setLogInvoice),
@@ -475,9 +535,19 @@ export default function RetailInvoiceList() {
         <InvoiceFilterBar
           key={filterQuery || "empty"}
           applied={applied}
+          suppliers={suppliers}
           onApply={writeFilter}
           onClear={() => writeFilter(null)}
         />
+
+        {applied && report.error ? (
+          <div role="alert" className="text-sm text-error-500">
+            {report.error.message}{" "}
+            <Button size="xs" appearance="outline" onPress={() => void report.refetch()}>
+              Retry
+            </Button>
+          </div>
+        ) : null}
 
         <RetailReportTable
           columns={columns}
@@ -485,7 +555,13 @@ export default function RetailInvoiceList() {
           rowKey={(row) => row.id}
           recordLabel="records"
           minWidthClassName="min-w-[64rem]"
-          emptyMessage="No invoices found for the selected filters. Preview invoices run through July 2025."
+          emptyMessage={
+            !applied
+              ? "Search a date to see invoices."
+              : report.isFetching
+                ? "Loading invoices."
+                : "No invoices found for the selected filters."
+          }
         />
       </div>
 

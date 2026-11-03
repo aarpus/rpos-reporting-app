@@ -1,29 +1,7 @@
 import retailReportingSql from "../../../database/reporting/retail/001-tables.sql";
 import { ReportingError } from "./snapshot.ts";
 
-export const retailSyncTables = [
-  "tbl_batch",
-  "tbl_shift",
-  "tbl_checkout_transaction",
-  "tbl_transaction_detail",
-  "tbl_transaction_payment",
-  "tbl_transaction_gift_card",
-  "tbl_station_transaction",
-  "tbl_store_account_transaction",
-  "tbl_station_cash_transfer",
-  "tbl_invoice",
-  "tbl_invoice_payment",
-  "tbl_clockin",
-  "tbl_nosale",
-  "tbl_account_payment",
-  "tbl_group_detail",
-  "tbl_store",
-  "tbl_Coupon",
-  "tbl_Online_Platform_Master",
-  "tbl_cashmachine_transaction",
-  "tbl_cashmachine_master",
-  "tbl_cashmachine_batch",
-] as const;
+export const retailSyncTables = [] as const;
 
 export type RetailTableName = (typeof retailSyncTables)[number];
 export type RetailValue = string | number | boolean | null;
@@ -38,13 +16,13 @@ export type RetailField = {
   scale?: number;
   default?: Exclude<RetailValue, null>;
 };
-export type RetailTable = { name: RetailTableName; key: string; fields: RetailField[] };
+export type RetailTable = { name: string; key: string; fields: RetailField[] };
 
 const quoteIdent = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 function retailSql() {
   const sql = retailReportingSql;
-  if (!sql.includes("tbl_checkout_transaction") || sql.includes("tbl_rpt_order") || !/create\s+table/i.test(sql))
+  if (!sql.includes("tbl_shift_end_report") || !sql.includes("tbl_day_end_report") || !sql.includes("tbl_transaction_journal_report") || !sql.includes("tbl_creditcard_detail") || !sql.includes("tbl_monthly_sales_tax") || !sql.includes("tbl_invoice_report") || !sql.includes("tbl_noupc_detail") || sql.includes("tbl_rpt_order") || !/create\s+table/i.test(sql))
     throw new ReportingError("Retail reporting tables are not available yet.", 503);
   return sql;
 }
@@ -133,20 +111,20 @@ function parseColumn(line: string): { field: RetailField; primaryKey: boolean; i
   };
 }
 
-function loadCatalog(): Record<RetailTableName, RetailTable> {
+function loadCatalog(): Record<string, RetailTable> {
   const sql = retailSql();
-  const tables = {} as Record<RetailTableName, RetailTable>;
+  const tables: Record<string, RetailTable> = {};
   const expression = /CREATE TABLE __SCHEMA__\."([^"]+)"\s*\(([\s\S]*?)\n\);/g;
   for (const match of sql.matchAll(expression)) {
     const name = match[1];
-    if (!retailSyncTables.includes(name as RetailTableName)) continue;
+    if (!(retailSyncTables as readonly string[]).includes(name)) continue;
     const columns = match[2].split("\n").map(parseColumn).filter((column) => column !== "skip");
     const fields = columns.map((column) => column.field);
     const primary = columns.find((column) => column.primaryKey);
     const identities = columns.filter((column) => column.identity);
     const key = primary?.field.name ?? (identities.length === 1 ? identities[0].field.name : undefined);
     if (!key) throw new ReportingError(`Retail table ${name} has no sync key.`, 503);
-    tables[name as RetailTableName] = { name: name as RetailTableName, key, fields };
+    tables[name] = { name, key, fields };
   }
   for (const name of retailSyncTables) {
     if (!tables[name]) throw new ReportingError(`Retail table ${name} is not available.`, 503);
@@ -154,7 +132,7 @@ function loadCatalog(): Record<RetailTableName, RetailTable> {
   return tables;
 }
 
-let catalog: Record<RetailTableName, RetailTable> | undefined;
+let catalog: Record<string, RetailTable> | undefined;
 
 export function retailTable(name: RetailTableName): RetailTable {
   catalog ??= loadCatalog();

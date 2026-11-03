@@ -2,9 +2,11 @@
 
 import { Button } from "@/components/tailgrids/core/button";
 import { useStore } from "@/components/store/store-provider";
+import { reportingQueryKey } from "@/lib/reporting/query-key";
 import { cn } from "@/utils/cn";
 import { CalendarDate, parseDate } from "@internationalized/date";
 import { ArrowLeft } from "@tailgrids/icons";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { LuUpload } from "react-icons/lu";
@@ -19,10 +21,7 @@ import {
   externalPayTerminalSummary,
   externalPayTotalAmount,
   externalPayTypeSummary,
-  filterCardTransactions,
-  filterExternalPayTransactions,
-  retailCardTransactions,
-  retailExternalPayTransactions,
+  formatCardStamp,
   type RetailCardTransaction,
   type RetailExternalPayTransaction,
 } from "./retail-credit-card-data";
@@ -231,23 +230,73 @@ export default function RetailCreditCardDetail() {
     [searchParams],
   );
 
+  const storeCode = selectedStore?.storeCode ?? "";
+  const report = useQuery({
+    queryKey: reportingQueryKey(storeCode, {
+      report: "credit-card-detail",
+      from: bounds?.from.toString() ?? "",
+      to: bounds?.to.toString() ?? "",
+    }),
+    enabled: Boolean(storeCode && bounds),
+    queryFn: async ({ signal }) => {
+      const params = new URLSearchParams({
+        store_code: storeCode,
+        from: bounds?.from.toString() ?? "",
+        to: bounds?.to.toString() ?? "",
+      });
+      const response = await fetch(`/api/reporting/retail/credit-card-transaction?${params}`, { signal, cache: "no-store" });
+      const body = (await response.json()) as {
+        timezone: string;
+        rows: Array<{
+          id: string;
+          card_datetime: string;
+          card_name: string;
+          card_no: string;
+          result: string | null;
+          amount: string;
+          auth_code: string;
+          station_name: string;
+          tender: "credit" | "debit" | "external";
+          transaction_type: string | null;
+        }>;
+        error?: string;
+      };
+      if (!response.ok) throw new Error(body.error ?? "Unable to load card transactions.");
+      return body;
+    },
+  });
+  const timezone = report.data?.timezone ?? selectedStore?.timezone ?? "UTC";
   const cardRows = useMemo(() => {
-    if (!bounds) return [] as RetailCardTransaction[];
-    return filterCardTransactions(
-      retailCardTransactions,
-      bounds.from,
-      bounds.to,
-    );
-  }, [bounds]);
+    return (report.data?.rows ?? [])
+      .filter((row) => row.tender === "credit" || row.tender === "debit")
+      .map((row): RetailCardTransaction => ({
+        id: row.id,
+        dateLabel: formatCardStamp(row.card_datetime, timezone),
+        date: new CalendarDate(2000, 1, 1),
+        cardName: row.card_name,
+        cardNumber: row.card_no,
+        result: row.result ?? "",
+        amount: row.amount,
+        amountValue: 0,
+        authCode: row.auth_code,
+        stationName: row.station_name,
+        kind: (row.tender === "debit" ? "debit" : "credit") as "credit" | "debit",
+      }));
+  }, [report.data, timezone]);
 
   const externalRows = useMemo(() => {
-    if (!bounds) return [] as RetailExternalPayTransaction[];
-    return filterExternalPayTransactions(
-      retailExternalPayTransactions,
-      bounds.from,
-      bounds.to,
-    );
-  }, [bounds]);
+    return (report.data?.rows ?? [])
+      .filter((row) => row.tender === "external")
+      .map((row): RetailExternalPayTransaction => ({
+        id: row.id,
+        dateLabel: formatCardStamp(row.card_datetime, timezone),
+        date: new CalendarDate(2000, 1, 1),
+        type: row.transaction_type ?? "ExternalPay",
+        amount: row.amount,
+        amountValue: 0,
+        stationName: row.station_name,
+      }));
+  }, [report.data, timezone]);
 
   const visibleCardRows = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -283,7 +332,7 @@ export default function RetailCreditCardDetail() {
     window.print();
   }
 
-  if (!bounds || cardRows.length === 0) {
+  if (!bounds || report.isFetching || report.error || (cardRows.length === 0 && externalRows.length === 0)) {
     return (
       <div className="min-h-full space-y-4 px-4 py-6 sm:px-6">
         <Button
@@ -297,8 +346,17 @@ export default function RetailCreditCardDetail() {
         </Button>
         <div className="rounded-lg border border-dashed border-card-border bg-card-surface-area px-5 py-10 text-center">
           <p className="text-sm font-medium text-text-secondary">
-            No card transaction details found for the selected date.
+            {report.error
+              ? report.error.message
+              : report.isFetching
+                ? "Loading card transactions."
+                : "No card transaction details found for the selected date."}
           </p>
+          {report.error ? (
+            <Button size="xs" appearance="outline" className="mt-3" onPress={() => void report.refetch()}>
+              Retry
+            </Button>
+          ) : null}
         </div>
       </div>
     );

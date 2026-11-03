@@ -24,7 +24,7 @@ function reportingSql(storeType: StoreType) {
 
 export async function loadReportingDdl(storeType: StoreType): Promise<string> {
   const sql = reportingSql(storeType);
-  const retailSql = sql.includes("tbl_checkout_transaction");
+  const retailSql = sql.includes("tbl_shift_end_report") && sql.includes("tbl_day_end_report") && sql.includes("tbl_transaction_journal_report") && sql.includes("tbl_creditcard_detail") && sql.includes("tbl_monthly_sales_tax") && sql.includes("tbl_invoice_report") && sql.includes("tbl_noupc_detail");
   const restaurantSql = sql.includes("tbl_rpt_order");
   if (
     !/create\s+table/i.test(sql) ||

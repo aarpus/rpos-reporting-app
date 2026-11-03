@@ -1,0 +1,14 @@
+[
+  {
+    "request_id": "example-retail-month-tax-2025-07",
+    "monthly_sales_tax": {
+      "report_month": "2025-07",
+      "employee_name": "Acute User",
+      "columns": ["Date", "Total Sales", "Net Sales", "Cash", "Sales Tax TaxableAmt", "Sales Tax TaxAmt"],
+      "rows": [
+        { "cells": ["07/01/2025", "148.25", "139.86", "0.00", "139.86", "8.39"], "emphasize": false },
+        { "cells": ["GiftCard", "42.38", "42.38", "0.00", "0.00", "0.00"], "emphasize": true }
+      ]
+    }
+  }
+]

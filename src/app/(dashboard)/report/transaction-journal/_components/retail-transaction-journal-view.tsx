@@ -2,16 +2,20 @@
 
 import { Button } from "@/components/tailgrids/core/button";
 import { useStore } from "@/components/store/store-provider";
+import { reportingQueryKey } from "@/lib/reporting/query-key";
 import { cn } from "@/utils/cn";
 import { ArrowLeft } from "@tailgrids/icons";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { notFound, useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { LuUpload } from "react-icons/lu";
+import { formatShiftStamp } from "../../shift-report/_components/retail-shift-data";
 import {
   formatJournalPrintedAt,
-  getRetailJournalDetail,
   parseRetailJournalFilter,
   transactionJournalListHref,
+  type RetailJournalDetail,
+  type RetailJournalLine,
 } from "./retail-transaction-journal-data";
 
 const printStyles = `
@@ -94,6 +98,25 @@ function PaidByRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+type JournalDetailResponse = {
+  timezone: string;
+  transaction: {
+    id: string;
+    transaction_date_time: string;
+    stationname: string;
+    transaction_number: string;
+    total: string;
+    cashier: string | null;
+    lines: { rows: RetailJournalLine[]; total: RetailJournalDetail["lineTotals"] & { retail?: string } | null };
+    credit_card: Array<{ label: string; value: string }>;
+    paid_by_amounts: Array<{ label: string; value: string }>;
+  } | null;
+};
+
+function cardValue(lines: Array<{ label: string; value: string }>, label: string) {
+  return lines.find((line) => line.label.toLowerCase() === label.toLowerCase())?.value ?? "";
+}
+
 export default function RetailTransactionJournalView() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -108,10 +131,62 @@ export default function RetailTransactionJournalView() {
     [listQuery],
   );
 
-  const detail = useMemo(
-    () => (id ? getRetailJournalDetail(id) : null),
-    [id],
-  );
+  const storeCode = selectedStore?.storeCode ?? "";
+  const report = useQuery({
+    queryKey: reportingQueryKey(storeCode, { report: "transaction-journal", id }),
+    enabled: Boolean(storeCode && id),
+    queryFn: async ({ signal }): Promise<JournalDetailResponse> => {
+      const params = new URLSearchParams({ store_code: storeCode, id: id ?? "" });
+      const response = await fetch(`/api/reporting/retail/transaction-journal?${params}`, { signal, cache: "no-store" });
+      if (response.status === 404) return { timezone: selectedStore?.timezone ?? "UTC", transaction: null };
+      const body = (await response.json()) as JournalDetailResponse & { error?: string };
+      if (!response.ok) throw new Error(body.error ?? "Unable to load this transaction.");
+      return body;
+    },
+  });
+  const loaded = report.data?.transaction;
+  const timezone = report.data?.timezone ?? selectedStore?.timezone ?? "UTC";
+  const detail = useMemo(() => {
+    if (!loaded) return null;
+    const lineTotal = loaded.lines.total;
+    return {
+      transaction: {
+        dateTimeLabel: formatShiftStamp(loaded.transaction_date_time, timezone),
+        stationId: loaded.stationname,
+        transactionNo: loaded.transaction_number,
+        total: loaded.total,
+        cashier: loaded.cashier ?? "",
+      },
+      lines: loaded.lines.rows,
+      lineTotals: {
+        discount: lineTotal?.discount ?? "",
+        amount: lineTotal?.amount ?? "",
+        tax: lineTotal?.tax ?? "",
+        deposit: lineTotal?.deposit ?? "",
+        total: lineTotal?.total ?? "",
+      },
+      cardDetail: {
+        authCode: cardValue(loaded.credit_card, "Auth Code"),
+        card: cardValue(loaded.credit_card, "Card"),
+        reference: cardValue(loaded.credit_card, "Reference"),
+        dateTime: cardValue(loaded.credit_card, "Date Time"),
+        amount: cardValue(loaded.credit_card, "Amount"),
+        transactionType: cardValue(loaded.credit_card, "Transaction Type"),
+      },
+      paidBy: {
+        cash: cardValue(loaded.paid_by_amounts, "Cash"),
+        check: cardValue(loaded.paid_by_amounts, "Check"),
+        card: cardValue(loaded.paid_by_amounts, "Card"),
+        giftCard: cardValue(loaded.paid_by_amounts, "GiftCard"),
+        storeCreditCard: cardValue(loaded.paid_by_amounts, "StoreCreditCard"),
+        foodStamp: cardValue(loaded.paid_by_amounts, "FoodStamp"),
+        ebt: cardValue(loaded.paid_by_amounts, "EBT"),
+        voucher: cardValue(loaded.paid_by_amounts, "Voucher"),
+        account: cardValue(loaded.paid_by_amounts, "Account"),
+        papodw2: cardValue(loaded.paid_by_amounts, "Papodw2"),
+      },
+    };
+  }, [loaded, timezone]);
 
   useEffect(() => {
     setPrintedAt(formatJournalPrintedAt(new Date()));
@@ -128,23 +203,11 @@ export default function RetailTransactionJournalView() {
     window.print();
   }
 
+  if (report.isSuccess && !loaded) notFound();
   if (!detail) {
     return (
-      <div className="min-h-full space-y-4 px-4 py-6 sm:px-6">
-        <Button
-          appearance="outline"
-          size="sm"
-          className="w-fit gap-1.5"
-          onPress={() => router.push(listHref)}
-        >
-          <ArrowLeft />
-          Back
-        </Button>
-        <div className="rounded-lg border border-dashed border-card-border bg-card-surface-area px-5 py-10 text-center">
-          <p className="text-sm font-medium text-text-secondary">
-            Transaction journal detail not found for id {id}.
-          </p>
-        </div>
+      <div className="px-4 py-4 text-sm text-text-secondary sm:px-6">
+        {report.error ? report.error.message : "Loading transaction."}
       </div>
     );
   }

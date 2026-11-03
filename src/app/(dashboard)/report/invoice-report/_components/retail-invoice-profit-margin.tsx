@@ -7,10 +7,8 @@ import { ArrowLeft } from "@tailgrids/icons";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { LuUpload } from "react-icons/lu";
-import {
-  getRetailInvoiceProfitDetail,
-  invoiceReportListHref,
-} from "./retail-invoice-data";
+import { invoiceReportListHref } from "./retail-invoice-data";
+import { toProfitDetail, useInvoiceDetail } from "./retail-invoice-query";
 
 const printStyles = `
 @media print {
@@ -83,10 +81,11 @@ export default function RetailInvoiceProfitMargin() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const type = Array.isArray(params.type) ? params.type[0] : params.type;
   const listHref = invoiceReportListHref(searchParams.toString());
-
+  const report = useInvoiceDetail(id, type);
+  const timezone = report.data?.timezone ?? selectedStore?.timezone ?? "UTC";
   const detail = useMemo(
-    () => (id && type ? getRetailInvoiceProfitDetail(id, type) : null),
-    [id, type],
+    () => (report.data ? toProfitDetail(report.data.invoice, timezone) : null),
+    [report.data, timezone],
   );
 
   useEffect(() => {
@@ -102,6 +101,37 @@ export default function RetailInvoiceProfitMargin() {
     };
     window.addEventListener("afterprint", restore);
     window.print();
+  }
+
+  if (report.isFetching && !detail) {
+    return (
+      <div className="min-h-full space-y-4 px-4 py-6 sm:px-6">
+        <Button appearance="outline" size="sm" className="w-fit gap-1.5" onPress={() => router.push(listHref)}>
+          <ArrowLeft />
+          Back
+        </Button>
+        <div className="rounded-lg border border-dashed border-card-border bg-card-surface-area px-5 py-10 text-center">
+          <p className="text-sm font-medium text-text-secondary">Loading invoice.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (report.error) {
+    return (
+      <div className="min-h-full space-y-4 px-4 py-6 sm:px-6">
+        <Button appearance="outline" size="sm" className="w-fit gap-1.5" onPress={() => router.push(listHref)}>
+          <ArrowLeft />
+          Back
+        </Button>
+        <div role="alert" className="rounded-lg border border-dashed border-card-border bg-card-surface-area px-5 py-10 text-center">
+          <p className="text-sm font-medium text-error-500">{report.error.message}</p>
+          <Button size="xs" appearance="outline" className="mt-3" onPress={() => void report.refetch()}>
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   if (!detail) {

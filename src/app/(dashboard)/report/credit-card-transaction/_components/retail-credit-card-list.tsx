@@ -2,6 +2,10 @@
 
 import { Breadcrumbs } from "@/components/tailgrids/core/breadcrumbs";
 import { Button } from "@/components/tailgrids/core/button";
+import { useStore } from "@/components/store/store-provider";
+import { reportingQueryKey } from "@/lib/reporting/query-key";
+import { CalendarDate } from "@internationalized/date";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
@@ -13,12 +17,23 @@ import {
   type RetailReportColumn,
 } from "../../_components/retail-report-table";
 import {
-  filterCardTransactions,
-  retailCardTransactions,
+  formatCardStamp,
   type RetailCardTransaction,
 } from "./retail-credit-card-data";
 
 const noRows: RetailCardTransaction[] = [];
+
+type CardApiRow = {
+  id: string;
+  card_datetime: string;
+  card_name: string;
+  card_no: string;
+  result: string | null;
+  amount: string;
+  auth_code: string;
+  station_name: string;
+  tender: "credit" | "debit" | "external";
+};
 
 function filterBounds(applied: RetailAppliedDateFilter) {
   if (applied.kind === "single") {
@@ -84,13 +99,45 @@ const columns: RetailReportColumn<RetailCardTransaction>[] = [
 
 export default function RetailCreditCardList() {
   const router = useRouter();
+  const { selectedStore } = useStore();
   const [applied, setApplied] = useState<RetailAppliedDateFilter | null>(null);
+  const storeCode = selectedStore?.storeCode ?? "";
+  const range = applied ? filterBounds(applied) : null;
+  const report = useQuery({
+    queryKey: reportingQueryKey(storeCode, { report: "credit-card", range }),
+    enabled: Boolean(storeCode && range),
+    queryFn: async ({ signal }): Promise<{ timezone: string; rows: CardApiRow[] }> => {
+      const params = new URLSearchParams({
+        store_code: storeCode,
+        from: range?.from.toString() ?? "",
+        to: range?.to.toString() ?? "",
+      });
+      const response = await fetch(`/api/reporting/retail/credit-card-transaction?${params}`, { signal, cache: "no-store" });
+      const body = (await response.json()) as { timezone: string; rows: CardApiRow[]; error?: string };
+      if (!response.ok) throw new Error(body.error ?? "Unable to load card transactions.");
+      return body;
+    },
+  });
 
   const rows = useMemo(() => {
     if (!applied) return noRows;
-    const { from, to } = filterBounds(applied);
-    return filterCardTransactions(retailCardTransactions, from, to);
-  }, [applied]);
+    const timezone = report.data?.timezone ?? selectedStore?.timezone ?? "UTC";
+    return (report.data?.rows ?? [])
+      .filter((row) => row.tender === "credit" || row.tender === "debit")
+      .map((row) => ({
+        id: row.id,
+        dateLabel: formatCardStamp(row.card_datetime, timezone),
+        date: new CalendarDate(2000, 1, 1),
+        cardName: row.card_name,
+        cardNumber: row.card_no,
+        result: row.result ?? "",
+        amount: row.amount,
+        amountValue: 0,
+        authCode: row.auth_code,
+        stationName: row.station_name,
+        kind: (row.tender === "debit" ? "debit" : "credit") as "credit" | "debit",
+      }));
+  }, [applied, report.data, selectedStore?.timezone]);
 
   return (
     <div className="min-h-full pb-6">
@@ -131,13 +178,27 @@ export default function RetailCreditCardList() {
             ) : null
           }
         />
+        {applied && report.error ? (
+          <div role="alert" className="text-sm text-error-500">
+            {report.error.message}{" "}
+            <Button size="xs" appearance="outline" onPress={() => void report.refetch()}>
+              Retry
+            </Button>
+          </div>
+        ) : null}
         <RetailReportTable
           columns={columns}
           rows={rows}
           rowKey={(row) => row.id}
           recordLabel="records"
           minWidthClassName="min-w-[52rem]"
-          emptyMessage="No card transactions found for the selected date. Preview transactions run from Apr 8, 2025 through Aug 25, 2025."
+          emptyMessage={
+            !applied
+              ? "Search a date to see card transactions."
+              : report.isFetching
+                ? "Loading card transactions."
+                : "No card transactions found for the selected date."
+          }
         />
       </div>
     </div>

@@ -61,7 +61,11 @@ const RETAIL_QUICK_REPORTS: NavigationItem[] = [
     icon: <InvoiceIcon />,
     url: "/report/invoice-report",
   },
-  { title: "NoUPC Details Report", icon: <TableIcon /> },
+  {
+    title: "NoUPC Details Report",
+    icon: <TableIcon />,
+    url: "/report/no-upc-detail",
+  },
 ];
 
 function retailNavigation(includeMobileReports: boolean): NavigationSection[] {

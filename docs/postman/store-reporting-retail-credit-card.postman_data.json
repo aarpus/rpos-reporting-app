@@ -1,0 +1,44 @@
+[
+  {
+    "request_id": "example-retail-card-401",
+    "credit_card": {
+      "transactionid": "401",
+      "card_datetime": "2026-10-27T14:45:34Z",
+      "card_name": "VISA",
+      "card_no": "***********4412",
+      "cust_name": "",
+      "result": "OK",
+      "amount": "28.75",
+      "exp_date": "12/28",
+      "auth_code": "551902",
+      "name_on_card": "",
+      "station_name": "Tobbaco",
+      "tender": "debit"
+    }
+  },
+  {
+    "request_id": "example-retail-card-402",
+    "credit_card": {
+      "transactionid": "402",
+      "card_datetime": "2026-10-27T16:05:19Z",
+      "card_name": "OTHER",
+      "card_no": "***********5426",
+      "result": "OK",
+      "amount": "-1.00",
+      "auth_code": "000000",
+      "station_name": "NRS13",
+      "tender": "credit"
+    }
+  },
+  {
+    "request_id": "example-retail-card-501",
+    "credit_card": {
+      "transactionid": "501",
+      "card_datetime": "2026-10-28T11:15:22Z",
+      "amount": "85.00",
+      "station_name": "TOBBACO",
+      "tender": "external",
+      "transaction_type": "ExternalPay"
+    }
+  }
+]

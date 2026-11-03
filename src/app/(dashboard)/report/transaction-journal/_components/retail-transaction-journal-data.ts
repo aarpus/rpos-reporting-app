@@ -644,7 +644,14 @@ function linesForJournalTransaction(
 }
 
 export type RetailJournalPrintGroup = {
-  transaction: RetailJournalRow;
+  transaction: {
+    id: string;
+    dateTimeLabel: string;
+    stationId: string;
+    transactionNo: string;
+    total: string;
+    cashier: string;
+  };
   lines: RetailJournalLine[];
   subtotal: {
     retail: string;

@@ -1,0 +1,72 @@
+[
+  {
+    "request_id": "example-retail-invoice-2",
+    "invoice": {
+      "invoiceid": "2",
+      "invoice_type": "OP",
+      "invoice_datetime": "2025-07-02T10:15:00Z",
+      "delivery_datetime": "2025-07-02T10:15:00Z",
+      "invoice_no": "123",
+      "supplier_name": "Tobbaco",
+      "supplier_invoice_no": "TB-900221",
+      "status": "Unpaid",
+      "employee_name": "Acute User",
+      "discount": "5.00",
+      "shipping": "0.00",
+      "tax": "8.10",
+      "deposit": "0.00",
+      "total": "143.00",
+      "lines": [
+        { "product_item_no": "5947", "product_name": "Salt Nic E-Juice", "supplier_item_no": "5947", "qty": "1U", "case_cost": "10.00", "total": "10.00" }
+      ],
+      "profit_lines": [
+        { "product_no": "5947", "product_name": "Salt Nic E-Juice", "supplier_item_no": "5947", "inv_qty": "1U", "cost": "10.00", "unit_cost": "10.00", "ext_cost": "10.00", "unit_retail": "19.99", "case_retail": "19.99", "ext_retail": "19.99", "profit_amount": "9.99", "profit_percent": "49.97" }
+      ],
+      "profit_totals": { "ext_cost": "$10.00", "ext_retail": "$19.99", "profit_amount": "$9.99", "profit_percent": "49.97%" },
+      "cost_lines": [
+        { "product_item_no": "5947", "product_name": "Salt Nic E-Juice", "supplier_item_no": "5947", "new_cost": "9.995", "previous_cost": "10.00", "difference_amount": "-0.01", "difference_percent": "-0.05", "average_cost": "9.9975", "retail_price": "19.99" }
+      ],
+      "qty_lines": [
+        { "product_item_no": "5947", "product_name": "Salt Nic E-Juice", "supplier_item_no": "5947", "ordered_qty": "0U", "received_qty": "1U", "difference": "-1U", "stock_in_hand": "1U" }
+      ],
+      "log": [
+        { "date": "2025-07-02 10:15:00", "log": "[Final Invoice] InvoiceNo: TB-900221" }
+      ]
+    }
+  },
+  {
+    "request_id": "example-retail-invoice-4",
+    "invoice": {
+      "invoiceid": "4",
+      "invoice_type": "RC",
+      "invoice_datetime": "2025-07-04T14:05:00Z",
+      "delivery_datetime": "2025-07-04T14:05:00Z",
+      "invoice_no": "INV040725",
+      "supplier_name": "H.T. Hackney",
+      "supplier_invoice_no": "HT-784590",
+      "status": "Paid",
+      "employee_name": "Acute User",
+      "discount": "0.00",
+      "shipping": "0.00",
+      "tax": "0.60",
+      "deposit": "0.00",
+      "total": "10.00",
+      "lines": [
+        { "product_item_no": "8015", "product_name": "Salt Nic Crunch", "supplier_item_no": "1234", "qty": "1U", "case_cost": "10.00", "total": "10.00" }
+      ],
+      "profit_lines": [
+        { "product_no": "8015", "product_name": "Salt Nic Crunch", "supplier_item_no": "1234", "inv_qty": "1U", "cost": "10.00", "unit_cost": "10.00", "ext_cost": "10.00", "unit_retail": "19.99", "case_retail": "19.99", "ext_retail": "19.99", "profit_amount": "9.99", "profit_percent": "49.97" }
+      ],
+      "profit_totals": { "ext_cost": "$10.00", "ext_retail": "$19.99", "profit_amount": "$9.99", "profit_percent": "49.97%" },
+      "cost_lines": [
+        { "product_item_no": "8015", "product_name": "Salt Nic Crunch", "supplier_item_no": "1234", "new_cost": "9.995", "previous_cost": "10.00", "difference_amount": "-0.01", "difference_percent": "-0.05", "average_cost": "9.9975", "retail_price": "19.99" }
+      ],
+      "qty_lines": [
+        { "product_item_no": "8015", "product_name": "Salt Nic Crunch", "supplier_item_no": "1234", "ordered_qty": "1U", "received_qty": "1U", "difference": "0U", "stock_in_hand": "1U" }
+      ],
+      "log": [
+        { "date": "2025-07-04 14:05:00", "log": "[Final Invoice] InvoiceNo: HT-784590" }
+      ]
+    }
+  }
+]
